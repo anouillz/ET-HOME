@@ -74,12 +74,20 @@ WSGI_APPLICATION = 'ET_HOME.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
+# POSTGRES SQL DB CONFIG
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'et_home_db',
+        'USER': 'your_username',
+        'PASSWORD': 'your_password',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
+
+AUTH_USER_MODEL = 'ET_HOME.User'
 
 
 # Password validation
