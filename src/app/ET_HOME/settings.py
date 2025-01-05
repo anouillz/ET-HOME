@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ET_HOME'
 ]
 
 MIDDLEWARE = [
@@ -79,11 +80,11 @@ WSGI_APPLICATION = 'ET_HOME.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'et_home_db',
-        'USER': 'your_username',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get("ET_HOME_DB_DATABASE"),
+        'USER': os.environ.get("ET_HOME_DB_USERNAME"),
+        'PASSWORD': os.environ.get("ET_HOME_DB_PASSWORD"),
+        'HOST': os.environ.get("ET_HOME_DB_HOST"),
+        'PORT': os.environ.get("ET_HOME_DB_PORT"),
     }
 }
 

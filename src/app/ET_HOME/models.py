@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 from django.utils.timezone import now
-from django.contrib.auth.models import User
 import pyotp # otp plugin for double auth (prototype now just an example)
 
 '''
@@ -12,8 +11,8 @@ import qrcode
 import qrcode.image.svg
 from io import BytesIO
 for generating qrcode of otp
-
 '''
+
 class User(AbstractUser):
     otp_secret = models.CharField(max_length=16, blank=True, null=True)     # double auth with otp
 
@@ -72,7 +71,11 @@ class Notification(models.Model):
     message = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
-    type = models.ForeignKey(NotificationType,on_delete=models.DO_NOTHING)
+    type = models.CharField(
+        choices=NotificationType.choices,
+        default=NotificationType.GENERAL,
+        max_length=2
+    )
     related_object_id = models.UUIDField(null=True, blank=True)
 '''
 done in graphical interface with graphs plugin ?
