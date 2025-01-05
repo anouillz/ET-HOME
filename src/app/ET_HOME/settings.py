@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,12 +31,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'ET_HOME',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ET_HOME'
 ]
 
 MIDDLEWARE = [
@@ -74,12 +76,20 @@ WSGI_APPLICATION = 'ET_HOME.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
+# POSTGRES SQL DB CONFIG
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("ET_HOME_DB_DATABASE"),
+        'USER': os.environ.get("ET_HOME_DB_USERNAME"),
+        'PASSWORD': os.environ.get("ET_HOME_DB_PASSWORD"),
+        'HOST': os.environ.get("ET_HOME_DB_HOST"),
+        'PORT': os.environ.get("ET_HOME_DB_PORT"),
     }
 }
+
+AUTH_USER_MODEL = 'ET_HOME.User'
 
 
 # Password validation
@@ -116,6 +126,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+STATICFILES_DIRS=[
+BASE_DIR / "static"  
+]
 STATIC_URL = 'static/'
 
 # Default primary key field type
