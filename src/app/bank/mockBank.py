@@ -14,9 +14,12 @@ class MockBank:
         print(f"Balance: {account.balance}")
 
 class MockAccount:
-    def __init__(self, name, balance):
-        self.name = name
+    def __init__(self, firstname,lastname, balance):
+        self.firstname = firstname
+        self.lastname = lastname
         self.balance = balance
+
+
 
 #Mock data
 account = MockAccount("Test1", 500)
