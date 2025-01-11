@@ -23,5 +23,8 @@ urlpatterns = [
     path("login/",views.login_view,name="login"),
     path("register/",views.register_view,name="register"),
     path("",views.home_view,name="home"),
-    path("bank/api/",include("bank.urls"))
+    path("bank/api/",include("bank.urls")),
+    path("api/", views.api_access, name="api"),
+    path('api/transactions/<str:date>/', views.get_transactions, name='get_transactions'),
+    path('api/spendings/<uuid:category>/', views.get_spending_per_category, name='get_spending_per_category')
 ]
