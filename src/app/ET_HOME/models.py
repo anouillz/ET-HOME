@@ -71,15 +71,11 @@ class Notification(models.Model):
     message = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
-<<<<<<< HEAD
     type = models.CharField(
         choices=NotificationType.choices,
         default=NotificationType.GENERAL,
         max_length=2
     )
-=======
-    type = models.CharField(choices=NotificationType.choices,default=NotificationType.GENERAL,max_length=2)
->>>>>>> 9cea2d0 (login and register init functionalities)
     related_object_id = models.UUIDField(null=True, blank=True)
 '''
 done in graphical interface with graphs plugin ?

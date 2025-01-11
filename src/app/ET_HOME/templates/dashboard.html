@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+        <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    </head>
+    <body>
+        <div class="dashboard">
+            <aside class="sidebar">
+                <h2>ET-HOME</h2>
+                <nav>
+                    <a href="">Categories</a>
+                    <a href="">Add bank account</a>
+                    <a href="">Settings</a>
+                </nav>
+                <a href="" class="logout">Logout</a>
+            </aside>
+            <main class="main-content">
+                <header>
+                    <h1>Welcome back, Matthew</h1>
+                    <div class="search">
+                        <input type="text" placeholder="Search"/>
+                        <i class="icon-search"></i>
+                    </div>
+                    <div class="user-info">
+                        <img src="" alt="User Avatar"/>
+                        <span>Matthew Parker</span>
+                    </div>
+                </header>
+
+                <section class="widgets">
+                    <div class="widget total-spent">Total Spent: 9328.55 CHF</div>
+                    <div class="widget last-month">Last Month: 12302.20 CHF</div>
+                    <div class="widget add-expense">Add Expenses: 963</div>
+                </section>
+
+                <section class="expsenses">
+                    <h2>Expenses</h2>
+                    <canvas id="expenses-chart"></canvas>
+                </section>
+                 
+                <section class="top-categories">
+                    <h2>Top Categories</h2>
+                    <div class="categories-chart"></div>
+                </section>
+            </main>
+        </div>
+    </body>
+</html>
