@@ -1,0 +1,23 @@
+{
+  "id": "394875734958",
+  "firstname": "Alfred",
+  "lastname": "Johnson",
+  "accounts": [
+    {
+      "id": "50986456",
+      "balance": 345.635,
+      "transactions": [
+        {
+          "id": "8342380",
+	      "category" : "Shop",
+          "amount": 12.50
+        },
+        {
+          "id": "7646780",
+          "category" : "Travel",
+          "amount": -123.3
+        }
+      ]
+    }
+  ]
+}
