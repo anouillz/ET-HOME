@@ -1,7 +1,11 @@
-from django.shortcuts import render
 from django.http import JsonResponse
-from .json_utils import open_json_file,get_json_client_from_id,get_json_client_from_name
+
 import json
+
+from django.http import JsonResponse
+
+from .json_utils import open_json_file, get_json_client_from_id, get_json_client_from_name
+
 JSON_URL = "src/app/bank/data.json"
 def get_client_from_id(request,id):
     if request.method == 'GET':
@@ -27,8 +31,27 @@ def search_client(request):
             return JsonResponse({""})
     return JsonResponse({""})
 
+def generate_secret(request):
+    # data.password, data.account_id
+    if request.method == "POST":
+        # TODO: verify user password
+        # TODO: generate random secret (with unique id)
+        # TODO: store secret in database
+        # TODO: send back secret with id
+        pass
+    pass
 
-
-
+def generate_token(request):
+    # data.account_id, data.secret_id
+    if request.method == "POST":
+        # if no token id:
+            # TODO: create token with challenge
+            # TODO: store token in database
+            # TODO: send back challenge with token id
+        # else
+            # TODO: check token challenge with secret
+            # TODO: return token value
+        pass
+    pass
 
 # Create your views here.
