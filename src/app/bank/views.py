@@ -5,6 +5,7 @@ import json
 JSON_URL = "src/app/bank/data.json"
 def get_client_from_id(request,id):
     if request.method == 'GET':
+        
         json_data = open_json_file(JSON_URL)
         client = get_json_client_from_id(json_data,id)
         return JsonResponse({'client': client})
