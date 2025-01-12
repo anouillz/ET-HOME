@@ -26,6 +26,9 @@ class Token(models.Model):
     secret = models.ForeignKey(Secret, on_delete=models.CASCADE)
     created_at = models.DateTimeField(editable=False,default=now)
     expires_at = models.DateTimeField(editable=False)
+    activated = models.BooleanField(default=False),
+    challenge = models.CharField(editable=False,max_length=32)
+    
 
 class SpendingCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
