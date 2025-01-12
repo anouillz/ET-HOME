@@ -36,6 +36,7 @@ class BankAccount(models.Model):
     account_number = models.CharField(max_length=50)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     bank_name = models.CharField(max_length=100)
+    secret = models.CharField(max_length=128)
 
 
 class SpendingCategory(models.Model):

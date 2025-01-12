@@ -1,35 +1,82 @@
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
-import json
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
 
-from django.http import JsonResponse
+from .models import Client, BankAccount, Transaction, SpendingCategory
 
-from .json_utils import open_json_file, get_json_client_from_id, get_json_client_from_name
-
-JSON_URL = "src/app/bank/data.json"
-def get_client_from_id(request,id):
+# Get client by ID
+def get_client_from_id(request, id):
     if request.method == 'GET':
-        json_data = open_json_file(JSON_URL)
-        client = get_json_client_from_id(json_data,id)
-        return JsonResponse({'client': client})
-    return JsonResponse({'client': ""})
+        client = get_object_or_404(Client, id=id)
+        client_data = {
+            'id': client.id,
+            'firstname': client.first_name,
+            'lastname': client.last_name,
+            'accounts': [
+                {
+                    'id': str(account.id),
+                    'balance': float(account.balance),
+                    'bank_name': account.bank_name,
+                    'transactions': [
+                        {
+                            'id': str(transaction.id),
+                            'amount': float(transaction.amount),
+                            'description': transaction.description,
+                            'category': transaction.category.name if transaction.category else None,
+                            'date': transaction.date
+                        }
+                        for transaction in account.transaction_set.all()
+                    ]
+                }
+                for account in client.bank_accounts.all()
+            ]
+        }
 
+        return JsonResponse({'client': client_data})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 def search_client(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             firstname = data.get('firstname')
-            lastname = data.get('lastname') 
-            json_data = open_json_file(JSON_URL)
-
+            lastname = data.get('lastname')
             if not firstname or not lastname:
-                return JsonResponse({'error': 'Both firstname and lastname are required'})
-            client = get_json_client_from_name(json_data,firstname,lastname)
+                return JsonResponse({'error': 'Both firstname and lastname are required'}, status=400)
+            client = get_object_or_404(Client, first_name=firstname, last_name=lastname)
 
-            return JsonResponse({"client":client})
+            client_data = {
+                'id': client.id,
+                'firstname': client.first_name,
+                'lastname': client.last_name,
+                'accounts': [
+                    {
+                        'id': str(account.id),
+                        'balance': float(account.balance),
+                        'bank_name': account.bank_name,
+                        'transactions': [
+                            {
+                                'id': str(transaction.id),
+                                'amount': float(transaction.amount),
+                                'description': transaction.description,
+                                'category': transaction.category.name if transaction.category else None,
+                                'date': transaction.date
+                            }
+                            for transaction in account.transaction_set.all()
+                        ]
+                    }
+                    for account in client.bank_accounts.all()
+                ]
+            }
+
+            return JsonResponse({'client': client_data})
+
         except json.JSONDecodeError:
-            return JsonResponse({""})
-    return JsonResponse({""})
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def generate_secret(request):
     # data.password, data.account_id
@@ -53,5 +100,3 @@ def generate_token(request):
             # TODO: return token value
         pass
     pass
-
-# Create your views here.
