@@ -82,16 +82,6 @@ def search_client(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-def generate_secret_model(request):
-    # data.password, data.account_id
-    if request.method == "POST":
-        # TODO: verify user password
-        # TODO: generate random secret (with unique id)
-        # TODO: store secret in database
-        # TODO: send back secret with id
-        pass
-    pass
-
 
 def generate_secret(request):
 
@@ -101,7 +91,7 @@ def generate_secret(request):
     # ------- Verify user password
     # Extract data from the request
     user_id = request.POST.get("user_id")
-    given_password = request.POST.get("password") # TODO jsp si cest commme ca quil faut faire pour avoir la pwd ptdr
+    given_password = request.POST.get("password")
     account_number = request.POST.get("account_number")
 
     if not user_id or not given_password or not account_number:
@@ -127,26 +117,12 @@ def generate_secret(request):
     secret = Secret.objects.create(account=bank_account, code=secret_code, created_at=now())
 
     # -------- Return the secret and its ID
-    # TODO dk if can send it back to app in this format
     return JsonResponse({
         "status": "success",
         "message": "Secret generated and stored successfully",
         "secret": secret_code,
         "id": secret.id
     })
-
-def generate_token_model(request):
-    # data.account_id, data.secret_id
-    if request.method == "POST":
-        # if no token id:
-            # TODO: create token with challenge
-            # TODO: store token in database
-            # TODO: send back challenge with token id
-        # else
-            # TODO: check token challenge with secret
-            # TODO: return token value
-        pass
-    pass
 
 
 def generate_token(request):
@@ -185,7 +161,6 @@ def generate_token(request):
         )
 
         # Return the challenge and token ID
-        # TODO dk if can send it back to app in this format
         return JsonResponse({
             "status": "success",
             "message": "Token created successfully",
@@ -205,7 +180,6 @@ def generate_token(request):
         if token.expires_at < now():
             return JsonResponse({"status": "error", "message": "Token has expired"}, status=403)
 
-        # TODO validate the challenge
         if token.activated:
             return JsonResponse({"status": "error", "message": "Token already activated"}, status=403)
 
@@ -224,3 +198,25 @@ def generate_token(request):
             "message": "Token validated successfully",
             "token_value": token.code
         })
+
+
+def validate_token(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    # get token
+    token = request.POST.get("token")
+    token_id = request.POST.get("token_id")
+
+    if not token_id:
+        return JsonResponse({"status": "error", "message": "Token is required"}, status=400)
+    else:
+        token = get_object_or_404(Token, id=token_id)
+
+        if token.code == token:
+            token.activated = True
+            token.save()
+            return JsonResponse({"status": "success", "message": "Token validated successfully"})
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid token"}, status=401)
+
