@@ -22,11 +22,8 @@ def home_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
     """
-    context = {
-        'title': 'Bienvenue',
-        'message': 'Bienvenue sur notre site Django !',
-    }
-    return render(request, 'home.html', context) 
+    context = {}
+    return render(request, 'dashboard.html', context)
 
 def register_view(request):
     return render(request, 'register.html') 
