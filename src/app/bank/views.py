@@ -7,9 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 
-from .models import Client, BankAccount, Secret, Token
-
-JSON_URL = "src/app/bank/data.json"
+from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
 
 # Get client by ID
 def get_client_from_id(request, id):
