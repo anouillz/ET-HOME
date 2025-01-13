@@ -1,8 +1,9 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
 import uuid
+
+import pyotp  # otp plugin for double auth (prototype now just an example)
+from django.contrib.auth.models import AbstractUser
+from django.db import models
 from django.utils.timezone import now
-import pyotp # otp plugin for double auth (prototype now just an example)
 
 '''
 import qrcode
@@ -36,7 +37,7 @@ class BankAccount(models.Model):
     account_number = models.CharField(max_length=50)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     bank_name = models.CharField(max_length=100)
-    secret = models.CharField(max_length=128)
+    secret = models.CharField(max_length=128, null=True)
 
 
 class SpendingCategory(models.Model):

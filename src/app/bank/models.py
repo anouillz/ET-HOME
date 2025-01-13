@@ -1,10 +1,25 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.utils.timezone import now
 import uuid
 
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.utils.timezone import now
+
+
 class Client(AbstractUser):
-    pass
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="bank_user_set",
+        blank=True,
+        help_text="The gruops this user blongs to",
+        verbose_name="groups"
+    )
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="bank_user_permissions_set",
+        blank=True,
+        help_text="Specific permissions for this user",
+        verbose_name="user permissions"
+    )
 
 class BankAccount(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

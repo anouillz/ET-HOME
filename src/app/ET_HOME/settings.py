@@ -87,6 +87,14 @@ DATABASES = {
         'PASSWORD': os.environ.get("ET_HOME_DB_PASSWORD"),
         'HOST': os.environ.get("ET_HOME_DB_HOST"),
         'PORT': os.environ.get("ET_HOME_DB_PORT"),
+    },
+    'db_bank': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("ET_HOME_DB_BANK_DATABASE"),
+        'USER': os.environ.get("ET_HOME_DB_USERNAME"),
+        'PASSWORD': os.environ.get("ET_HOME_DB_PASSWORD"),
+        'HOST': os.environ.get("ET_HOME_DB_HOST"),
+        'PORT': os.environ.get("ET_HOME_DB_PORT"),
     }
 }
 
@@ -110,6 +118,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+DATABASE_ROUTERS = ['bank.dbRouter.BankRouter']
 
 
 # Internationalization
