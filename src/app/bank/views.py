@@ -8,11 +8,8 @@ from django.utils.timezone import now
 from django.http import JsonResponse
 
 import json
-from .json_utils import open_json_file, get_json_client_from_id, get_json_client_from_name
 
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
-
-JSON_URL = "src/app/bank/data.json"
 
 # Get client by ID
 def get_client_from_id(request, id):
