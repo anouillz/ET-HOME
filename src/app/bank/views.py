@@ -1,16 +1,13 @@
-import random
-import string
+import hmac
+import json
+import secrets
 from datetime import timedelta
 
-from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.timezone import now
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 
-import json
-from .json_utils import open_json_file, get_json_client_from_id, get_json_client_from_name
-
-from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
+from .models import Client, BankAccount, Secret, Token
 
 JSON_URL = "src/app/bank/data.json"
 
@@ -126,7 +123,7 @@ def generate_secret(request):
         return JsonResponse({"status": "error", "message": "Bank account not found"}, status=404)
 
     # -------- Generate a secure secret
-    secret_code = ''.join(random.choices(string.ascii_letters + string.digits, k=128))
+    secret_code = secrets.token_hex(64)
 
     # -------- Create a new Secret object and store it in the database
     secret = Secret.objects.create(account=bank_account, code=secret_code, created_at=now())
@@ -169,16 +166,16 @@ def generate_token(request):
         return JsonResponse({"status": "error", "message": "Account ID and Secret ID are required"}, status=400)
 
     # Retrieve the Secret object
-    secret = get_object_or_404(Secret, id=secret_id, account__id=account_id)
+    secret = get_object_or_404(Secret, id=secret_id, account_id=account_id)
 
     # If no token_id is provided, create a new token with a challenge
     if not token_id:
         # TODO, dk if challenge/token should be random
         # Generate a random challenge
-        challenge = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+        challenge = secrets.token_hex(16)
 
         # Generate a random token value
-        token_value = ''.join(random.choices(string.ascii_letters + string.digits, k=64))
+        token_value = secrets.token_hex(64)
 
         # Create the token in the database
         token = Token.objects.create(
@@ -186,7 +183,7 @@ def generate_token(request):
             secret=secret,
             code=token_value,
             created_at=now(),
-            expires_at=now() + timedelta(minutes=15)  # Tokens expire in 15 minutes
+            expires_at=now() + timedelta(minutes=60)  # Tokens expire in 60 minutes
         )
 
         # Return the challenge and token ID
@@ -211,6 +208,17 @@ def generate_token(request):
             return JsonResponse({"status": "error", "message": "Token has expired"}, status=403)
 
         # TODO validate the challenge
+        if token.activated:
+            return JsonResponse({"status": "error", "message": "Token already activated"}, status=403)
+
+        swapped_token = token.challenge[16:] + token.challenge[:16]
+        expected = hmac.digest(bytes.fromhex(secret.code), bytes.fromhex(swapped_token), "SHA256")
+
+        if not hmac.compare_digest(expected, bytes.fromhex(challenge)):
+            return JsonResponse({
+                "status": "error",
+                "message": "Incorrect response"
+            }, status=401)
 
         # Return the token value
         return JsonResponse({
