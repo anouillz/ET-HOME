@@ -20,11 +20,12 @@ class TokenVerificationMiddleware:
             '/login/',  # Add your restricted URL patterns here
             '/register/',
         ]
-        
+        '''
         # Check if the current path is one of the restricted URLs
         if request.path not in exempted_url and self.checkTokenValidiy(request):
             # Redirect to login page if not authenticated
             return redirect(reverse('login'))  # Adjust 'login' to the actual name of your login view
+        '''
         
         # If the user is authenticated or the URL is not restricted, continue processing the request
         response = self.get_response(request)

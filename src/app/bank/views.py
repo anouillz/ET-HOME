@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models.utils import get_or_none
+from .models_utils import get_or_none
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 
