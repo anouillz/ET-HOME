@@ -11,7 +11,6 @@ from django.utils.timezone import now
 
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
 
-@login_required
 def get_client(request):
     if request.method == 'GET':
         id = request.user.id
