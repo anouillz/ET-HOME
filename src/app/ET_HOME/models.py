@@ -33,11 +33,11 @@ class User(AbstractUser):
 
 class BankAccount(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bank_accounts')
     account_number = models.CharField(max_length=50)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     bank_name = models.CharField(max_length=100)
-    secret = models.CharField(max_length=128, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bank_accounts')
+    #secret = models.CharField(max_length=128, null=True)
 
 
 class SpendingCategory(models.Model):
