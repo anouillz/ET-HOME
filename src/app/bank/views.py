@@ -47,6 +47,23 @@ def get_transaction(request,transactionId):
             "message":"transaction not found"
         },status=404)
 
+@require_GET
+def get_all_transaction(request,id):
+    userId = request.user.id
+    transaction = Transaction.objects.filter(user__id=userId,id=id).first()
+    if transaction:
+        return JsonResponse({
+            "status":"success",
+            "data":to_json(transaction,Transaction),
+            "message":"transaction found"
+        },status=200)
+    else:
+        return JsonResponse({
+            "status":"error",
+            "data":None,
+            "message":"transaction not found"
+        },status=404)
+
 @require_POST
 def filter_transaction(request):
     start_date = request.data.get('start_date')
