@@ -5,59 +5,73 @@ from datetime import timedelta
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models_utils import get_or_none
-from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
+from django.views.decorators.http import require_GET,require_POST
+from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_datetime
+from .api_utils import to_json
 
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
 
+@require_GET
 def get_client(request):
-    if request.method == 'GET':
-        id = request.user.id
-        client = get_object_or_404(Client, id=id)
-        client_data = {
-            'id': client.id,
-            'firstname': client.first_name,
-            'lastname': client.last_name,
-            'accounts': [
-                {
-                    'id': str(account.id),
-                    'balance': float(account.balance),
-                    'bank_name': account.bank_name,
-                    'transactions': [
-                        {
-                            'id': str(transaction.id),
-                            'amount': float(transaction.amount),
-                            'description': transaction.description,
-                            'category': transaction.category.name if transaction.category else None,
-                            'date': transaction.date
-                        }
-                        for transaction in account.transaction_set.all()
-                    ]
-                }
-                for account in client.bank_accounts.all()
-            ]
-        }
-
-        return JsonResponse({'client': client_data})
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
+    id = request.user.id
+    client = Client.objects.filter(id=id).first()
+    if client:
+        return JsonResponse({
+            "status":"error",
+            "data":None,
+            "message":"client not found"
+        },status=200)
+    else:
+        return JsonResponse({
+            "status":"success",
+            "data":to_json(client,Client),
+            "message":"client found"
+        },status=404)
+    
+@require_GET
 def get_transaction(request,transactionId):
     userId = request.user.id
-    if request.method == 'GET':
-        transaction = get_or_none(Transaction,id=transactionId,user__id=userId)
-        if transaction == None:
-            return JsonResponse({
-                'transaction':None,
-                'message':"Transaction does not exist"
-            })
+    transaction = Transaction.objects.filter(user__id=userId,id=transactionId).first()
+    if transaction:
         return JsonResponse({
-                'transaction':transaction,
-                'message':""
-            })
+            "status":"success",
+            "data":to_json(transaction,Transaction),
+            "message":"transaction found"
+        },status=200)
+    else:
+        return JsonResponse({
+            "status":"error",
+            "data":None,
+            "message":"transaction not found"
+        },status=404)
+
+@require_POST
+def filter_transaction(request):
+    start_date = request.data.get('start_date')
+    end_date = request.data.get('end_date')
+    if not start_date or not end_date:
+        return JsonResponse({"status":"error","message": "Both start_date and end_date are required."}, status=400)
+    try:
+        start_date = parse_datetime(start_date)
+        end_date = parse_datetime(end_date)
+
+        if not start_date or not end_date:
+            return JsonResponse({"status":"error","message": "Invalid date format. Use ISO 8601."}, status=400)
+    except ValueError:
+        return JsonResponse({"status":"error","message": "Invalid date format. Use ISO 8601."}, status=400)
+    
+    transactions = Transaction.objects.filter(date__gte=start_date, date__lte=end_date)
+    return JsonResponse({
+        "status":"sucess",
+        "message":"transactions between "+start_date+" and "+end_date,
+        "data":to_json(transactions,Transaction,many=True)
+    })
+    
 
     
+
 
 
 def generate_secret(request):
