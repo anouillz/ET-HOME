@@ -1,0 +1,23 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2em;
+    min-width: 30%;
+    max-width: 30em;
+    margin: auto;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+label {
+    font-weight: bold;
+}
+
+input, button {
+    font-family: inherit;
+    font-size: inherit;
+}

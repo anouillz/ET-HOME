@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from bank.models import BankAccount
-from .models import Transaction, SpendingCategory
+from .models import Transaction, SpendingCategory, User
 
 
 def login_view(request):
@@ -25,11 +25,24 @@ def home_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
     """
-    context = {}
+    context = {
+        "user": request.user
+    }
     return render(request, 'dashboard.html', context)
 
 def register_view(request):
-    return render(request, 'register.html') 
+    if request.method == "POST":
+        user = User.objects.create_user(
+            username=request.POST["username"],
+            email=request.POST["email"],
+            password=request.POST["password"],
+        )
+
+        user.first_name = request.POST["firstname"]
+        user.last_name = request.POST["lastname"]
+        user.save()
+        return redirect("login")
+    return render(request, 'register.html')
 
 def api_access(request):
     return render(request, 'api.html')
