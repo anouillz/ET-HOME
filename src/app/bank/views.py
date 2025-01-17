@@ -5,6 +5,8 @@ from datetime import timedelta
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.template.context_processors import request
+
 from .models_utils import get_or_none
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -196,4 +198,34 @@ def validate_token(request):
             return JsonResponse({"status": "success", "message": "Token validated successfully"})
         else:
             return JsonResponse({"status": "error", "message": "Invalid token"}, status=401)
+
+def add_transaction(request):
+    if request.method == "POST":
+        transaction = Transaction.objects.create(
+            id = request.POST['id'],
+            account = request.POST['account'],
+            amount = request.POST['amount'],
+            date = request.POST['date'],
+            description = request.POST['description'],
+            category_id = request.POST['category'],
+        )
+        transaction.save()
+        return JsonResponse({"status": "success"})
+    else :
+        return JsonResponse({"status": "error"}, status=400)
+
+
+def add_account(request):
+    if request.method == "POST":
+        bankAccount = BankAccount.objects.create(
+            id = request.POST['id'],
+            user_id = request.POST['user'],
+            account_number = request.POST['account_number'],
+            balance = request.POST['balance'],
+            bank_name = request.POST['bank_name'],
+        )
+        bankAccount.save()
+        return JsonResponse({"status": "success"})
+    else:
+        return JsonResponse({"status": "error"}, status=400)
 
