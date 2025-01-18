@@ -44,7 +44,6 @@ class Token(models.Model):
     activated = models.BooleanField(default=False),
     challenge = models.CharField(editable=False,max_length=32)
     
-
 class SpendingCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=30)

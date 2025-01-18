@@ -6,91 +6,89 @@ from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
+from django.views.decorators.http import require_GET,require_POST
+from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_datetime
+from .api_utils import to_json
 
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
 
-# Get client by ID
-def get_client_from_id(request, id):
-    if request.method == 'GET':
-        client = get_object_or_404(Client, id=id)
-        client_data = {
-            'id': client.id,
-            'firstname': client.first_name,
-            'lastname': client.last_name,
-            'accounts': [
-                {
-                    'id': str(account.id),
-                    'balance': float(account.balance),
-                    'bank_name': account.bank_name,
-                    'transactions': [
-                        {
-                            'id': str(transaction.id),
-                            'amount': float(transaction.amount),
-                            'description': transaction.description,
-                            'category': transaction.category.name if transaction.category else None,
-                            'date': transaction.date
-                        }
-                        for transaction in account.transaction_set.all()
-                    ]
-                }
-                for account in client.bank_accounts.all()
-            ]
-        }
+@require_GET
+def get_client(request):
+    id = request.user.id
+    client = Client.objects.filter(id=id).first()
+    if client:
+        return JsonResponse({
+            "status":"error",
+            "data":None,
+            "message":"client not found"
+        },status=200)
+    else:
+        return JsonResponse({
+            "status":"success",
+            "data":to_json(client,Client),
+            "message":"client found"
+        },status=404)
+    
+@require_GET
+def get_transaction(request,transactionId):
+    userId = request.user.id
+    transaction = Transaction.objects.filter(user__id=userId,id=transactionId).first()
+    if transaction:
+        return JsonResponse({
+            "status":"success",
+            "data":to_json(transaction,Transaction),
+            "message":"transaction found"
+        },status=200)
+    else:
+        return JsonResponse({
+            "status":"error",
+            "data":None,
+            "message":"transaction not found"
+        },status=404)
 
-        return JsonResponse({'client': client_data})
+@require_GET
+def get_all_transaction(request,id):
+    userId = request.user.id
+    transaction = Transaction.objects.filter(user__id=userId,id=id).first()
+    if transaction:
+        return JsonResponse({
+            "status":"success",
+            "data":to_json(transaction,Transaction),
+            "message":"transaction found"
+        },status=200)
+    else:
+        return JsonResponse({
+            "status":"error",
+            "data":None,
+            "message":"transaction not found"
+        },status=404)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+@require_POST
+def filter_transaction(request):
+    start_date = request.data.get('start_date')
+    end_date = request.data.get('end_date')
+    if not start_date or not end_date:
+        return JsonResponse({"status":"error","message": "Both start_date and end_date are required."}, status=400)
+    try:
+        start_date = parse_datetime(start_date)
+        end_date = parse_datetime(end_date)
 
-def search_client(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            firstname = data.get('firstname')
-            lastname = data.get('lastname')
-            if not firstname or not lastname:
-                return JsonResponse({'error': 'Both firstname and lastname are required'}, status=400)
-            client = get_object_or_404(Client, first_name=firstname, last_name=lastname)
+        if not start_date or not end_date:
+            return JsonResponse({"status":"error","message": "Invalid date format. Use ISO 8601."}, status=400)
+    except ValueError:
+        return JsonResponse({"status":"error","message": "Invalid date format. Use ISO 8601."}, status=400)
+    
+    transactions = Transaction.objects.filter(date__gte=start_date, date__lte=end_date)
+    return JsonResponse({
+        "status":"sucess",
+        "message":"transactions between "+start_date+" and "+end_date,
+        "data":to_json(transactions,Transaction,many=True)
+    })
+    
 
-            client_data = {
-                'id': client.id,
-                'firstname': client.first_name,
-                'lastname': client.last_name,
-                'accounts': [
-                    {
-                        'id': str(account.id),
-                        'balance': float(account.balance),
-                        'bank_name': account.bank_name,
-                        'transactions': [
-                            {
-                                'id': str(transaction.id),
-                                'amount': float(transaction.amount),
-                                'description': transaction.description,
-                                'category': transaction.category.name if transaction.category else None,
-                                'date': transaction.date
-                            }
-                            for transaction in account.transaction_set.all()
-                        ]
-                    }
-                    for account in client.bank_accounts.all()
-                ]
-            }
+    
 
-            return JsonResponse({'client': client_data})
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-def generate_secret_model(request):
-    # data.password, data.account_id
-    if request.method == "POST":
-        # TODO: verify user password
-        # TODO: generate random secret (with unique id)
-        # TODO: store secret in database
-        # TODO: send back secret with id
-        pass
-    pass
 
 
 def generate_secret(request):
@@ -101,7 +99,7 @@ def generate_secret(request):
     # ------- Verify user password
     # Extract data from the request
     user_id = request.POST.get("user_id")
-    given_password = request.POST.get("password") # TODO jsp si cest commme ca quil faut faire pour avoir la pwd ptdr
+    given_password = request.POST.get("password")
     account_number = request.POST.get("account_number")
 
     if not user_id or not given_password or not account_number:
@@ -127,26 +125,12 @@ def generate_secret(request):
     secret = Secret.objects.create(account=bank_account, code=secret_code, created_at=now())
 
     # -------- Return the secret and its ID
-    # TODO dk if can send it back to app in this format
     return JsonResponse({
         "status": "success",
         "message": "Secret generated and stored successfully",
         "secret": secret_code,
         "id": secret.id
     })
-
-def generate_token_model(request):
-    # data.account_id, data.secret_id
-    if request.method == "POST":
-        # if no token id:
-            # TODO: create token with challenge
-            # TODO: store token in database
-            # TODO: send back challenge with token id
-        # else
-            # TODO: check token challenge with secret
-            # TODO: return token value
-        pass
-    pass
 
 
 def generate_token(request):
@@ -185,7 +169,6 @@ def generate_token(request):
         )
 
         # Return the challenge and token ID
-        # TODO dk if can send it back to app in this format
         return JsonResponse({
             "status": "success",
             "message": "Token created successfully",
@@ -205,7 +188,6 @@ def generate_token(request):
         if token.expires_at < now():
             return JsonResponse({"status": "error", "message": "Token has expired"}, status=403)
 
-        # TODO validate the challenge
         if token.activated:
             return JsonResponse({"status": "error", "message": "Token already activated"}, status=403)
 
@@ -224,3 +206,55 @@ def generate_token(request):
             "message": "Token validated successfully",
             "token_value": token.code
         })
+
+
+def validate_token(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    # get token
+    token = request.POST.get("token")
+    token_id = request.POST.get("token_id")
+
+    if not token_id:
+        return JsonResponse({"status": "error", "message": "Token is required"}, status=400)
+    else:
+        token = get_object_or_404(Token, id=token_id)
+
+        if token.code == token:
+            token.activated = True
+            token.save()
+            return JsonResponse({"status": "success", "message": "Token validated successfully"})
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid token"}, status=401)
+
+def add_transaction(request):
+    if request.method == "POST":
+        transaction = Transaction.objects.create(
+            id = request.POST['id'],
+            account = request.POST['account'],
+            amount = request.POST['amount'],
+            date = request.POST['date'],
+            description = request.POST['description'],
+            category_id = request.POST['category'],
+        )
+        transaction.save()
+        return JsonResponse({"status": "success"})
+    else :
+        return JsonResponse({"status": "error"}, status=400)
+
+
+def add_account(request):
+    if request.method == "POST":
+        bankAccount = BankAccount.objects.create(
+            id = request.POST['id'],
+            user_id = request.POST['user'],
+            account_number = request.POST['account_number'],
+            balance = request.POST['balance'],
+            bank_name = request.POST['bank_name'],
+        )
+        bankAccount.save()
+        return JsonResponse({"status": "success"})
+    else:
+        return JsonResponse({"status": "error"}, status=400)
+

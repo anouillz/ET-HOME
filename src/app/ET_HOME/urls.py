@@ -24,7 +24,19 @@ urlpatterns = [
     path("register/",views.register_view,name="register"),
     path("",views.home_view,name="home"),
     path("bank/api/",include("bank.urls")),
+
+    #Dashboard
+    path("addBank/", views.addBank_view, name="add_bank"),
+    path("account/", views.account_view, name="account"),
+    path("settings/", views.settings_view, name="settings"),
+    path("logout/", views.logout_view, name="logout"),
+    path("categories/", views.category_view, name="categories"),
+
+    #Application API
     path("api/", views.api_access, name="api"),
-    path('api/transactions/<str:date>/', views.get_transactions, name='get_transactions'),
-    path('api/spendings/<uuid:category>/', views.get_spending_per_category, name='get_spending_per_category')
+    path('api/get_transactions/<str:first_date>/<str:second_date>/', views.get_transactions, name='get_transactions'),
+    path('api/get_outcomes/<str:first_date>/<str:second_date>/', views.get_outcomes, name='get_outcomes'),
+    path('api/get_incomes/<str:first_date>/<str:second_date>/', views.get_incomes, name='get_incomes'),
+    path('api/get_bankAccount_info/<uuid:id>/', views.get_bankAccount_info, name='get_bankAccount_info'),
+    path('api/get_category/<uuid:id>/', views.get_category, name='get_category')
 ]

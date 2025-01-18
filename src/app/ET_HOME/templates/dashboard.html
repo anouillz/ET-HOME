@@ -1,24 +1,26 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>Dashboard</title>
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
         <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     </head>
     <body>
+        <input type="hidden" id="userId" value="{{ user.id }}">
         <div class="dashboard">
             <aside class="sidebar">
                 <h2>ET-HOME</h2>
                 <nav>
-                    <a href="">Categories</a>
-                    <a href="">Add bank account</a>
-                    <a href="">Settings</a>
+                    <a href="http://localhost:8000/categories/">Categories</a>
+                    <a href="http://localhost:8000/addBank/">Add bank account</a>
+                    <a href="http://localhost:8000/settings/">Settings</a>
                 </nav>
-                <a href="" class="logout">Logout</a>
+                <a href="http://localhost:8000/logout/" class="logout">Logout</a>
             </aside>
             <main class="main-content">
                 <header>
-                    <h1>Welcome back, </h1>
+                    <h1>Welcome back, {{ user.username }}</h1>
                     <div class="search">
                         <input type="text" placeholder="Search"/>
                         <i class="icon-search"></i>
@@ -26,6 +28,8 @@
                     <div class="user-info">
                         <img src="profile_icon.svg" alt="User Avatar"/>
                         <span></span>
+                        <img src="" alt="User Avatar"/>
+                        <span>{{ user.first_name }} {{ user.last_name }}</span>
                     </div>
                 </header>
 
