@@ -153,7 +153,10 @@ def get_bankAccount_info(request, id):
                 "amount": float(transaction.amount),
                 "date": transaction.date.isoformat(),
                 "description": transaction.description,
-                "category": transaction.category.name,
+                "category": {
+                    "id": str(transaction.category.id),
+                    "name": transaction.category.name
+                }
             }
             for transaction in transactions
             if start_date <= transaction.date.date()

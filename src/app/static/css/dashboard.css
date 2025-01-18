@@ -5,7 +5,8 @@ header {
 }
 
 .widgets {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
     margin-top: 20px;
 }
@@ -26,6 +27,7 @@ header {
     gap: 1em;
     cursor: pointer;
     transition: box-shadow 0.2s;
+    min-width: 10em;
 }
 
 .widget.inverted {
@@ -99,4 +101,39 @@ header {
 
 .widget.last-month .diff .value {
     font-size: 80%;
+}
+
+.widget.top-categories .content {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.widget.top-categories .chart {
+    width: 10em;
+    height: 10em;
+    align-self: center;
+}
+
+.widget.top-categories .list {
+    display: flex;
+    flex-direction: column;
+}
+
+.widget.top-categories .list .category {
+    padding: 0.4em 0 0.4em 1.6em;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.widget.top-categories .list .category::before {
+    content: "";
+    position: absolute;
+    left: 0.5em;
+    top: 50%;
+    width: 1em;
+    height: 1em;
+    border-radius: 25%;
+    background-color: var(--col);
+    transform: translate(-50%, -50%);
 }
