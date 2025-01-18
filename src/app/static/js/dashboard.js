@@ -60,6 +60,7 @@ async function refreshDashboard() {
     })
     categories = categories.sort((c1, c2) => c1.total - c2.total)
     showTopCategories(categories)
+    showAccounts()
 }
 
 function showTopCategories(categories) {
@@ -103,6 +104,21 @@ function showTopCategories(categories) {
         row.innerText = category.name
 
         list.appendChild(row)
+    })
+}
+
+function showAccounts() {
+    let widget = document.getElementById("accounts")
+    let template = widget.querySelector(".template.account").cloneNode(true)
+    template.classList.remove("template")
+    let list = widget.querySelector(".list")
+    list.innerHTML = ""
+    accounts.forEach(account => {
+        let entry = template.cloneNode(true)
+        entry.querySelector(".id").innerText = "#" + account.account_number.slice(-4)
+        entry.querySelector(".bank").innerText = "(" + account.bank + ")"
+        entry.querySelector(".balance").innerText = formatMoney(account.balance)
+        list.appendChild(entry)
     })
 }
 

@@ -60,4 +60,10 @@ body {
 .main-content {
     flex: 1;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.template {
+    display: none !important;
 }
