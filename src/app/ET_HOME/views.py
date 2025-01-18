@@ -15,13 +15,13 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')  # Redirige vers une page d'accueil
+            return redirect('dashboard')  # Redirige vers une page d'accueil
         else:
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
     return render(request, 'login.html')
 
 
-def home_view(request):
+def dashboard_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
     """
