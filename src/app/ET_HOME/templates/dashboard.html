@@ -13,6 +13,8 @@
             <i class="icon-search"></i>
         </div>
         <div class="user-info">
+            <img src="profile_icon.svg" alt="User Avatar"/>
+            <span></span>
             <img src="" alt="User Avatar"/>
             <span>{{ user.first_name }} {{ user.last_name }}</span>
         </div>
@@ -25,13 +27,14 @@
         {% include "widgets/top_categories.html" with id='top-categories' %}
     </section>
 
-    <section class="expenses">
+    <section class="expenses-categories">
+                    <section class="expenses">
         <h2>Expenses</h2>
         <canvas id="expenses-chart"></canvas>
     </section>
 
     <section class="top-categories">
         <h2>Top Categories</h2>
-        <div class="categories-chart"></div>
+        <div class="categories-chart"></div></section>
     </section>
 {% endblock %}
