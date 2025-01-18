@@ -1,4 +1,4 @@
-{% load static %}
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -18,31 +18,33 @@
             </aside>
             <main class="main-content">
                 <header>
-                    <h1>Welcome back, Matthew</h1>
+                    <h1>Welcome back, </h1>
                     <div class="search">
                         <input type="text" placeholder="Search"/>
                         <i class="icon-search"></i>
                     </div>
                     <div class="user-info">
-                        <img src="" alt="User Avatar"/>
-                        <span>Matthew Parker</span>
+                        <img src="profile_icon.svg" alt="User Avatar"/>
+                        <span></span>
                     </div>
                 </header>
 
                 <section class="widgets">
-                    <div class="widget total-spent">Total Spent: 9328.55 CHF</div>
-                    <div class="widget last-month">Last Month: 12302.20 CHF</div>
-                    <div class="widget add-expense">Add Expenses: 963</div>
+                    <div class="widget total-spent">Total Spent: </div>
+                    <div class="widget last-month">Last Month: </div>
+                    <div class="widget add-expense">Add Expenses: </div>
                 </section>
 
-                <section class="expsenses">
-                    <h2>Expenses</h2>
-                    <canvas id="expenses-chart"></canvas>
-                </section>
-                 
-                <section class="top-categories">
-                    <h2>Top Categories</h2>
-                    <div class="categories-chart"></div>
+                <section class="expenses-categories">
+                    <section class="expenses">
+                        <h2>Expenses</h2>
+                        <canvas id="expenses-chart"></canvas>
+                    </section>
+                
+                    <section class="top-categories">
+                        <h2>Top Categories</h2>
+                        <div class="categories-chart"></div>
+                    </section>
                 </section>
             </main>
         </div>

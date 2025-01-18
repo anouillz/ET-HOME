@@ -5,6 +5,11 @@ body {
     padding: 0;
 }
 
+.main-content {
+    margin: 0;
+    padding: 0;
+}
+
 .dashboard {
     display: flex;
 }
@@ -17,11 +22,17 @@ body {
     height: 100vh;
 }
 
+
 .sidebar a {
     color: #ccc;
     text-decoration: none;
     display: block;
     margin: 10px 0;
+}
+
+.sidebar .logout {
+    position: absolute;
+    bottom: 20px;
 }
 
 .sidebar a:hover {
@@ -30,13 +41,44 @@ body {
 
 .main-content {
     flex: 1;
-    padding: 20px;
 }
 
 header {
+    background-color: white;
     display: flex;
+    top: 0;
     justify-content: space-between;
     align-items: center;
+    margin: 0;
+    width: 100%;
+    padding-left: 20px;
+}
+
+header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f4f4f4;
+    border-radius: 25px;
+    margin-right : 50px;
+    padding-right: 5px;
+}
+
+span {
+    text-align: center;
+}
+
+header input{
+    background-color: #f4f4f4;
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
 }
 
 .widgets {
@@ -51,5 +93,41 @@ header {
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    text-align: top-left;
+    margin : 20px;
+}
+
+.widget:hover {
+    background-color: black;
+    color: white;
+}
+
+
+.expenses-categories{
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.expenses {
+    flex: 1;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: top-left;
+    width: 75%;
+    float: left;
+}   
+
+.top-categories {
+    flex: 1;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: top-left;
+    width: auto;
+    float: right;
 }
