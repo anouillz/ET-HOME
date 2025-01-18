@@ -3,6 +3,15 @@ function formatMoney(amount) {
     return fmt.format(amount)
 }
 
+function formatPercentage(ratio, withSign=false) {
+    let fmt = new Intl.NumberFormat("fr-CH", {maximumFractionDigits: 1})
+    let txt = fmt.format(ratio * 100) + "%"
+    if (withSign && ratio >= 0) {
+        txt = "+" + txt
+    }
+    return txt
+}
+
 function notify(msg) {
 
 }

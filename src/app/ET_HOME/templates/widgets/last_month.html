@@ -1,6 +1,13 @@
 {% extends "widgets/base.html" %}
+{% load static %}
 {% block classes %}last-month{% endblock %}
 {% block title %}Last Month{% endblock %}
 {% block content %}
-    <span class="value">0.00 CHF</span>
+    <div class="total">
+        <div class="value">0.00 CHF</div>
+    </div>
+    <div class="diff">
+        <div class="icon" style="--icon: url({% static 'images/icon_evolution.svg' %});"></div>
+        <div class="value"></div>
+    </div>
 {% endblock %}

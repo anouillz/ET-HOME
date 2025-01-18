@@ -26,15 +26,20 @@ async function refreshDashboard() {
                     curMonthTotal += t.amount
                 }
             })
-            //document.getElementById("")
         })
         accountsPromises.push(promise)
     })
 
     await Promise.all(accountsPromises)
     let total = lastMonthTotal + curMonthTotal
+    let diff = curMonthTotal - lastMonthTotal
+
     document.querySelector("#current-month .value").innerText = formatMoney(curMonthTotal)
-    document.querySelector("#last-month .value").innerText = formatMoney(lastMonthTotal)
+    document.querySelector("#last-month .total .value").innerText = formatMoney(lastMonthTotal)
+    if (lastMonthTotal !== 0) {
+        diff = diff / lastMonthTotal
+        document.querySelector("#last-month .diff .value").innerText = formatPercentage(diff, true)
+    }
 }
 
 window.addEventListener("load", () => {

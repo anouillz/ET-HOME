@@ -47,7 +47,7 @@ header {
     font-weight: bold;
 }
 
-.widget .icon {
+.widget .title .icon {
     width: 2em;
     height: 2em;
     background-color: var(--bg-2);
@@ -55,7 +55,7 @@ header {
     border-radius: 0.6em;
 }
 
-.widget .icon::after {
+.widget .title .icon::after {
     content: "";
     width: 1.4em;
     height: 1.4em;
@@ -73,10 +73,30 @@ header {
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
 }
 
-#current-month .value, #last-month .value {
+#current-month .value, #last-month .total .value {
     font-weight: bold;
 }
 
 #add-expense {
     align-self: flex-start;
+}
+
+.widget.last-month .diff {
+    display: flex;
+    gap: 0.4em;
+    align-items: center;
+}
+
+.widget.last-month .diff .icon {
+    background-color: var(--fg);
+    width: 1em;
+    height: 1em;
+    mask-image: var(--icon);
+    -webkit-mask-image: var(--icon);
+    mask-size: contain;
+    -webkiet-mask-size: contain;
+}
+
+.widget.last-month .diff .value {
+    font-size: 80%;
 }
