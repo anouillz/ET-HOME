@@ -13,28 +13,17 @@
             <i class="icon-search"></i>
         </div>
         <div class="user-info">
-            <img src="profile_icon.svg" alt="User Avatar"/>
-            <span></span>
-            <img src="" alt="User Avatar"/>
+            <img src="{% static "images/icon_profile.svg" %}" alt="User Avatar"/>
             <span>{{ user.first_name }} {{ user.last_name }}</span>
         </div>
     </header>
 
     <section class="widgets">
         {% include "widgets/spendings.html" with id='current-month' icon='images/icon_current_month.svg' %}
-        {% include "widgets/last_month.html" with id='last-month' icon='images/icon_last_month.svg' %}
+        {% include "widgets/accounts.html" with id='accounts' %}
         {% include "widgets/add_expense.html" with id='add-expense' icon='images/icon_add_expense.svg' %}
+        {% include "widgets/last_month.html" with id='last-month' icon='images/icon_last_month.svg' %}
+        {% include "widgets/expenses.html" with id='expenses' %}
         {% include "widgets/top_categories.html" with id='top-categories' %}
-    </section>
-
-    <section class="expenses-categories">
-                    <section class="expenses">
-        <h2>Expenses</h2>
-        <canvas id="expenses-chart"></canvas>
-    </section>
-
-    <section class="top-categories">
-        <h2>Top Categories</h2>
-        <div class="categories-chart"></div></section>
     </section>
 {% endblock %}
