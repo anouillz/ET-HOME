@@ -1,42 +1,3 @@
-body {
-    display: flex;
-}
-
-.sidebar {
-    width: 250px;
-    background-color: #1f1f1f;
-    color: white;
-    padding-bottom: 20px;
-    height: 100vh;
-}
-
-.sidebar h2 {
-    padding: 0 20px;
-}
-
-.sidebar a {
-    color: #ccc;
-    text-decoration: none;
-    display: block;
-    padding: 10px 20px;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
-}
-
-.sidebar a:hover {
-    color: white;
-}
-
-.sidebar a.active {
-    border-left: solid white 4px;
-    padding-left: 16px;
-}
-
-.main-content {
-    flex: 1;
-    padding: 20px;
-}
-
 header {
     display: flex;
     justify-content: space-between;
@@ -50,10 +11,72 @@ header {
 }
 
 .widget {
+    --bg: var(--light-1);
+    --fg: var(--dark-1);
+    --bg-2: var(--light-2);
+    --fg-2: var(--dark-1);
     flex: 1;
-    background-color: white;
+    background-color: var(--bg);
+    color: var(--fg);
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.widget.inverted {
+    --bg: var(--dark-1);
+    --fg: var(--light-1);
+    --bg-2: var(--dark-3);
+    --fg-2: var(--light-1);
+}
+
+.widget .title {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+    height: 2em;
+}
+
+.widget .title .text {
+    font-size: 120%;
+    font-weight: bold;
+}
+
+.widget .icon {
+    width: 2em;
+    height: 2em;
+    background-color: var(--bg-2);
+    position: relative;
+    border-radius: 0.6em;
+}
+
+.widget .icon::after {
+    content: "";
+    width: 1.4em;
+    height: 1.4em;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    background-color: var(--fg-2);
+    mask-image: var(--icon);
+    -webkit-mask-image: var(--icon);
+    mask-size: contain;
+    -webkit-mask-size: contain;
+}
+
+.widget:hover {
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+}
+
+#current-month .value, #last-month .value {
+    font-weight: bold;
+}
+
+#add-expense {
+    align-self: flex-start;
 }

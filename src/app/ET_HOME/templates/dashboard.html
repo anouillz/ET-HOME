@@ -19,9 +19,9 @@
     </header>
 
     <section class="widgets">
-        <div id="current-month" class="widget total-spent">Total Spent: <span class="value">0.00 CHF</span></div>
-        <div id="last-month" class="widget last-month">Last Month: <span class="value">0.00 CHF</span></div>
-        <div class="widget add-expense">Add Expenses: 963</div>
+        {% include "widgets/spendings.html" with id='current-month' %}
+        {% include "widgets/last_month.html" with id='last-month' icon='images/icon_last_month.svg' %}
+        {% include "widgets/add_expense.html" with id='add-expense' icon='images/icon_add_expense.svg' %}
     </section>
 
     <section class="expenses">

@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Dashboard</title>
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+        <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+        <script src="{% static 'js/base.js' %}"></script>
+        <script src="{% static 'js/dashboard.js' %}"></script>
+    </head>
+    <body>
+        <input type="hidden" id="userId" value="{{ user.id }}">
+        <div class="dashboard">
+            <aside class="sidebar">
+                <h2>ET-HOME</h2>
+                <nav>
+                    <a href="http://localhost:8000/" class="active">Dashboard</a>
+                    <a href="http://localhost:8000/categories/">Categories</a>
+                    <a href="http://localhost:8000/addBank/">Add bank account</a>
+                    <a href="http://localhost:8000/settings/">Settings</a>
+                </nav>
+                <a href="http://localhost:8000/logout/" class="logout">Logout</a>
+            </aside>
+            <main class="main-content">
+                <header>
+                    <h1>Welcome back, {{ user.username }}</h1>
+                    <div class="search">
+                        <input type="text" placeholder="Search"/>
+                        <i class="icon-search"></i>
+                    </div>
+                    <div class="user-info">
+                        <img src="" alt="User Avatar"/>
+                        <span>{{ user.first_name }} {{ user.last_name }}</span>
+                    </div>
+                </header>
+
+                <section class="widgets">
+                    <div id="current-month" class="widget total-spent">Total Spent: <span class="value">0.00 CHF</span></div>
+                    <div id="last-month" class="widget last-month">Last Month: <span class="value">0.00 CHF</span></div>
+                    <div class="widget add-expense">Add Expenses: 963</div>
+                </section>
+
+                <section class="expenses">
+                    <h2>Expenses</h2>
+                    <canvas id="expenses-chart"></canvas>
+                </section>
+                 
+                <section class="top-categories">
+                    <h2>Top Categories</h2>
+                    <div class="categories-chart"></div>
+                </section>
+            </main>
+        </div>
+    </body>
+</html>
