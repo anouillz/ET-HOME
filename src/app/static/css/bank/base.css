@@ -6,7 +6,7 @@ form {
     display: flex;
     flex-direction: column;
     gap: 1em;
-    width: 50%;
+    width: 100%;
     max-width: 30em;
     margin: 0 auto;
 }
@@ -52,4 +52,28 @@ form button:active {
 form button:disabled {
     background-color: var(--light-4);
     color: var(--dark-4);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 60em;
+    margin: 0 auto;
+}
+
+table thead {
+    border-bottom: solid var(--dark-1) 2px;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 0.4em 0.8em;
+}
+
+table th:not(:first-child) {
+    border-left: solid var(--dark-1) 2px;
+}
+
+table tr:nth-child(even) {
+    background-color: var(--light-3);
 }

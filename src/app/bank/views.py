@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from django.views.decorators.http import require_GET, require_POST
+from rest_framework.status import HTTP_200_OK
 
 from .api_utils import to_json
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
@@ -314,3 +315,27 @@ def add_transaction_view(request):
 
 def add_category_view(request):
     return render(request, "bank/add_category.html")
+
+def accounts_view(request):
+    context = {
+        "accounts": BankAccount.objects.all()
+    }
+    return render(request, "bank/accounts.html", context)
+
+def transactions_view(request):
+    context = {
+        "transactions": Transaction.objects.all()
+    }
+    return render(request, "bank/transactions.html", context)
+
+@require_POST
+def delete_transaction(request, id):
+    transaction = get_object_or_404(Transaction, id=id)
+    transaction.delete()
+    return JsonResponse({"status": "success"}, status=HTTP_200_OK)
+
+@require_POST
+def delete_account(request, id):
+    account = get_object_or_404(BankAccount, id=id)
+    account.delete()
+    return JsonResponse({"status": "success"}, status=HTTP_200_OK)

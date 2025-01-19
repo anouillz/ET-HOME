@@ -10,5 +10,7 @@ def navbar_links(request):
             {'url_name': 'bank:add_account', 'label': 'Add account'},
             {'url_name': 'bank:add_transaction', 'label': 'Add transaction'},
             {'url_name': 'bank:add_category', 'label': 'Add category'},
+            {'url_name': 'bank:accounts', 'label': 'Accounts'},
+            {'url_name': 'bank:transactions', 'label': 'Transactions'},
         ]
     }
