@@ -224,23 +224,16 @@ def validate_token(request):
 def add_transaction(request):
     try:
 
-        account_id = request.POST.get('account')
-        category_id = request.POST.get('category')
-        amount = request.POST.get('amount')
-        description = request.POST.get('description')
+        account_id = request.POST.get("account_id")
+        category_id = request.POST.get("category_id")
+        amount = request.POST.get("amount")
+        description = request.POST.get("description", "")
 
-        if not all([account_id, category_id, amount,description]):
+        if not all([account_id, category_id, amount]):
             return JsonResponse({"status": "error", "message": "All fields are required."}, status=400)
 
-
-        account = BankAccount.objects.filter(id=account_id, user=request.user).first()
-        category = SpendingCategory.objects.filter(id=category_id, user=request.user).first()
-
-        if not account:
-            return JsonResponse({"status": "error", "message": "Invalid account ID."}, status=400)
-        if not category:
-            return JsonResponse({"status": "error", "message": "Invalid category ID."}, status=400)
-
+        account = get_object_or_404(BankAccount, id=account_id)
+        category = get_object_or_404(SpendingCategory, id=category_id)
 
         # Create transaction
         transaction = Transaction.objects.create(
@@ -249,7 +242,11 @@ def add_transaction(request):
             description=description,
             category=category,
         )
-        return JsonResponse({"status": "success", "message": "Transaction added successfully.","data":to_json(transaction)})
+        return JsonResponse({
+            "status": "success",
+            "message": "Transaction added successfully.",
+            "id": transaction.id
+        })
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
@@ -283,9 +280,37 @@ def add_account(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+@require_POST
+def add_category(request):
+    try:
+        name = request.POST.get("name")
+
+        if not name:
+            return JsonResponse({"status": "error", "message": "All fields are required."}, status=400)
+
+        category = SpendingCategory.objects.create(name=name)
+        return JsonResponse({
+            "status": "success",
+            "message": "Category added successfully.",
+            "id": category.id
+        })
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 def add_account_view(request):
     context = {
         "clients": Client.objects.all(),
         "banks": ["UBS", "BCV", "BCVs", "Raiffeisen"]
     }
     return render(request, "bank/add_account.html", context)
+
+def add_transaction_view(request):
+    context = {
+        "accounts": BankAccount.objects.all(),
+        "categories": SpendingCategory.objects.all()
+    }
+    return render(request, "bank/add_transaction.html", context)
+
+def add_category_view(request):
+    return render(request, "bank/add_category.html")

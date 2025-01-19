@@ -4,10 +4,20 @@
     <head>
         <title>{% block title %}Title{% endblock %}</title>
         <link rel="stylesheet" href="{% static 'css/base.css' %}">
+        <link rel="stylesheet" href="{% static 'css/bank/base.css' %}">
         <script src="{% static 'js/base.js' %}"></script>
+        <script src="{% static 'js/bank/base.js' %}"></script>
         {% block head %}{% endblock head %}
     </head>
     <body>
+        <aside class="sidebar">
+            <h2>Bank</h2>
+            <nav>
+                {% for link in bank_nav_links %}
+                    <a href="{% url link.url_name %}" class="{% if request.resolver_match.view_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+        </aside>
         <main class="main-content">
             <h1>{% block page-name %}{% endblock %}</h1>
             {% block main %}{% endblock %}

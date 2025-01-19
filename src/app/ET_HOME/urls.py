@@ -23,7 +23,7 @@ urlpatterns = [
     path("login/",views.login_view,name="login"),
     path("register/",views.register_view,name="register"),
     path("",views.dashboard_view,name="dashboard"),
-    path("bank/", include("bank.urls")),
+    path("bank/", include("bank.urls", namespace="bank")),
 
     #Dashboard
     path("addAccount/", views.add_account_view, name="add_bank"),

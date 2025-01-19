@@ -13,7 +13,7 @@
             <h2>ET-HOME</h2>
             <nav>
                 {% for link in nav_links %}
-                	<a href="{% url link.url_name %}" class="{% if request.resolver_match.url_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
+                    <a href="{% url link.url_name %}" class="{% if request.resolver_match.url_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
                 {% endfor %}
             </nav>
             <a href="{% url "logout" %}" class="logout">Logout</a>

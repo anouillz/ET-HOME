@@ -1,0 +1,35 @@
+{% extends 'bank/base.html' %}
+{% load static %}
+{% load random %}
+{% block title %}Add Transaction{% endblock %}
+{% block page-name %}Add a transaction{% endblock %}
+{% block main %}
+    <form data-endpoint="transactions/add">
+        {% csrf_token %}
+        <div class="field">
+            <label for="account_id">Account number</label>
+            <select name="account_id" id="account_id">
+                {% for account in accounts %}
+                    <option value="{{ account.id }}">{{ account.account_number }} ({{ account.user.first_name }} {{ account.user.last_name }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="category_id">Category</label>
+            <select name="category_id" id="category_id">
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="amount">Amount</label>
+            <input type="number" name="amount" id="amount" value="{% rand_float -200 200 2 %}">
+        </div>
+        <div class="field">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" rows="5"></textarea>
+        </div>
+        <button type="submit">Create</button>
+    </form>
+{% endblock %}
