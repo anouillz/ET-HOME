@@ -1,4 +1,3 @@
-import datetime
 import time
 from datetime import datetime
 
@@ -143,8 +142,8 @@ def get_bankAccount_info(request, id):
     try:
         account = BankAccount.objects.get(id=id)
         # Only get transactions from the beginning of last month
-        today = datetime.datetime.today()
-        start_date = datetime.datetime(today.year, today.month, 1)
+        today = datetime.today()
+        start_date = datetime(today.year, today.month, 1)
         start_date += relativedelta(months=-1)
         start_date = start_date.date()
         transactions = Transaction.objects.filter(
