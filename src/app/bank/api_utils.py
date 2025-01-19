@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from django.db import models
 
-def to_json(obj,model,many=False):
-    return UniversalSerializer(obj,model=model,many=many,safe=False).data
+def to_json(obj, model, many=False):
+    return UniversalSerializer(obj, model=model, many=many, safe=False).data
 
 class UniversalSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):

@@ -1,33 +1,33 @@
 import hmac
+import json
 import secrets
 from datetime import timedelta
 
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from django.views.decorators.http import require_GET, require_POST
 
 from .api_utils import to_json
-from .models import Client, BankAccount, Transaction, Secret, Token
-
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
 
+
 @require_GET
-def get_transaction(request,transactionId):
-    transaction = Transaction.objects.filter(account=request.account,id=transactionId).first()
+def get_transaction(request, transactionId):
+    transaction = Transaction.objects.filter(account=request.account, id=transactionId).first()
     if transaction:
         return JsonResponse({
-            "status":"success",
-            "data":to_json(transaction,Transaction),
-            "message":"transaction found"
-        },status=200)
+            "status": "success",
+            "data": to_json(transaction, Transaction),
+            "message": "transaction found"
+        }, status=200)
     else:
         return JsonResponse({
-            "status":"error",
-            "data":None,
-            "message":"transaction not found"
-        },status=404)
+            "status": "error",
+            "data": None,
+            "message": "transaction not found"
+        }, status=404)
 
 
 @require_POST
@@ -74,14 +74,14 @@ def filter_transaction(request):
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 @require_GET
-def get_account(request,id):
+def get_account(request, id):
     account = BankAccount.objects.filter(id=request.account.id)
     request.account = account
     return JsonResponse({
-        "message":"client "+id+" accounts",
-        "status":"success",
-        "data":to_json(request,many=False)
-})
+        "message": f"client {id} accounts",
+        "status": "success",
+        "data": to_json(request, many=False)
+    })
 
 def generate_secret(request):
     if request.method != "POST":
@@ -258,16 +258,14 @@ def add_transaction(request):
 def add_account(request):
     try:
 
-        account_number = request.POST.get('account_number')
-        balance = request.POST.get('balance')
-        bank_name = request.POST.get('bank_name')
+        account_number = request.POST.get("account_number")
+        balance = request.POST.get("balance")
+        bank_name = request.POST.get("bank_name")
 
         if not all([account_number, balance, bank_name]):
             return JsonResponse({"status": "error", "message": "All fields are required."}, status=400)
 
-        user = Client.objects.filter(id=request.user.id).first()
-        if not user:
-            return JsonResponse({"status": "error", "message": "Invalid user."}, status=400)
+        user = get_object_or_404(Client, id=request.POST.get("user_id"))
 
         # Create bank account
         bank_account = BankAccount.objects.create(
@@ -276,8 +274,18 @@ def add_account(request):
             balance=balance,
             bank_name=bank_name,
         )
-        return JsonResponse({"status": "success", "message": "Bank account added successfully.","data":to_json(bank_account)})
+        return JsonResponse({
+            "status": "success",
+            "message": "Bank account added successfully.",
+            "id": bank_account.id
+        })
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+def add_account_view(request):
+    context = {
+        "clients": Client.objects.all(),
+        "banks": ["UBS", "BCV", "BCVs", "Raiffeisen"]
+    }
+    return render(request, "bank/add_account.html", context)
