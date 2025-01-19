@@ -23,7 +23,7 @@ urlpatterns = [
     path("login/",views.login_view,name="login"),
     path("register/",views.register_view,name="register"),
     path("",views.dashboard_view,name="dashboard"),
-    path("bank/api/",include("bank.urls")),
+    path("bank/", include("bank.urls")),
 
     #Dashboard
     path("addAccount/", views.add_account_view, name="add_bank"),
@@ -42,5 +42,5 @@ urlpatterns = [
     path('api/get_accounts/', views.get_accounts, name='get_accounts'),
     path('api/add_transaction/', views.add_transactions, name='add_transactions'),
     path("api/add_bank_account", views.add_bank_account, name='add_bank_account'),
-    path("api/test_secret", views.test_secret, name='test_secret')
+    path("api/test_secret", views.test_secret, name='test_secret'),
 ]
