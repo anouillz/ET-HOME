@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 
 def to_json(obj,model,many=False):
-    return UniversalSerializer(obj,model=model,many=many,safe=False)
+    return UniversalSerializer(obj,model=model,many=many,safe=False).data
 
 class UniversalSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
