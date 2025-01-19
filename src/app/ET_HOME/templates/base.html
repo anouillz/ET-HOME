@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Title{% endblock %}</title>
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+        <script src="{% static 'js/base.js' %}"></script>
+        {% block head %}{% endblock head %}
+    </head>
+    <body>
+        <input type="hidden" id="userId" value="{{ user.id }}">
+        <aside class="sidebar">
+            <h2>ET-HOME</h2>
+            <nav>
+                {% for link in nav_links %}
+                	<a href="{% url link.url_name %}" class="{% if request.resolver_match.url_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+            <a href="{% url "logout" %}" class="logout">Logout</a>
+        </aside>
+        <main class="main-content">
+            {% block main %}{% endblock %}
+        </main>
+    </body>
+</html>

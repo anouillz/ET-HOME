@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("login/",views.login_view,name="login"),
     path("register/",views.register_view,name="register"),
-    path("",views.home_view,name="home"),
+    path("",views.dashboard_view,name="dashboard"),
     path("bank/api/",include("bank.urls")),
 
     #Dashboard
@@ -38,5 +38,6 @@ urlpatterns = [
     path('api/get_outcomes/<str:first_date>/<str:second_date>/', views.get_outcomes, name='get_outcomes'),
     path('api/get_incomes/<str:first_date>/<str:second_date>/', views.get_incomes, name='get_incomes'),
     path('api/get_bankAccount_info/<uuid:id>/', views.get_bankAccount_info, name='get_bankAccount_info'),
-    path('api/get_category/<uuid:id>/', views.get_category, name='get_category')
+    path('api/get_category/<uuid:id>/', views.get_category, name='get_category'),
+    path('api/get_accounts/', views.get_accounts, name='get_accounts')
 ]

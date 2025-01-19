@@ -1,0 +1,12 @@
+{% load static %}
+<div id="{{ id }}" class="widget {% block classes %}{% endblock %}">
+    <div class="title">
+        {% if icon %}
+            <div style="--icon: url({% static icon %});" class="icon"></div>
+        {% endif %}
+        <div class="text">{% block title %}Widget Title{% endblock %}</div>
+    </div>
+    {% block no-content %}
+        <div class="content">{% block content %}{% endblock %}</div>
+    {% endblock %}
+</div>

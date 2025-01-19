@@ -1,11 +1,12 @@
-from datetime import datetime
+import datetime
 
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from bank.models import BankAccount
-from .models import Transaction, SpendingCategory, User
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+
+from .models import Transaction, SpendingCategory, User, BankAccount
 
 
 def login_view(request):
@@ -15,13 +16,13 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')  # Redirige vers une page d'accueil
+            return redirect('dashboard')  # Redirige vers une page d'accueil
         else:
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
     return render(request, 'login.html')
 
 
-def home_view(request):
+def dashboard_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
     """
@@ -135,33 +136,61 @@ def logout_view(request):
 def get_bankAccount_info(request, id):
     try:
         account = BankAccount.objects.get(id=id)
-        transactions = Transaction.objects.filter(account_id=id)
+        # Only get transactions from the beginning of last month
+        today = datetime.datetime.today()
+        start_date = datetime.datetime(today.year, today.month, 1)
+        start_date += relativedelta(months=-1)
+        start_date = start_date.date()
+        transactions = Transaction.objects.filter(
+            account_id=id,
+            date__gte=start_date.isoformat()
+        )
 
         transactions_data = [
-                {
-                    "id": str(transaction.id),
-                    "account": transaction.account.id,
-                    "amount": float(transaction.amount),
-                    "date": transaction.date.isoformat(),
-                    "description": transaction.description,
-                    "category": transaction.category.name,
-                }
-                for transaction in transactions
-            ]
-
-        account_data = [
             {
-                "id" : str(account.id),
-                "account_number" : account.account_number,
-                "balance" : account.balance,
-                "bank_name" : account.bank_name,
+                "id": str(transaction.id),
+                "account": transaction.account.id,
+                "amount": float(transaction.amount),
+                "date": transaction.date.isoformat(),
+                "description": transaction.description,
+                "category": {
+                    "id": str(transaction.category.id),
+                    "name": transaction.category.name
+                }
             }
+            for transaction in transactions
+            if start_date <= transaction.date.date()
         ]
+
+        account_data = {
+            "id" : str(account.id),
+            "account_number" : account.account_number,
+            "balance" : float(account.balance),
+            "bank_name" : account.bank_name,
+        }
+
         return JsonResponse({"account_data" : account_data, "transactions": transactions_data})
 
-    except ValueError:
+    except ValueError as e:
+        print(e)
         return JsonResponse({"error": "Wrong account number."}, status=404)
 
+def get_accounts(request):
+    try:
+        accounts = BankAccount.objects.filter(user__id=request.user.id)
+        accounts_data = [
+            {
+                "id": str(account.id),
+                "bank": account.bank_name,
+                "balance": float(account.balance),
+                "account_number": account.account_number
+            }
+            for account in accounts
+        ]
+
+        return JsonResponse({"accounts": accounts_data})
+    except ValueError:
+        return JsonResponse({"error": "An error occured"}, status=500)
 
 def get_outcomes(request, first_date, second_date):
     try:

@@ -1,7 +1,6 @@
-from django.http import JsonResponse,Http404
-from restframework import serializers
-from django.apps import apps
-from django.db import models
+from rest_framework import serializers
+from rest_framework import serializers
+
 
 def to_json(obj,model,many=False):
     return UniversalSerializer(obj,model=model,many=many,safe=False).data
