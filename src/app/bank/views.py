@@ -10,13 +10,13 @@ from django.views.decorators.http import require_GET,require_POST
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_datetime
 from .api_utils import to_json
+import uuid
 
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
 
 @require_GET
 def get_client(request):
-    id = request.user.id
-    client = Client.objects.filter(id=id).first()
+    client = Client.objects.filter(id=request.user.id).first()
     if client:
         return JsonResponse({
             "status":"error",
@@ -32,8 +32,8 @@ def get_client(request):
     
 @require_GET
 def get_transaction(request,transactionId):
-    userId = request.user.id
-    transaction = Transaction.objects.filter(user__id=userId,id=transactionId).first()
+    accounts = Client.objects.filter(user__id=request.user.id)
+    transaction = Transaction.objects.filter(account__in=accounts,id=transactionId).first()
     if transaction:
         return JsonResponse({
             "status":"success",
@@ -47,49 +47,50 @@ def get_transaction(request,transactionId):
             "message":"transaction not found"
         },status=404)
 
-@require_GET
-def get_all_transaction(request,id):
-    userId = request.user.id
-    transaction = Transaction.objects.filter(user__id=userId,id=id).first()
-    if transaction:
-        return JsonResponse({
-            "status":"success",
-            "data":to_json(transaction,Transaction),
-            "message":"transaction found"
-        },status=200)
-    else:
-        return JsonResponse({
-            "status":"error",
-            "data":None,
-            "message":"transaction not found"
-        },status=404)
-
+ 
 @require_POST
 def filter_transaction(request):
-    start_date = request.data.get('start_date')
-    end_date = request.data.get('end_date')
-    if not start_date or not end_date:
-        return JsonResponse({"status":"error","message": "Both start_date and end_date are required."}, status=400)
     try:
-        start_date = parse_datetime(start_date)
-        end_date = parse_datetime(end_date)
+        data = json.loads(request.body)
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        categories = data.get('categories', [])
 
-        if not start_date or not end_date:
-            return JsonResponse({"status":"error","message": "Invalid date format. Use ISO 8601."}, status=400)
-    except ValueError:
-        return JsonResponse({"status":"error","message": "Invalid date format. Use ISO 8601."}, status=400)
-    
-    transactions = Transaction.objects.filter(date__gte=start_date, date__lte=end_date)
-    return JsonResponse({
-        "status":"sucess",
-        "message":"transactions between "+start_date+" and "+end_date,
-        "data":to_json(transactions,Transaction,many=True)
-    })
-    
+        if start_date:
+            start_date = parse_datetime(start_date)
+            if not start_date:
+                return JsonResponse({"status": "error", "message": "Invalid start_date format. Use ISO 8601."}, status=400)
+        if end_date:
+            end_date = parse_datetime(end_date)
+            if not end_date:
+                return JsonResponse({"status": "error", "message": "Invalid end_date format. Use ISO 8601."}, status=400)
 
-    
+        if categories and not isinstance(categories, list):
+            return JsonResponse({"status": "error", "message": "Categories should be an array."}, status=400)
 
+        user_accounts = BankAccount.objects.filter(user__id=request.user.id)
 
+        transactions = Transaction.objects.filter(account__in=user_accounts)
+
+        if start_date:
+            transactions = transactions.filter(date__gte=start_date)
+        if end_date:
+            transactions = transactions.filter(date__lte=end_date)
+
+        if categories:
+            db_categories = SpendingCategory.objects.filter(id__in=categories)
+            transactions = transactions.filter(category__in=db_categories)
+
+        return JsonResponse({
+            "status": "success",
+            "message": f"got transactions query",
+            "data": to_json(transactions, Transaction, many=True)
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "message": "Invalid JSON body."}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 def generate_secret(request):
 
@@ -228,33 +229,64 @@ def validate_token(request):
         else:
             return JsonResponse({"status": "error", "message": "Invalid token"}, status=401)
 
+@require_POST
 def add_transaction(request):
-    if request.method == "POST":
+    try:
+
+        account_id = request.POST.get('account')
+        category_id = request.POST.get('category')
+        amount = request.POST.get('amount')
+        description = request.POST.get('description')
+
+        if not all([account_id, category_id, amount,description]):
+            return JsonResponse({"status": "error", "message": "All fields are required."}, status=400)
+
+
+        account = BankAccount.objects.filter(id=account_id, user=request.user).first()
+        category = SpendingCategory.objects.filter(id=category_id, user=request.user).first()
+
+        if not account:
+            return JsonResponse({"status": "error", "message": "Invalid account ID."}, status=400)
+        if not category:
+            return JsonResponse({"status": "error", "message": "Invalid category ID."}, status=400)
+
+
+        # Create transaction
         transaction = Transaction.objects.create(
-            id = request.POST['id'],
-            account = request.POST['account'],
-            amount = request.POST['amount'],
-            date = request.POST['date'],
-            description = request.POST['description'],
-            category_id = request.POST['category'],
+            account=account,
+            amount=amount,
+            description=description,
+            category=category,
         )
-        transaction.save()
-        return JsonResponse({"status": "success"})
-    else :
-        return JsonResponse({"status": "error"}, status=400)
+        return JsonResponse({"status": "success", "message": "Transaction added successfully.","data":to_json(transaction)})
 
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+@require_POST
 def add_account(request):
-    if request.method == "POST":
-        bankAccount = BankAccount.objects.create(
-            id = request.POST['id'],
-            user_id = request.POST['user'],
-            account_number = request.POST['account_number'],
-            balance = request.POST['balance'],
-            bank_name = request.POST['bank_name'],
+    try:
+
+        account_number = request.POST.get('account_number')
+        balance = request.POST.get('balance')
+        bank_name = request.POST.get('bank_name')
+
+        if not all([account_number, balance, bank_name]):
+            return JsonResponse({"status": "error", "message": "All fields are required."}, status=400)
+        
+        user = Client.objects.filter(id=request.user.id).first()
+        if not user:
+            return JsonResponse({"status": "error", "message": "Invalid user."}, status=400)
+
+        # Create bank account
+        bank_account = BankAccount.objects.create(
+            user=user,
+            account_number=account_number,
+            balance=balance,
+            bank_name=bank_name,
         )
-        bankAccount.save()
-        return JsonResponse({"status": "success"})
-    else:
-        return JsonResponse({"status": "error"}, status=400)
+        return JsonResponse({"status": "success", "message": "Bank account added successfully.","data":to_json(bank_account)})
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
