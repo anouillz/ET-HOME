@@ -5,19 +5,10 @@
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}
+{% block header %}
+    <h1>Welcome back, {{ user.username }}</h1>
+{% endblock %}
 {% block main %}
-    <header>
-        <h1>Welcome back, {{ user.username }}</h1>
-        <div class="search">
-            <input type="text" placeholder="Search"/>
-            <i class="icon-search"></i>
-        </div>
-        <div class="user-info">
-            <img src="{% static "images/icon_profile.svg" %}" alt="User Avatar"/>
-            <span>{{ user.first_name }} {{ user.last_name }}</span>
-        </div>
-    </header>
-
     <section class="widgets">
         {% include "widgets/spendings.html" with id='current-month' icon='images/icon_current_month.svg' %}
         {% include "widgets/accounts.html" with id='accounts' icon='images/icon_accounts.svg' %}

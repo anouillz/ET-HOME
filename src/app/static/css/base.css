@@ -67,3 +67,37 @@ body {
 .template {
     display: none !important;
 }
+
+header {
+    background-color: white;
+    display: flex;
+    top: 0;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    width: 100%;
+    padding-left: 20px;
+}
+
+header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--light-2);
+    border-radius: 25px;
+    padding-right: 0.8em;
+    margin: 10px 50px 10px auto;
+}
+
+header input{
+    background-color: #f4f4f4;
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
+}

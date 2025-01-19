@@ -19,6 +19,13 @@
             <a href="{% url "logout" %}" class="logout">Logout</a>
         </aside>
         <main class="main-content">
+            <header>
+                {% block header %}{% endblock %}
+                <div class="user-info">
+                    <img src="{% static "images/icon_profile.svg" %}" alt="User Avatar"/>
+                    <span>{{ user.first_name }} {{ user.last_name }}</span>
+                </div>
+            </header>
             {% block main %}{% endblock %}
         </main>
     </body>
