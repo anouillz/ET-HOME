@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-
+from datetime import datetime
 from .models import Transaction, SpendingCategory, User, BankAccount
 
 
@@ -242,3 +242,18 @@ def get_incomes(request, first_date, second_date):
         return JsonResponse({"dates": {"start_date": first_date, "end_date": second_date}, "income": incomes, "transactions": transactions_data})
     except ValueError:
         return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
+
+def add_transactions(request):
+    if request.method == "POST":
+        transaction = Transaction.objects.create(
+            id = request.POST['id'],
+            account_id = request.POST['account id'],
+            amount = request.POST['amount'],
+            date = request.POST['date'],
+            description = request.POST['description'],
+            category_id = request.POST['category id'],
+        )
+        transaction.save()
+        return JsonResponse({"new transaction status": "success"})
+    else:
+        return JsonResponse({"new transaction status": "error"}, status=400)
