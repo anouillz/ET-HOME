@@ -19,7 +19,7 @@ class Client(AbstractUser):
         blank=True,
         help_text="Specific permissions for this user",
         verbose_name="user permissions"
-    )
+)
 
 class BankAccount(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -26,7 +26,7 @@ class TokenVerificationMiddleware:
             # Redirect to login page if not authenticated
             return redirect(reverse('login'))  # Adjust 'login' to the actual name of your login view
         '''
-        
+
         # If the user is authenticated or the URL is not restricted, continue processing the request
         response = self.get_response(request)
         return response

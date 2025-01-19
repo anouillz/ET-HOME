@@ -10,30 +10,12 @@ from django.views.decorators.http import require_GET,require_POST
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_datetime
 from .api_utils import to_json
-import uuid
 
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
-
-@require_GET
-def get_client(request):
-    client = Client.objects.filter(id=request.user.id).first()
-    if client:
-        return JsonResponse({
-            "status":"error",
-            "data":None,
-            "message":"client not found"
-        },status=200)
-    else:
-        return JsonResponse({
-            "status":"success",
-            "data":to_json(client,Client),
-            "message":"client found"
-        },status=404)
-    
+ 
 @require_GET
 def get_transaction(request,transactionId):
-    accounts = Client.objects.filter(user__id=request.user.id)
-    transaction = Transaction.objects.filter(account__in=accounts,id=transactionId).first()
+    transaction = Transaction.objects.filter(account=request.account,id=transactionId).first()
     if transaction:
         return JsonResponse({
             "status":"success",
@@ -67,10 +49,9 @@ def filter_transaction(request):
 
         if categories and not isinstance(categories, list):
             return JsonResponse({"status": "error", "message": "Categories should be an array."}, status=400)
+        
 
-        user_accounts = BankAccount.objects.filter(user__id=request.user.id)
-
-        transactions = Transaction.objects.filter(account__in=user_accounts)
+        transactions = Transaction.objects.filter(account=request.account)
 
         if start_date:
             transactions = transactions.filter(date__gte=start_date)
@@ -91,6 +72,16 @@ def filter_transaction(request):
         return JsonResponse({"status": "error", "message": "Invalid JSON body."}, status=400)
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    
+@require_GET
+def get_account(request,id):
+    account = BankAccount.objects.filter(id=request.account.id)
+    request.account = account
+    return JsonResponse({
+        "message":"client "+id+" accounts",
+        "status":"success",
+        "data":to_json(request,many=False)
+})
 
 def generate_secret(request):
 
