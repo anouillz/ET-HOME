@@ -24,7 +24,7 @@ class Client(AbstractUser):
 class BankAccount(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='bank_accounts')
-    account_number = models.CharField(max_length=50)
+    account_number = models.CharField(max_length=50, unique=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     bank_name = models.CharField(max_length=100)
 
@@ -41,7 +41,7 @@ class Token(models.Model):
     secret = models.ForeignKey(Secret, on_delete=models.CASCADE)
     created_at = models.DateTimeField(editable=False,default=now)
     expires_at = models.DateTimeField(editable=False)
-    activated = models.BooleanField(default=False),
+    activated = models.BooleanField(default=False)
     challenge = models.CharField(editable=False,max_length=32)
     
 class SpendingCategory(models.Model):

@@ -26,7 +26,7 @@ urlpatterns = [
     path("bank/api/",include("bank.urls")),
 
     #Dashboard
-    path("addBank/", views.addBank_view, name="add_bank"),
+    path("addAccount/", views.add_account_view, name="add_bank"),
     path("account/", views.account_view, name="account"),
     path("settings/", views.settings_view, name="settings"),
     path("logout/", views.logout_view, name="logout"),
@@ -41,4 +41,6 @@ urlpatterns = [
     path('api/get_category/<uuid:id>/', views.get_category, name='get_category'),
     path('api/get_accounts/', views.get_accounts, name='get_accounts'),
     path('api/add_transaction/', views.add_transactions, name='add_transactions'),
+    path("api/add_bank_account", views.add_bank_account, name='add_bank_account'),
+    path("api/test_secret", views.test_secret, name='test_secret')
 ]

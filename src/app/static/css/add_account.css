@@ -1,0 +1,109 @@
+.steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+    gap: 1em;
+}
+
+.steps .step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    align-items: center;
+    color: var(--dark-4);
+    align-self: flex-start;
+}
+
+.steps .step.active {
+    color: black;
+}
+
+.steps .step .num {
+    font-size: 150%;
+    font-weight: bold;
+}
+.steps .step .text {
+    font-size: 120%;
+    text-align: center;
+}
+
+.steps .link {
+    flex-grow: 1;
+    height: 0.4em;
+    border-radius: 0.2em;
+    position: relative;
+    background-color: var(--light-4);
+}
+.steps .link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    height: inherit;
+    border-radius: inherit;
+    transition: width 0.5s;
+    background-color: #66BB6A;
+}
+.steps .gap {
+    flex-grow: 1;
+}
+
+/*.steps .step.active + .link::after {
+    width: 20%;
+}*/
+
+.steps .step.finished + .link::after {
+    width: 100%;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    max-width: 30em;
+    align-self: center;
+    width: 100%;
+    padding: 1em;
+}
+
+.info .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+.info .field input {
+    font-family: inherit;
+    font-size: inherit;
+    background-color: var(--light-3);
+    border: solid var(--dark-4) 1px;
+    border-radius: 4px;
+    padding: 0.4em;
+}
+
+.info button {
+    font-family: inherit;
+    font-size: inherit;
+    background-color: var(--dark-2);
+    color: var(--light-1);
+    padding: 0.6em 1.2em;
+    border: none;
+    border-radius: 8px;
+    align-self: center;
+    cursor: pointer;
+}
+
+.info button:hover {
+    background-color: var(--dark-3);
+}
+
+.info button:active {
+    background-color: var(--dark-1);
+}
+.info button:disabled {
+    background-color: var(--light-4);
+    color: var(--dark-4);
+}

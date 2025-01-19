@@ -1,18 +1,18 @@
 import hmac
-import json
 import secrets
 from datetime import timedelta
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.utils.timezone import now
-from django.views.decorators.http import require_GET,require_POST
-from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_datetime
+from django.utils.timezone import now
+from django.views.decorators.http import require_GET, require_POST
+
 from .api_utils import to_json
+from .models import Client, BankAccount, Transaction, Secret, Token
 
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
- 
+
 @require_GET
 def get_transaction(request,transactionId):
     transaction = Transaction.objects.filter(account=request.account,id=transactionId).first()
@@ -29,7 +29,7 @@ def get_transaction(request,transactionId):
             "message":"transaction not found"
         },status=404)
 
- 
+
 @require_POST
 def filter_transaction(request):
     try:
@@ -49,7 +49,7 @@ def filter_transaction(request):
 
         if categories and not isinstance(categories, list):
             return JsonResponse({"status": "error", "message": "Categories should be an array."}, status=400)
-        
+
 
         transactions = Transaction.objects.filter(account=request.account)
 
@@ -72,7 +72,7 @@ def filter_transaction(request):
         return JsonResponse({"status": "error", "message": "Invalid JSON body."}, status=400)
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
-    
+
 @require_GET
 def get_account(request,id):
     account = BankAccount.objects.filter(id=request.account.id)
@@ -84,7 +84,6 @@ def get_account(request,id):
 })
 
 def generate_secret(request):
-
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
@@ -131,16 +130,16 @@ def generate_token(request):
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
     # Extract data from the request
-    account_id = request.POST.get("account_id")
+    account_number = request.POST.get("account_number")
     secret_id = request.POST.get("secret_id")
     token_id = request.POST.get("token_id", None)
     challenge = request.POST.get("challenge", None)
 
-    if not account_id or not secret_id:
+    if not account_number or not secret_id:
         return JsonResponse({"status": "error", "message": "Account ID and Secret ID are required"}, status=400)
 
     # Retrieve the Secret object
-    secret = get_object_or_404(Secret, id=secret_id, account_id=account_id)
+    secret = get_object_or_404(Secret, id=secret_id, account__account_number=account_number)
 
     # If no token_id is provided, create a new token with a challenge
     if not token_id:
@@ -156,6 +155,7 @@ def generate_token(request):
             account=secret.account,
             secret=secret,
             code=token_value,
+            challenge=challenge,
             created_at=now(),
             expires_at=now() + timedelta(minutes=60)  # Tokens expire in 60 minutes
         )
@@ -183,8 +183,8 @@ def generate_token(request):
         if token.activated:
             return JsonResponse({"status": "error", "message": "Token already activated"}, status=403)
 
-        swapped_token = token.challenge[16:] + token.challenge[:16]
-        expected = hmac.digest(bytes.fromhex(secret.code), bytes.fromhex(swapped_token), "SHA256")
+        swapped_challenge = token.challenge[16:] + token.challenge[:16]
+        expected = hmac.digest(bytes.fromhex(secret.code), bytes.fromhex(swapped_challenge), "SHA256")
 
         if not hmac.compare_digest(expected, bytes.fromhex(challenge)):
             return JsonResponse({
@@ -264,7 +264,7 @@ def add_account(request):
 
         if not all([account_number, balance, bank_name]):
             return JsonResponse({"status": "error", "message": "All fields are required."}, status=400)
-        
+
         user = Client.objects.filter(id=request.user.id).first()
         if not user:
             return JsonResponse({"status": "error", "message": "Invalid user."}, status=400)

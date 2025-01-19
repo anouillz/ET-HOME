@@ -16,8 +16,8 @@ function notify(msg) {
 
 }
 
-function apiGet(endpoint) {
-    return fetch("api/" + endpoint, {
+function apiGet(endpoint, bank=false) {
+    return fetch((bank ? "/bank/api/" : "/api/") + endpoint, {
         method: "GET",
         headers: {
             "Accept": "application/json"
@@ -32,14 +32,20 @@ function apiGet(endpoint) {
     })
 }
 
-function apiPost(endpoint, data) {
-    return fetch("api/" + endpoint, {
+function apiPost(endpoint, data, bank=false) {
+    let csrftoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
+    let headers = {
+        "Accept": "application/json",
+        "X-CSRFToken": csrftoken
+    }
+    if (!(data instanceof FormData)) {
+        data = JSON.stringify(data)
+        headers["Content-Type"] = "application/json"
+    }
+    return fetch((bank ? "/bank/api/" : "/api/") + endpoint, {
         method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
+        body: data,
+        headers: headers
     }).then(res => {
         return res.json()
     }).catch(err => {

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Add an account{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/add_account.css' %}">
+    <script src="{% static 'js/add_account.js' %}"></script>
+{% endblock %}
+{% block main %}
+    <div class="steps">
+        <div class="gap"></div>
+        <div class="step step-1 active">
+            <div class="num">1</div>
+            <div class="text">Account<br>Info</div>
+        </div>
+        <div class="link"></div>
+        <div class="step step-2">
+            <div class="num">2</div>
+            <div class="text">Authentication</div>
+        </div>
+        <div class="link"></div>
+        <div class="step step-3">
+            <div class="num">3</div>
+            <div class="text">Testing<br>Connection</div>
+        </div>
+        <div class="gap"></div>
+    </div>
+    <div class="info">
+        {% csrf_token %}
+        <div class="field">
+            <label for="bankUserId">User ID</label>
+            <input type="text" id="bankUserId">
+        </div>
+        <div class="field">
+            <label for="bankName">Bank Name</label>
+            <input type="text" id="bankName">
+        </div>
+        <div class="field">
+            <label for="bankAccountNumber">Account Number</label>
+            <input type="text" id="bankAccountNumber">
+        </div>
+        <div class="field">
+            <label for="bankUserPassword">Password</label>
+            <input type="password" id="bankUserPassword">
+        </div>
+        <button type="button" id="confirmBtn">Add account</button>
+    </div>
+{% endblock %}

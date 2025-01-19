@@ -37,7 +37,8 @@ class BankAccount(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     bank_name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bank_accounts')
-    #secret = models.CharField(max_length=128, null=True)
+    secret = models.CharField(max_length=128, null=True)
+    secret_id = models.UUIDField(null=True)
 
 
 class SpendingCategory(models.Model):

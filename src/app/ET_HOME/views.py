@@ -1,11 +1,17 @@
 import datetime
+import time
+from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
-from datetime import datetime
+from django.views.decorators.http import require_POST
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
+
+from .core import bank_auth
 from .models import Transaction, SpendingCategory, User, BankAccount
 
 
@@ -117,8 +123,8 @@ def category_view(request):
     return render(request, 'categories.html')
 
 
-def addBank_view(request):
-    return render(request, 'add_bank.html')
+def add_account_view(request):
+    return render(request, 'add_account.html')
 
 
 def account_view(request):
@@ -257,3 +263,43 @@ def add_transactions(request):
         return JsonResponse({"new transaction status": "success"})
     else:
         return JsonResponse({"new transaction status": "error"}, status=400)
+@require_POST
+def add_bank_account(request):
+    res = bank_auth.generate_secret(
+        request,
+        request.POST.get("user_id"),
+        request.POST.get("account_number"),
+        request.POST.get("password")
+    )
+
+    # Artificial delay
+    time.sleep(3)
+    if res is not None:
+        account = BankAccount.objects.create(
+            account_number=request.POST.get("account_number"),
+            balance=0,
+            bank_name=request.POST.get("bank_name"),
+            user=request.user,
+            secret=res.get("secret"),
+            secret_id=res.get("id")
+        )
+        return JsonResponse({
+            "id": account.id
+        }, status=HTTP_201_CREATED)
+    return JsonResponse({"error": "An error occurred"}, status=HTTP_400_BAD_REQUEST)
+
+@require_POST
+def test_secret(request):
+    account = get_object_or_404(BankAccount, id=request.POST.get("account_id"))
+    token, error = bank_auth.generate_token(
+        request,
+        account.account_number,
+        account.secret,
+        account.secret_id
+    )
+
+    # Artificial delay
+    time.sleep(3)
+    if token is not None:
+        return JsonResponse({"status": "Connection successful"}, status=HTTP_200_OK)
+    return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
