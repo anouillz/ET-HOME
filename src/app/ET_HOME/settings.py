@@ -101,6 +101,7 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = 'ET_HOME.User'
+LOGIN_URL = "/login"
 
 
 # Password validation

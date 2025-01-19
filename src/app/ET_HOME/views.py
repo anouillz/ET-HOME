@@ -3,7 +3,8 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
@@ -27,6 +28,7 @@ def login_view(request):
     return render(request, 'login.html')
 
 
+@login_required
 def dashboard_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
@@ -117,7 +119,7 @@ def get_category(request, id):
     except SpendingCategory.DoesNotExist:
         return JsonResponse({"error": "Spending category not found."}, status=404)
 
-
+@login_required
 def category_view(request):
     return render(request, 'categories.html')
 
@@ -129,15 +131,16 @@ def add_account_view(request):
 def account_view(request):
     return render(request, 'account.html')
 
-
+@login_required
 def settings_view(request):
     return render(request, 'settings.html')
 
-
+@login_required
 def logout_view(request):
-    return render(request, 'logout.html')
+    logout(request)
+    return redirect('login')
 
-
+@login_required
 def get_bankAccount_info(request, id):
     try:
         account = BankAccount.objects.get(id=id)
@@ -180,6 +183,7 @@ def get_bankAccount_info(request, id):
         print(e)
         return JsonResponse({"error": "Wrong account number."}, status=404)
 
+@login_required
 def get_accounts(request):
     try:
         accounts = BankAccount.objects.filter(user__id=request.user.id)
@@ -262,7 +266,9 @@ def add_transactions(request):
         return JsonResponse({"new transaction status": "success"})
     else:
         return JsonResponse({"new transaction status": "error"}, status=400)
+
 @require_POST
+@login_required
 def add_bank_account(request):
     res = bank_auth.generate_secret(
         request,
@@ -288,6 +294,7 @@ def add_bank_account(request):
     return JsonResponse({"error": "An error occurred"}, status=HTTP_400_BAD_REQUEST)
 
 @require_POST
+@login_required
 def test_secret(request):
     account = get_object_or_404(BankAccount, id=request.POST.get("account_id"))
     token, error = bank_auth.generate_token(
