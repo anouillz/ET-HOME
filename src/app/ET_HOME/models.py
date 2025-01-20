@@ -43,8 +43,8 @@ class BankAccount(models.Model):
 
 class SpendingCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=30, unique = True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=30)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None, null=True)
     is_default = models.BooleanField(default=False)
     default_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     # if user want to modify the default budget
