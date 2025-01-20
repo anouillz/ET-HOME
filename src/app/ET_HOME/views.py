@@ -49,7 +49,26 @@ def register_view(request):
         user.first_name = request.POST["firstname"]
         user.last_name = request.POST["lastname"]
         user.save()
+
+        default_categories = [
+            {"name": "Food", "default_budget": 1000.00},
+            {"name": "Bills", "default_budget": 1500.00},
+            {"name": "Entertainment", "default_budget": 200.00},
+            {"name": "Health", "default_budget": 300.00},
+            {"name": "Gifts", "default_budget": 100.00},
+            {"name": "Transport", "default_budget": 200.00}
+        ]
+
+        for category in default_categories:
+            SpendingCategory.objects.create(
+                user=user,
+                name=category["name"],
+                default_budget=category["default_budget"],
+                is_default=True
+            )
+
         return redirect("login")
+
     return render(request, 'register.html')
 
 def api_access(request):
@@ -309,3 +328,77 @@ def test_secret(request):
     if token is not None:
         return JsonResponse({"status": "Connection successful"}, status=HTTP_200_OK)
     return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
+
+@login_required
+def add_category(request):
+    if request.method == "POST":
+        category = SpendingCategory.objects.create(
+            name=request.POST["name"],
+            user=request.user,
+            default_budget=request.POST["default_budget"]
+        )
+        category.save()
+        return JsonResponse({"new category status": "success"})
+    else:
+        return JsonResponse({"new category status": "error"}, status=400)
+
+@login_required
+def delete_category(request):
+    if request.method == "POST":
+        category_name = request.POST.get("name")
+        if not category_name:
+            return JsonResponse({"delete category status": "error", "message": "Category name is required"}, status=400)
+
+        try:
+            # ensure the category belongs to the user and is not a default category
+            category = SpendingCategory.objects.get(name=category_name, user=request.user, is_default=False)
+            category.delete()
+            return JsonResponse({"delete category status": "success"})
+        except SpendingCategory.DoesNotExist:
+            return JsonResponse(
+                {"delete category status": "error", "message": "Category not found or cannot be deleted"}, status=404)
+    else:
+        return JsonResponse({"delete category status": "error", "message": "Invalid request method"}, status=400)
+
+@login_required
+def modify_category(request):
+    if request.method == "POST":
+        category_name = request.POST.get("name")
+
+        # depends on what the user wants to modify
+        new_name = request.POST.get("new_name")
+        new_budget = request.POST.get("new_budget")
+
+        if not category_name or not new_name or not new_budget:
+            return JsonResponse({
+                "modify category status": "error",
+                "message": "Name, new name, and new budget are required"
+            }, status=400)
+
+        try:
+            # ensure the category belongs to the user and is not a default category
+            category = SpendingCategory.objects.get(name=category_name, user=request.user, is_default=False)
+
+            # check if the new name is already in use by another category
+            if SpendingCategory.objects.filter(name=new_name, user=request.user).exclude(id=category.id).exists():
+                return JsonResponse({
+                    "modify category status": "error",
+                    "message": "A category with the new name already exists"
+                }, status=400)
+
+            # Update the category
+            category.name = new_name
+            category.user_budget = new_budget
+            category.save()
+
+            return JsonResponse({"modify category status": "success"})
+        except SpendingCategory.DoesNotExist:
+            return JsonResponse({
+                "modify category status": "error",
+                "message": "Category not found or cannot be modified"
+            }, status=404)
+    else:
+        return JsonResponse({
+            "modify category status": "error",
+            "message": "Invalid request method"
+        }, status=400)
