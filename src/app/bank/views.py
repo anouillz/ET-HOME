@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from django.views.decorators.http import require_GET, require_POST
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from .api_utils import to_json
+from .serializers import TransactionSerializer,SpendingCategorySerializer,BankAccountSerializer
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
 
 
@@ -20,7 +20,7 @@ def get_transaction(request, transactionId):
     if transaction:
         return JsonResponse({
             "status": "success",
-            "data": to_json(transaction, Transaction),
+            "data": TransactionSerializer(transaction).data,
             "message": "transaction found"
         }, status=200)
     else:
@@ -66,7 +66,7 @@ def filter_transaction(request):
         return JsonResponse({
             "status": "success",
             "message": f"got transactions query",
-            "data": to_json(transactions, Transaction, many=True)
+            "data": TransactionSerializer(transactions,many=True).data
         })
 
     except json.JSONDecodeError:
@@ -81,7 +81,7 @@ def get_account(request, id):
     return JsonResponse({
         "message": f"client {id} accounts",
         "status": "success",
-        "data": to_json(request, many=False)
+        "data": BankAccountSerializer(account)
     })
 
 def generate_secret(request):
