@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-
+import json
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -403,3 +403,50 @@ def modify_category(request):
             "modify category status": "error",
             "message": "Invalid request method"
         }, status=400)
+
+def export_data(request):
+    if request.method == 'POST':
+
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON received."}, status=400)
+
+        if not user_id:
+            return JsonResponse({"error": "User ID is required."}, status=400)
+
+        bank_accounts = BankAccount.objects.filter(user_id=user_id)
+
+        if not bank_accounts.exists():
+            return JsonResponse({"error": "No data found for the given user ID."}, status=404)
+
+        export_file = {
+            "user_id": user_id,
+            "bank_accounts": []
+        }
+
+        for bank_account in bank_accounts:
+            bank_account_data = {
+                "id": str(bank_account.id),
+                "account_number": bank_account.account_number,
+                "balance": float(bank_account.balance),
+                "bank_name": bank_account.bank_name,
+                "transactions": []
+            }
+            transactions = Transaction.objects.filter(account=bank_account)
+
+            for transaction in transactions:
+                category = SpendingCategory.objects.filter(id=transaction.category_id).first()
+                transaction_data = {
+                    "id": str(transaction.id),
+                    "amount": float(transaction.amount),
+                    "date": transaction.date.isoformat(),
+                    "description": transaction.description,
+                    "category": category.name,
+                }
+                bank_account_data["transactions"].append(transaction_data)
+
+            export_file["bank_accounts"].append(bank_account_data)
+
+        return JsonResponse(export_file, safe=False, status=200)

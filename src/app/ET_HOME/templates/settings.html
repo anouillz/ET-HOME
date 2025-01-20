@@ -6,7 +6,65 @@
     <title>{{ title }}</title>
 </head>
 <body>
-    <h1>{{ message }}</h1>
     <h2>Settings</h2>
+    <p> Exporting data : </p>
+
+    <form id="exportForm" method="post">
+        {% csrf_token %}
+        <div class="field">
+            <label for="user_id">User ID:</label>
+            <input type="number" name="user_id" id="user_id" required>
+        </div>
+        <button type="submit" id="exportButton">Export Data</button>
+    </form>
+
+        <script>
+        document.getElementById("exportForm").addEventListener("submit", async function(event) {
+            event.preventDefault();  // Prevent the form from refreshing the page
+
+            const userId = document.getElementById("user_id").value;
+            if (!userId) {
+                alert("Please enter a valid User ID.");
+                return;
+            }
+
+            try {
+                // Send the POST request to the server using fetch
+                const response = await fetch('/api/export/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                    body: JSON.stringify({ user_id: userId })  // Send the user_id as JSON
+                });
+
+                // If the request was successful
+                if (response.ok) {
+                    const data = await response.json();  // Get the JSON response from the server
+
+                    // Create a Blob with the response data (JSON)
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+                    // Create a temporary link to trigger the file download
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `user_${userId}_data.json`;  // Set the download filename
+                    document.body.appendChild(a);
+                    a.click();  // Trigger the download
+                    document.body.removeChild(a);  // Clean up the DOM
+
+                    // Clean up the object URL
+                    URL.revokeObjectURL(a.href);
+                } else {
+                    alert("Failed to export data. Please try again.");
+                }
+            } catch (error) {
+                alert("An error occurred. Please try again.");
+                console.error(error);
+            }
+        });
+    </script>
+
 </body>
 </html>
