@@ -57,7 +57,7 @@ form button:disabled {
 table {
     border-collapse: collapse;
     width: 100%;
-    max-width: 60em;
+    max-width: 65em;
     margin: 0 auto;
 }
 

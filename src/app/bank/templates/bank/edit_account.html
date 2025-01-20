@@ -1,0 +1,31 @@
+{% extends 'bank/base.html' %}
+{% load static %}
+{% load random %}
+{% block title %}Edit Account{% endblock %}
+{% block page-name %}Edit an account{% endblock %}
+{% block main %}
+    <form data-endpoint="accounts/{{ account.id }}/edit" data-next="{% url "bank:accounts" %}">
+        {% csrf_token %}
+        <div class="field">
+            <label for="account_number">Account number</label>
+            <input type="text" name="account_number" id="account_number" value="{{ account.account_number }}" readonly>
+        </div>
+        <div class="field">
+            <label for="balance">Balance</label>
+            <input type="number" name="balance" id="balance" value="{{ account.balance }}" step="0.01">
+        </div>
+        <div class="field">
+            <label for="bank_name">Bank name</label>
+            <input type="text" name="bank_name" id="bank_name" value="{{ account.bank_name }}">
+        </div>
+        <div class="field">
+            <label for="user_id">Client</label>
+            <select name="user_id" id="user_id">
+                {% for client in clients %}
+                    <option value="{{ client.id }}" {% if client.id == account.user.id %}selected{% endif %}>{{ client.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit">Modify</button>
+    </form>
+{% endblock %}

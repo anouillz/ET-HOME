@@ -339,3 +339,62 @@ def delete_account(request, id):
     account = get_object_or_404(BankAccount, id=id)
     account.delete()
     return JsonResponse({"status": "success"}, status=HTTP_200_OK)
+
+def edit_account_view(request, id):
+    account = get_object_or_404(BankAccount, id=id)
+    context = {
+        "account": account,
+        "clients": Client.objects.all()
+    }
+    return render(request, "bank/edit_account.html", context)
+
+def edit_transaction_view(request, id):
+    transaction = get_object_or_404(Transaction, id=id)
+    context = {
+        "transaction": transaction,
+        "accounts": BankAccount.objects.all(),
+        "categories": SpendingCategory.objects.all()
+    }
+    return render(request, "bank/edit_transaction.html", context)
+
+@require_POST
+def edit_account(request, id):
+    account = get_object_or_404(BankAccount, id=id)
+    balance = request.POST.get("balance", account.balance)
+    bank_name = request.POST.get("bank_name", account.bank_name)
+    user = Client.objects.get(id=request.POST.get("user_id"))
+    if user is None:
+        user = account.user
+
+    account.balance = balance
+    account.bank_name = bank_name
+    account.user = user
+    account.save()
+
+    return JsonResponse({
+        "status": "success",
+        "message": "Account modified successfully."
+    }, status=HTTP_200_OK)
+
+@require_POST
+def edit_transaction(request, id):
+    transaction = get_object_or_404(Transaction, id=id)
+    account = BankAccount.objects.get(id=request.POST.get("account_id"))
+    if account is None:
+        account = transaction.account
+    category = SpendingCategory.objects.get(id=request.POST.get("category_id"))
+    if category is None:
+        category = transaction.category
+    amount = request.POST.get("amount", transaction.amount)
+    description = request.POST.get("description", transaction.description)
+
+    transaction.account = account
+    transaction.category = category
+    transaction.amount = amount
+    transaction.description = description
+    transaction.save()
+
+    return JsonResponse({
+        "status": "success",
+        "message": "Transaction modified successfully."
+    }, status=HTTP_200_OK)

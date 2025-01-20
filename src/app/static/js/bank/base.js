@@ -13,7 +13,11 @@ function initializeForm(form) {
             } else {
                 alert(res.message)
             }
-            window.location.reload()
+            if (form.dataset.next) {
+                window.location.href = form.dataset.next
+            } else {
+                window.location.reload()
+            }
         }).catch(err => {
             alert(err)
         })
