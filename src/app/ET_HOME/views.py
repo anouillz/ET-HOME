@@ -15,6 +15,71 @@ from .core import bank_auth
 from .models import Transaction, SpendingCategory, User, BankAccount
 
 
+def api_access(request):
+    return render(request, 'api.html')
+
+def get_transactions(request, first_date, second_date):
+    try:
+        transactions = Transaction.objects.all()
+        first_date = datetime.strptime(first_date, "%Y-%m-%d").date()
+        second_date = datetime.strptime(second_date, "%Y-%m-%d").date()
+        transactions_data = []
+        for transaction in transactions:
+            transaction_date = transaction.date.date()
+            if first_date <= transaction_date <= second_date:
+                transactions_data.append(
+                  {
+                       "id": str(transaction.id),
+                       "account": transaction.account.id,
+                       "amount": float(transaction.amount),
+                       "date": transaction.date.isoformat(),
+                       "description": transaction.description,
+                       "category": transaction.category.id if transaction.category else None,
+                  }
+                )
+        return JsonResponse({"transactions": transactions_data})
+    except ValueError:
+        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
+
+def get_all_transactions(request):
+    transactions = Transaction.objects.all()
+    transactions_data = [
+        {
+            "id": str(transaction.id),
+            "account": transaction.account.id,
+            "amount": float(transaction.amount),
+            "date": transaction.date.isoformat(),
+            "description": transaction.description,
+            "category": transaction.category.name if transaction.category else None,
+        }
+        for transaction in transactions
+    ]
+    return transactions_data
+
+def get_category(request, id):
+    try:
+        spending_category = SpendingCategory.objects.get(id=id)
+        transactions = Transaction.objects.filter(category=spending_category)
+
+        transactions_data = [
+            {
+                "id": str(transaction.id),
+                "account": transaction.account.id,
+                "amount": float(transaction.amount),
+                "date": transaction.date.isoformat(),
+                "description": transaction.description,
+                "category": transaction.category.name,
+            }
+            for transaction in transactions
+        ]
+        return JsonResponse({"category": spending_category.name, "transactions": transactions_data})
+
+    except SpendingCategory.DoesNotExist:
+        return JsonResponse({"error": "Spending category not found."}, status=404)
+
+
+# main views
+@login_required
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -26,17 +91,6 @@ def login_view(request):
         else:
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
     return render(request, 'login.html')
-
-
-@login_required
-def dashboard_view(request):
-    """
-    Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
-    """
-    context = {
-        "user": request.user
-    }
-    return render(request, 'dashboard.html', context)
 
 def register_view(request):
     if request.method == "POST":
@@ -71,74 +125,6 @@ def register_view(request):
 
     return render(request, 'register.html')
 
-def api_access(request):
-    return render(request, 'api.html')
-
-def get_transactions(request, first_date, second_date):
-    try:
-        transactions = Transaction.objects.all()
-        first_date = datetime.strptime(first_date, "%Y-%m-%d").date()
-        second_date = datetime.strptime(second_date, "%Y-%m-%d").date()
-        transactions_data = []
-        for transaction in transactions:
-            transaction_date = transaction.date.date()
-            if first_date <= transaction_date <= second_date:
-                transactions_data.append(
-                  {
-                       "id": str(transaction.id),
-                       "account": transaction.account.id,
-                       "amount": float(transaction.amount),
-                       "date": transaction.date.isoformat(),
-                       "description": transaction.description,
-                       "category": transaction.category.id if transaction.category else None,
-                  }
-                )
-        return JsonResponse({"transactions": transactions_data})
-    except ValueError:
-        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
-
-
-
-
-def get_all_transactions(request):
-    transactions = Transaction.objects.all()
-    transactions_data = [
-        {
-            "id": str(transaction.id),
-            "account": transaction.account.id,
-            "amount": float(transaction.amount),
-            "date": transaction.date.isoformat(),
-            "description": transaction.description,
-            "category": transaction.category.name if transaction.category else None,
-        }
-        for transaction in transactions
-    ]
-    return transactions_data
-
-
-
-def get_category(request, id):
-    try:
-        spending_category = SpendingCategory.objects.get(id=id)
-        transactions = Transaction.objects.filter(category=spending_category)
-
-        transactions_data = [
-            {
-                "id": str(transaction.id),
-                "account": transaction.account.id,
-                "amount": float(transaction.amount),
-                "date": transaction.date.isoformat(),
-                "description": transaction.description,
-                "category": transaction.category.name,
-            }
-            for transaction in transactions
-        ]
-        return JsonResponse({"category": spending_category.name, "transactions": transactions_data})
-
-    except SpendingCategory.DoesNotExist:
-        return JsonResponse({"error": "Spending category not found."}, status=404)
-
-@login_required
 def category_view(request):
     return render(request, 'categories.html')
 
@@ -150,6 +136,16 @@ def add_account_view(request):
 @login_required
 def account_view(request):
     return render(request, 'account.html')
+
+@login_required
+def dashboard_view(request):
+    """
+    Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
+    """
+    context = {
+        "user": request.user
+    }
+    return render(request, 'dashboard.html', context)
 
 @login_required
 def settings_view(request):
@@ -246,7 +242,6 @@ def get_outcomes(request, first_date, second_date):
     except ValueError:
         return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
 
-
 def get_incomes(request, first_date, second_date):
     try:
         transactions = Transaction.objects.all()
@@ -330,18 +325,35 @@ def test_secret(request):
         return JsonResponse({"status": "Connection successful"}, status=HTTP_200_OK)
     return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
 
+# categories functions
 @login_required
 def add_category(request):
     if request.method == "POST":
-        category = SpendingCategory.objects.create(
-            name=request.POST["name"],
-            user=request.user,
-            default_budget=request.POST["default_budget"]
-        )
-        category.save()
-        return JsonResponse({"new category status": "success"})
-    else:
-        return JsonResponse({"new category status": "error"}, status=400)
+        category_name = request.POST.get("name")
+        user_budget = request.POST.get("user_budget")
+
+        if not category_name or not user_budget:
+            return JsonResponse({"new category status": "error", "message": "Category name and budget are required"}, status=400)
+
+        try:
+            # Check if a category with the same name already exists for this user
+            if SpendingCategory.objects.filter(name=category_name, user=request.user).exists():
+                return JsonResponse({"new category status": "error", "message": "Category with this name already exists"}, status=400)
+
+            # Create the new category with the custom budget
+            category = SpendingCategory.objects.create(
+                name=category_name,
+                user=request.user,
+                user_budget=user_budget,
+                is_default=False
+            )
+            category.save()
+            return JsonResponse({"new category status": "success", "category_id": category.id})
+        except Exception as e:
+            return JsonResponse({"new category status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"new category status": "error", "message": "Invalid request method"}, status=400)
+
 
 @login_required
 def delete_category(request):
@@ -403,6 +415,44 @@ def modify_category(request):
             "modify category status": "error",
             "message": "Invalid request method"
         }, status=400)
+
+# change password
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        current_password = request.POST.get("current_password")
+
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if not current_password or not new_password or not confirm_password:
+            messages.error(request, "All fields are required.")
+            return redirect("change_password.html")
+
+        # Authenticate the current password
+        # check if the current password is correct
+        user = authenticate(username=request.user.username, password=current_password)
+        if user is None:
+            messages.error(request, "Current password is incorrect.")
+            return redirect("change_password.html")
+
+        # Check if the new password and confirmation match
+        if new_password != confirm_password:
+            messages.error(request, "New password and confirmation do not match.")
+            return redirect("change_password.html")
+
+        # Update the password
+        user.set_password(new_password)
+        user.save()
+
+        # Re-authenticate and log the user in after password change
+        login(request, user)
+        messages.success(request, "Password updated successfully.")
+        return redirect('account.html')  # Replace "profile" with the desired redirect URL
+
+    # create a form to change the password
+    return render(request, "change_password")
+
 
 def export_data(request):
     if request.method == 'POST':
