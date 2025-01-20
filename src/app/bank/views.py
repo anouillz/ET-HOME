@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from django.views.decorators.http import require_GET, require_POST
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from .api_utils import to_json
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
@@ -398,3 +398,27 @@ def edit_transaction(request, id):
         "status": "success",
         "message": "Transaction modified successfully."
     }, status=HTTP_200_OK)
+
+def add_client_view(request):
+    return render(request, "bank/add_client.html")
+
+@require_POST
+def add_client(request):
+    username = request.POST.get("username")
+    password = request.POST.get("password")
+    firstname = request.POST.get("firstname")
+    lastname = request.POST.get("lastname")
+    email = request.POST.get("email")
+    if not all([username, password, firstname, lastname, email]):
+        return JsonResponse({"status": "error", "message": "All fields are required."}, staus=HTTP_400_BAD_REQUEST)
+
+    client = Client.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+    )
+
+    client.first_name = firstname
+    client.last_name = lastname
+    client.save()
+    return JsonResponse({"status": "success", "message": "Client created successfully."})
