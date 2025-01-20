@@ -1,4 +1,6 @@
 let accounts = []
+/** @type {HTMLCanvasElement} */
+let graphCanvas
 
 const CATEG_MARGIN = 50
 const CATEG_THICKNESS = 25
@@ -164,12 +166,20 @@ function showAccounts() {
     })
 }
 
+function resizeGraph() {
+    let parent = graphCanvas.parentElement
+    graphCanvas.width = parent.clientWidth
+    graphCanvas.height = parent.clientHeight
+}
+
 window.addEventListener("load", () => {
+    graphCanvas = document.querySelector("#expenses .chart")
+    window.addEventListener("resize", resizeGraph)
+    resizeGraph()
+
     apiGet("get_accounts").then(res => {
         if (res.accounts) {
             accounts = res.accounts
         }
-    }).then(() => {
-        refreshDashboard()
-    })
+    }).then(refreshDashboard)
 })

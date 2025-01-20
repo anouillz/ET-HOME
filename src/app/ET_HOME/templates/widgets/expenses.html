@@ -2,5 +2,17 @@
 {% block classes %}expenses{% endblock %}
 {% block title %}Expenses{% endblock %}
 {% block content %}
-    <canvas class="chart" width="300" height="300"></canvas>
+    <div class="filters">
+        <div class="select-wrapper">
+            <select id="expensesRange">
+                <option value="week">Last 7 days</option>
+                <option value="fortnight">Last 14 days</option>
+                <option value="month">Last 30 days</option>
+                <option value="year">Last year</option>
+            </select>
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas class="chart" width="800" height="400"></canvas>
+    </div>
 {% endblock %}
