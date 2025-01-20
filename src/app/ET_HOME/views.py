@@ -143,10 +143,11 @@ def category_view(request):
     return render(request, 'categories.html')
 
 
+@login_required
 def add_account_view(request):
     return render(request, 'add_account.html')
 
-
+@login_required
 def account_view(request):
     return render(request, 'account.html')
 
