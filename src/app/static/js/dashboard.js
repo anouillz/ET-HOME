@@ -1,5 +1,10 @@
 let accounts = []
 
+const CATEG_MARGIN = 50
+const CATEG_THICKNESS = 25
+const CATEG_GAP = 3
+const CATEG_PCT_PADDING = 10
+
 async function refreshDashboard() {
     let userId = document.getElementById("userId").value
     let accountsInfo = []
@@ -33,7 +38,9 @@ async function refreshDashboard() {
                     if (!(t.category.id in categoryNames)) {
                         categoryNames[t.category.id] = t.category.name
                     }
-                    byCategory[t.category.id] += t.amount
+                    if (t.amount < 0) {
+                        byCategory[t.category.id] += t.amount
+                    }
                 }
             })
         })
@@ -55,10 +62,10 @@ async function refreshDashboard() {
         categories.push({
             id: id,
             name: categoryNames[id],
-            total: total
+            total: -total
         })
     })
-    categories = categories.sort((c1, c2) => c1.total - c2.total)
+    categories = categories.sort((c1, c2) => c2.total - c1.total)
     showTopCategories(categories)
     showAccounts()
 }
@@ -71,38 +78,73 @@ function showTopCategories(categories) {
     let total = categories.map(c => c.total).reduce((a, b) => a+b, 0)
     let offset = -0.25
     let colStep = 360 / categories.length
-    let gap = 3
 
+    /** @var {CanvasRenderingContext2D} ctx */
     let ctx = chart.getContext("2d")
     let w = chart.width
     let h = chart.height
     let mx = w / 2
     let my = h / 2
-    let radius = Math.min(mx, my) - 15
-    ctx.lineWidth = 30
+    let radius = Math.min(mx, my) - CATEG_MARGIN
+    let radiusPct = radius + CATEG_THICKNESS / 2 + CATEG_PCT_PADDING
+    ctx.lineWidth = CATEG_THICKNESS
+    ctx.font = "16pt 'Arial', sans-serif"
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
     ctx.clearRect(0, 0, w, h)
 
     list.innerHTML = ""
+    let template = document.querySelector(".template.category").cloneNode(true)
+    template.classList.remove("template")
     categories.forEach((category, i) => {
         let ratio = category.total / total
-        let angleStart = offset * 360 + gap / 2
-        let angleEnd = angleStart + ratio * 360 - gap
+        let angleStart = offset * 360 + CATEG_GAP / 2
+        let angleEnd = angleStart + ratio * 360 - CATEG_GAP
+        angleStart = angleStart * Math.PI / 180
+        angleEnd = angleEnd * Math.PI / 180
+        let angleMid = (angleEnd + angleStart) / 2
         let col = `hsl(${i * colStep}deg 70% 60%)`
 
         if (angleEnd > angleStart) {
+            // Draw segment
             ctx.strokeStyle = col
             ctx.beginPath()
-            ctx.arc(mx, my, radius, angleStart * Math.PI / 180, angleEnd * Math.PI / 180)
+            ctx.arc(mx, my, radius, angleStart, angleEnd)
             ctx.stroke()
+
+            // Place percentage label (minimize overlapping with segment)
+            let x = mx + radiusPct * Math.cos(angleMid)
+            let y = my + radiusPct * Math.sin(angleMid)
+            let pct = formatPercentage(ratio)
+            let measure = ctx.measureText(pct)
+            let w2 = measure.width / 2
+            let h2 = (measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent) / 2
+            let m = Math.tan(angleMid)
+            let a = angleMid % (2 * Math.PI)
+            if (a < 0) {
+                a += 2 * Math.PI
+            }
+            if (Math.PI / 2 < a && a < Math.PI) {
+                m = -m
+            }
+
+            let dx = m === 0.0 ? w2 : Math.min(w2, Math.abs(h2 / m))
+            let dy = Math.min(h2, Math.abs(m * w2))
+            if (Math.PI / 2 < a && a < 3 * Math.PI / 2) {
+                dx = -dx
+            }
+            if (Math.PI < a) {
+                dy = -dy
+            }
+            ctx.fillText(pct, x + dx, y + dy)
         }
 
         offset += ratio
 
-        let row = document.createElement("div")
-        row.classList.add("category")
+        let row = template.cloneNode(true)
         row.style.setProperty("--col", col)
-        row.innerText = category.name
-
+        row.querySelector(".name").innerText = category.name
+        row.querySelector(".amount").innerText = formatMoney(category.total)
         list.appendChild(row)
     })
 }

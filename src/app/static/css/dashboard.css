@@ -112,8 +112,8 @@
 }
 
 .widget.top-categories .chart {
-    width: 10em;
-    height: 10em;
+    width: 20em;
+    height: 15em;
     align-self: center;
 }
 
@@ -127,6 +127,7 @@
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 .widget.top-categories .list .category::before {
     content: "";
