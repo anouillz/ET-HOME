@@ -43,4 +43,5 @@ urlpatterns = [
     path('api/add_transaction/', views.add_transactions, name='add_transactions'),
     path("api/add_bank_account", views.add_bank_account, name='add_bank_account'),
     path("api/test_secret", views.test_secret, name='test_secret'),
+    path("api/export/", views.export_data, name='export_data'),
 ]

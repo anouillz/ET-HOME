@@ -8,7 +8,7 @@ from django.urls import reverse
 def generate_secret(request, user_id, account_number, password):
     csrf_token = get_token(request)
     response = requests.post(
-        request.build_absolute_uri(reverse("gen_secret")),
+        request.build_absolute_uri(reverse("bank:gen_secret")),
         {
             "user_id": user_id,
             "account_number": account_number,
@@ -28,7 +28,7 @@ def generate_secret(request, user_id, account_number, password):
 
 def generate_token(request, account_number, secret, secret_id):
     csrf_token = get_token(request)
-    url = request.build_absolute_uri(reverse("gen_token"))
+    url = request.build_absolute_uri(reverse("bank:gen_token"))
     kwargs = {
         "headers": {
             "X-CSRFToken": csrf_token
