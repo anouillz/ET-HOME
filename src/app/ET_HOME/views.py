@@ -10,9 +10,9 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
-
+from .serializers import NotificationSerializer
 from .core import bank_auth
-from .models import Transaction, SpendingCategory, User, BankAccount
+from .models import Transaction, SpendingCategory, User, BankAccount,Notification
 
 
 def api_access(request):
@@ -500,3 +500,28 @@ def export_data(request):
             export_file["bank_accounts"].append(bank_account_data)
 
         return JsonResponse(export_file, safe=False, status=200)
+
+
+
+def get_notifications(request):
+    notifications = Notification.objects.filter(user=request.user,is_read=False)
+    return JsonResponse({
+        "message":"user not readed notifications",
+        "status":"success",
+        "notifications":NotificationSerializer(notifications,many=True).data
+    })
+    
+
+def read_notification(request,id):
+    notification = Notification.objects.filter(user=request.user,id=id).first()
+    if notification:
+        notification.is_read = True
+        notification.save()
+        return JsonResponse({
+            "message":"notification"+id+" successfully read",
+            "status":"success"
+        })
+    return JsonResponse({
+        "message":"notification does not exist",
+        "status":"error"
+    })

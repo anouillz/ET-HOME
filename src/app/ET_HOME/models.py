@@ -73,7 +73,6 @@ class NotificationType(models.TextChoices):
     TRANSACTION = 'TR', 'Transaction'
     ACCOUNT = 'AC', 'Account'
     BUDGET = 'BU', 'Budget'
-    INSIGHT = 'IN', 'Insight'
     GENERAL = 'GE', 'General'
 
 
