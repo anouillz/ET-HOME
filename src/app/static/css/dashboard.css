@@ -212,6 +212,7 @@
     right: 0.4em;
     top: 50%;
     transform: translate(-50%, -75%) rotate(45deg);
+    pointer-events: none;
 }
 
 .widget.expenses .filters select:hover {
@@ -235,4 +236,14 @@
     position: absolute;
     inset: 0;
     margin: auto;
+
+    --axis-col: #888888;
+    --grid-col: var(--light-4);
+    --label-col: black;
+    --outcome-line-col: var(--dark-4);
+    --outcome-pt-stroke: none;
+    --outcome-pt-fill: var(--dark-4);
+    --income-line-col: var(--dark-1);
+    --income-pt-stroke: var(--dark-1);
+    --income-pt-fill: white;
 }

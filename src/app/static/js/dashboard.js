@@ -1,6 +1,34 @@
 let accounts = []
 /** @type {HTMLCanvasElement} */
 let graphCanvas
+let outcomes = {}
+let incomes = {}
+let graphStartDate = new Date()
+
+const GRAPH_RANGES = {
+    week: {
+        days: 7,
+        step: 1
+    },
+    fortnight: {
+        days: 14,
+        step: 2
+    },
+    month: {
+        days: 30,
+        step: 6
+    },
+    year: {
+        days: 365,
+        step: 36.5
+    }
+}
+const GRAPH_VSTEPS = [5, 10, 25, 50, 100, 250, 500, 1000, 10_000]
+const GRAPH_LMARGIN = 60
+const GRAPH_RMARGIN = 10
+const GRAPH_TMARGIN = 10
+const GRAPH_BMARGIN = 20
+const GRAPH_MIN_VTICK_SPACING = 80
 
 const CATEG_MARGIN = 50
 const CATEG_THICKNESS = 25
@@ -70,6 +98,7 @@ async function refreshDashboard() {
     categories = categories.sort((c1, c2) => c2.total - c1.total)
     showTopCategories(categories)
     showAccounts()
+    await updateGraph()
 }
 
 function showTopCategories(categories) {
@@ -170,6 +199,234 @@ function resizeGraph() {
     let parent = graphCanvas.parentElement
     graphCanvas.width = parent.clientWidth
     graphCanvas.height = parent.clientHeight
+    showExpenses()
+}
+
+async function updateGraph() {
+    let range = document.getElementById("expenses-range").value
+    let today = new Date()
+    let rangeDays = GRAPH_RANGES[range].days
+    let startDate = new Date(today.valueOf() - (rangeDays - 1) * 24 * 60 * 60 * 1000)
+    let start = formatDate(startDate, "Y-m-d")
+    let end = formatDate(today, "Y-m-d")
+    let transactions = (await apiGet(`get_transactions/${start}/${end}/`)).transactions
+
+    incomes = {}
+    outcomes = {}
+    transactions.forEach(transaction => {
+        let date = new Date(transaction.date)
+        transaction.date = formatDate(date, "Y-m-d")
+        if (transaction.amount < 0) {
+            if (!(transaction.date in outcomes)) {
+                outcomes[transaction.date] = 0
+            }
+            outcomes[transaction.date] += -transaction.amount
+        } else {
+            if (!(transaction.date in incomes)) {
+                incomes[transaction.date] = 0
+            }
+            incomes[transaction.date] += transaction.amount
+        }
+    })
+    graphStartDate = startDate
+    console.log(outcomes)
+    console.log(startDate)
+    showExpenses()
+}
+
+function showExpenses() {
+    let range = document.getElementById("expenses-range").value
+    /** @var {CanvasRenderingContext2D} ctx */
+    let ctx = graphCanvas.getContext("2d")
+    let {days, step: tickStep} = GRAPH_RANGES[range]
+
+    let width = graphCanvas.width
+    let height = graphCanvas.height
+    ctx.clearRect(0, 0, width, height)
+    let innerWidth = width - GRAPH_LMARGIN - GRAPH_RMARGIN
+    let innerHeight = height - GRAPH_BMARGIN - GRAPH_TMARGIN
+    let ox = GRAPH_LMARGIN
+    let oy = GRAPH_TMARGIN + innerHeight
+    let ticks = days / tickStep
+    let hgap = innerWidth / (ticks - 1)
+
+    let style = getComputedStyle(graphCanvas)
+    let axisColor = style.getPropertyValue("--axis-col")
+    let gridColor = style.getPropertyValue("--grid-col")
+    let labelColor = style.getPropertyValue("--label-col")
+    let incomeLineColor = style.getPropertyValue("--income-line-col")
+    let incomePtStroke = style.getPropertyValue("--income-pt-stroke")
+    let incomePtFill = style.getPropertyValue("--income-pt-fill")
+    let outcomeLineColor = style.getPropertyValue("--outcome-line-col")
+    let outcomePtStroke = style.getPropertyValue("--outcome-pt-stroke")
+    let outcomePtFill = style.getPropertyValue("--outcome-pt-fill")
+
+    ctx.strokeStyle = axisColor
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.moveTo(ox, oy - innerHeight)
+    ctx.lineTo(ox, oy)
+    ctx.lineTo(ox + innerWidth, oy)
+    ctx.stroke()
+
+    ctx.strokeStyle = gridColor
+    ctx.lineWidth = 1
+    let date = graphStartDate
+    let stepMs = tickStep * 24 * 60 * 60 * 1000
+
+    let maxOutcome = Math.max(...Object.values(outcomes))
+    let maxIncome = Math.max(...Object.values(incomes))
+    let maxValue = Math.max(maxOutcome, maxIncome)
+    let outcomePts = []
+    let incomePts = []
+
+    ctx.fillStyle = labelColor
+    // Horizontal lines
+    ctx.font = "8pt 'Arial', sans-serif"
+    ctx.textBaseline = "middle"
+    ctx.textAlign = "right"
+    let fmt = new Intl.NumberFormat("fr-CH")
+    let vstep = GRAPH_VSTEPS[0]
+    let nSteps = 1
+    let stepHeight = innerHeight
+    for (let i = 0; i < GRAPH_VSTEPS.length; i++) {
+        vstep = GRAPH_VSTEPS[i]
+        nSteps = Math.floor(maxValue / vstep)
+        stepHeight = innerHeight * vstep / maxValue
+        if (stepHeight > GRAPH_MIN_VTICK_SPACING) {
+            break
+        }
+    }
+
+    for (let i = 1; i <= nSteps; i++) {
+        let y = oy - i * stepHeight
+        ctx.beginPath()
+        ctx.moveTo(ox, y)
+        ctx.lineTo(ox + innerWidth, y)
+        ctx.stroke()
+        ctx.fillText("CHF " + fmt.format(vstep * i) + ".-", ox - 2, y)
+    }
+
+    // Vertical lines
+    //ctx.font = "8pt 'Arial', sans-serif"
+    ctx.textBaseline = "top"
+    ctx.textAlign = "center"
+    for (let i = 1; i < ticks; i++) {
+        date = new Date(date.valueOf() + stepMs)
+        let x = ox + hgap * i
+        ctx.beginPath()
+        ctx.moveTo(x, oy)
+        ctx.lineTo(x, oy - innerHeight)
+        ctx.stroke()
+        if (i !== ticks - 1) {
+            ctx.fillText(formatDate(date, "d / m"), x, oy + 5)
+        }
+    }
+    let dayStep = innerWidth / (days - 1)
+    date = graphStartDate
+    for (let i = 0; i < days; i++) {
+        let x = ox + dayStep * i
+        let key = formatDate(date, "Y-m-d")
+        let outcome = outcomes[key]
+        let income = incomes[key]
+        if (outcome) {
+            let y = oy - outcome * innerHeight / maxValue
+            outcomePts.push([x, y])
+        } else {
+            //outcomePts.push([x, oy])
+        }
+        if (income) {
+            let y = oy - income * innerHeight / maxValue
+            incomePts.push([x, y])
+        } else {
+            //incomePts.push([x, oy])
+        }
+        date = new Date(date.valueOf() + 24 * 60 * 60 * 1000)
+    }
+
+    let start = formatDate(graphStartDate, "Y-m-d")
+    let addedOrigin = false
+    if (!(start in outcomes)) {
+        outcomePts.splice(0, 0, [ox, oy])
+        addedOrigin = true
+    }
+    drawGraph(ctx, outcomeLineColor, outcomePtStroke, outcomePtFill, outcomePts, addedOrigin ? [0] : [])
+    addedOrigin = false
+    if (!(start in incomes)) {
+        incomePts.splice(0, 0, [ox, oy])
+        addedOrigin = true
+    }
+    drawGraph(ctx, incomeLineColor, incomePtStroke, incomePtFill, incomePts, addedOrigin ? [0] : [])
+}
+
+function drawGraph(ctx, lineColor, strokeColor, fillColor, points, hidden=[]) {
+    let withSlopes = []
+    for (let i = 0; i < points.length; i++) {
+        let pt = points[i]
+
+        let pt0 = pt
+        let pt2 = pt
+        if (i !== 0) {
+            pt0 = points[i - 1]
+        }
+        if (i !== points.length - 1) {
+            pt2 = points[i + 1]
+        }
+        let dx = pt2[0] - pt0[0]
+        let dy = pt2[1] - pt0[1]
+        let slope = dy / dx
+
+        let point = {
+            slope: slope,
+            x: pt[0],
+            y: pt[1],
+        }
+
+        if (hidden.includes(i)) {
+            point.hidden = true
+        }
+
+        withSlopes.push(point)
+    }
+
+    ctx.strokeStyle = lineColor
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.moveTo(withSlopes[0].x, withSlopes[0].y)
+    for (let i = 0; i < withSlopes.length - 1; i++) {
+        let p1 = withSlopes[i]
+        let p2 = withSlopes[i + 1]
+        let dx = p2.x - p1.x
+        let dy1 = p1.slope * dx
+        let dy2 = p2.slope * dx
+
+        ctx.bezierCurveTo(
+            p1.x + dx / 3,
+            p1.y + dy1 / 3,
+            p2.x - dx / 3,
+            p2.y - dy2 /3,
+            p2.x,
+            p2.y
+        )
+    }
+    ctx.stroke()
+
+    ctx.strokeStyle = strokeColor
+    ctx.fillStyle = fillColor
+    for (let i = 0; i < withSlopes.length; i++) {
+        let pt = withSlopes[i]
+        if (pt.hidden) {
+            continue
+        }
+        ctx.beginPath()
+        ctx.ellipse(pt.x, pt.y, 4, 4, 0, 0, Math.PI * 2)
+        if (fillColor !== "none") {
+            ctx.fill()
+        }
+        if (strokeColor !== "none") {
+            ctx.stroke()
+        }
+    }
 }
 
 window.addEventListener("load", () => {
@@ -182,4 +439,6 @@ window.addEventListener("load", () => {
             accounts = res.accounts
         }
     }).then(refreshDashboard)
+
+    document.getElementById("expenses-range").addEventListener("change", () => updateGraph())
 })

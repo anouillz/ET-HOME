@@ -12,6 +12,27 @@ function formatPercentage(ratio, withSign=false) {
     return txt
 }
 
+function formatDate(date, format) {
+    let result = ""
+    format.split("").forEach(char => {
+        switch (char) {
+            case "Y":
+                result += date.getFullYear().toString().padStart(4, "0")
+                break
+            case "m":
+                result += (date.getMonth() + 1).toString().padStart(2, "0")
+                break
+            case "d":
+                result += date.getDate().toString().padStart(2, "0")
+                break
+            default:
+                result += char
+                break
+        }
+    })
+    return result
+}
+
 function notify(msg) {
 
 }
