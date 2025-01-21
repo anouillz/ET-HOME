@@ -229,8 +229,6 @@ async function updateGraph() {
         }
     })
     graphStartDate = startDate
-    console.log(outcomes)
-    console.log(startDate)
     showExpenses()
 }
 
@@ -248,7 +246,7 @@ function showExpenses() {
     let ox = GRAPH_LMARGIN
     let oy = GRAPH_TMARGIN + innerHeight
     let ticks = days / tickStep
-    let hgap = innerWidth / (ticks - 1)
+    let hgap = innerWidth / (days - 1) * tickStep
 
     let style = getComputedStyle(graphCanvas)
     let axisColor = style.getPropertyValue("--axis-col")
@@ -318,7 +316,7 @@ function showExpenses() {
         ctx.moveTo(x, oy)
         ctx.lineTo(x, oy - innerHeight)
         ctx.stroke()
-        if (i !== ticks - 1) {
+        if (i * tickStep !== days - 1) {
             ctx.fillText(formatDate(date, "d / m"), x, oy + 5)
         }
     }

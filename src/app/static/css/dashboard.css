@@ -171,6 +171,17 @@
 
 .widget.expenses {
     grid-column: 1 / 3;
+    --outcome-col: var(--dark-4);
+    --income-col: var(--dark-1);
+    --outcome-col: #c73636;
+    --income-col: #3ec41a;
+
+    --outcome-line-col: var(--outcome-col);
+    --outcome-pt-stroke: none;
+    --outcome-pt-fill: var(--outcome-col);
+    --income-line-col: var(--income-col);
+    --income-pt-stroke: var(--income-col);
+    --income-pt-fill: white;
 }
 
 .widget.expenses .content {
@@ -230,7 +241,7 @@
 }
 
 .widget.expenses .chart {
-    border: solid black 1px;
+    /*border: solid black 1px;*/
     width: 100%;
     height: 100%;
     position: absolute;
@@ -240,10 +251,37 @@
     --axis-col: #888888;
     --grid-col: var(--light-4);
     --label-col: black;
-    --outcome-line-col: var(--dark-4);
-    --outcome-pt-stroke: none;
-    --outcome-pt-fill: var(--dark-4);
-    --income-line-col: var(--dark-1);
-    --income-pt-stroke: var(--dark-1);
-    --income-pt-fill: white;
+}
+
+.widget.expenses .footer {
+    display: flex;
+    gap: 0.4em;
+    justify-content: space-evenly;
+}
+
+.widget.expenses .footer .series {
+    --fill: black;
+    --stroke: none;
+    padding-left: 1em;
+    position: relative;
+}
+.widget.expenses .footer .series::before {
+    content: "";
+    position: absolute;
+    left: 0.5em;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--fill);
+    border: solid var(--stroke) 2px;
+    transform: translate(-50%, -50%);
+}
+.widget.expenses .footer .series.outcomes {
+    --stroke: var(--outcome-pt-stroke);
+    --fill: var(--outcome-pt-fill);
+}
+.widget.expenses .footer .series.incomes {
+    --stroke: var(--income-pt-stroke);
+    --fill: var(--income-pt-fill);
 }
