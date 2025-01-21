@@ -15,11 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include, register_converter
 from . import views
+from .converters import DateConverter
+
+register_converter(DateConverter, "date")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     path("login/",views.login_view,name="login"),
     path("register/",views.register_view,name="register"),
     path("",views.dashboard_view,name="dashboard"),
@@ -34,13 +37,13 @@ urlpatterns = [
 
     #Application API
     path("api/", views.api_access, name="api"),
-    path('api/get_transactions/<str:first_date>/<str:second_date>/', views.get_transactions, name='get_transactions'),
-    path('api/get_outcomes/<str:first_date>/<str:second_date>/', views.get_outcomes, name='get_outcomes'),
-    path('api/get_incomes/<str:first_date>/<str:second_date>/', views.get_incomes, name='get_incomes'),
-    path('api/get_bankAccount_info/<uuid:id>/', views.get_bankAccount_info, name='get_bankAccount_info'),
-    path('api/get_category/<uuid:id>/', views.get_category, name='get_category'),
-    path('api/get_accounts/', views.get_accounts, name='get_accounts'),
-    path('api/add_transaction/', views.add_transactions, name='add_transactions'),
-    path("api/add_bank_account", views.add_bank_account, name='add_bank_account'),
-    path("api/test_secret", views.test_secret, name='test_secret'),
+    path("api/get_transactions/<date:first_date>/<date:second_date>/", views.get_transactions, name="get_transactions"),
+    path("api/get_outcomes/<date:first_date>/<date:second_date>/", views.get_outcomes, name="get_outcomes"),
+    path("api/get_incomes/<date:first_date>/<date:second_date>/", views.get_incomes, name="get_incomes"),
+    path("api/get_bankAccount_info/<uuid:id>/", views.get_bankAccount_info, name="get_bankAccount_info"),
+    path("api/get_category/<uuid:id>/", views.get_category, name="get_category"),
+    path("api/get_accounts/", views.get_accounts, name="get_accounts"),
+    path("api/add_transaction/", views.add_transactions, name="add_transactions"),
+    path("api/add_bank_account", views.add_bank_account, name="add_bank_account"),
+    path("api/test_secret", views.test_secret, name="test_secret"),
 ]

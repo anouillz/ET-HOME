@@ -75,30 +75,22 @@ def api_access(request):
     return render(request, 'api.html')
 
 def get_transactions(request, first_date, second_date):
-    try:
-        transactions = Transaction.objects.all()
-        first_date = datetime.strptime(first_date, "%Y-%m-%d").date()
-        second_date = datetime.strptime(second_date, "%Y-%m-%d").date()
-        transactions_data = []
-        for transaction in transactions:
-            transaction_date = transaction.date.date()
-            if first_date <= transaction_date <= second_date:
-                transactions_data.append(
-                  {
-                       "id": str(transaction.id),
-                       "account": transaction.account.id,
-                       "amount": float(transaction.amount),
-                       "date": transaction.date.isoformat(),
-                       "description": transaction.description,
-                       "category": transaction.category.id if transaction.category else None,
-                  }
-                )
-        return JsonResponse({"transactions": transactions_data})
-    except ValueError:
-        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
-
-
-
+    transactions = Transaction.objects.filter(
+        account__user=request.user,
+        date__gte=first_date,
+        date__lte=second_date
+    ).order_by("date")
+    transactions_data = []
+    for transaction in transactions:
+        transactions_data.append({
+            "id": str(transaction.id),
+            "account": transaction.account.id,
+            "amount": float(transaction.amount),
+            "date": transaction.date.isoformat(),
+            "description": transaction.description,
+            "category": transaction.category.id if transaction.category else None,
+        })
+    return JsonResponse({"transactions": transactions_data})
 
 def get_all_transactions(request):
     transactions = Transaction.objects.all()
@@ -224,8 +216,6 @@ def get_accounts(request):
 def get_outcomes(request, first_date, second_date):
     try:
         transactions = Transaction.objects.all()
-        first_date = datetime.strptime(first_date, "%Y-%m-%d").date()
-        second_date = datetime.strptime(second_date, "%Y-%m-%d").date()
         outcome = 0
         transactions_data = []
         for transaction in transactions:
@@ -250,8 +240,6 @@ def get_outcomes(request, first_date, second_date):
 def get_incomes(request, first_date, second_date):
     try:
         transactions = Transaction.objects.all()
-        first_date = datetime.strptime(first_date, "%Y-%m-%d").date()
-        second_date = datetime.strptime(second_date, "%Y-%m-%d").date()
         incomes = 0
         transactions_data = []
         for transaction in transactions:
