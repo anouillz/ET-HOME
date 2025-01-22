@@ -33,7 +33,7 @@ urlpatterns = [
     path("account/", views.account_view, name="account"),
     path("settings/", views.settings_view, name="settings"),
     path("logout/", views.logout_view, name="logout"),
-    path("categories/", views.categories_view, name="categories"),
+    path("categories/", views.category_view, name="categories"),
 
 
     #Application API
