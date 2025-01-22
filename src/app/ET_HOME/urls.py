@@ -48,5 +48,7 @@ urlpatterns = [
     path("api/test_secret", views.test_secret, name="test_secret"),
     path("api/export/", views.export_data, name="export_data"),
     path("api/get_notifications",views.get_notifications, name="get_notifications"),
-    path("api/read_notification/<str:id>",views.read_notification, name="read_notification")
+    path("api/read_notification/<str:id>",views.read_notification, name="read_notification"),
+    path("api/validate_token/", views.validate_token_view, name="validate_token")
+
 ]

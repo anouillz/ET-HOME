@@ -98,6 +98,7 @@ class FinancialInsight(models.Model):
     date_generated = models.DateTimeField(auto_now_add=True)
 '''
 
+# store bank token
 class AppToken(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     bank_token_id = models.UUIDField(editable=False)  # Reference to the bank token ID

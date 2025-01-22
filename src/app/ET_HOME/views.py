@@ -1,6 +1,8 @@
 import time
 from datetime import datetime
 import json
+import requests
+from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -12,7 +14,8 @@ from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
 from .serializers import NotificationSerializer
 from .core import bank_auth
-from .models import Transaction, SpendingCategory, User, BankAccount,Notification
+from .models import Transaction, SpendingCategory, User, BankAccount, Notification, AppToken
+from bank.models import Token
 
 
 def api_access(request):
@@ -74,7 +77,7 @@ def get_category(request, id):
 
 
 # main views
-@login_required
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -131,7 +134,7 @@ def add_account_view(request):
 def account_view(request):
     return render(request, 'account.html')
 
-@login_required
+
 def dashboard_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
@@ -316,7 +319,6 @@ def test_secret(request):
     return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
 
 # categories functions
-@login_required
 def add_category(request):
     if request.method == "POST":
         category_name = request.POST.get("name")
@@ -344,7 +346,6 @@ def add_category(request):
 
     return JsonResponse({"new category status": "error", "message": "Invalid request method"}, status=400)
 
-@login_required
 def delete_category(request):
     if request.method == "POST":
         category_name = request.POST.get("name")
@@ -362,7 +363,6 @@ def delete_category(request):
     else:
         return JsonResponse({"delete category status": "error", "message": "Invalid request method"}, status=400)
 
-@login_required
 def modify_category(request):
     if request.method == "POST":
         category_name = request.POST.get("name")
@@ -406,7 +406,6 @@ def modify_category(request):
         }, status=400)
 
 # change password
-@login_required
 def change_password(request):
     if request.method == "POST":
         current_password = request.POST.get("current_password")
@@ -491,8 +490,6 @@ def export_data(request):
 
         return JsonResponse(export_file, safe=False, status=200)
 
-
-
 def get_notifications(request):
     notifications = Notification.objects.filter(user=request.user,is_read=False)
     return JsonResponse({
@@ -500,7 +497,6 @@ def get_notifications(request):
         "status":"success",
         "notifications":NotificationSerializer(notifications,many=True).data
     })
-
 
 def read_notification(request,id):
     notification = Notification.objects.filter(user=request.user,id=id).first()
@@ -515,3 +511,53 @@ def read_notification(request,id):
         "message":"notification does not exist",
         "status":"error"
     })
+
+# authentication with bank
+def validate_token_locally(token_id):
+    try:
+        # Retrieve the token from the Bank's database
+        token = Token.objects.get(id=token_id)
+
+        # Check if the token has expired
+        if token.expires_at < now():
+            return {"status": "error", "message": "Token has expired"}
+
+        # Check if the token is activated
+        if not token.activated:
+            return {"status": "error", "message": "Token is not active"}
+
+        # Token is valid
+        return {"status": "success", "message": "Token is valid"}
+
+    except Token.DoesNotExist:
+        # Token does not exist
+        return {"status": "error", "message": "Token does not exist"}
+
+def validate_token_view(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    # Extract the token ID from the POST data
+    token_id = request.POST.get("token_id")
+
+    # get token
+    token = Token.objects.get(id=token_id)
+
+    # check if token expired
+    if token.expires_at < now():
+        return {"status": "error", "message": "Token has expired"}
+
+    # Check if the token is activated
+    if not token.activated:
+        return {"status": "error", "message": "Token is not active"}
+
+    # if token doesnt exist
+    # TODO can regenrate token
+    if not token_id:
+        return JsonResponse({"status": "error", "message": "Token ID is required"}, status=400)
+
+    # Token is valid
+    return {"status": "success", "message": "Token is valid"}
+
+
+

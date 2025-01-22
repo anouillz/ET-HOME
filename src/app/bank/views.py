@@ -125,7 +125,6 @@ def generate_secret(request):
         "secret": secret_code,
         "id": secret.id
     })
-
 def generate_token(request):
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
@@ -209,26 +208,6 @@ def generate_token(request):
             "message": "Token validated successfully",
             "token_value": token.code
         })
-
-def validate_token(request):
-    if request.method != "POST":
-        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
-
-    # get token
-    token = request.POST.get("token")
-    token_id = request.POST.get("token_id")
-
-    if not token_id:
-        return JsonResponse({"status": "error", "message": "Token is required"}, status=400)
-    else:
-        token = get_object_or_404(Token, id=token_id)
-
-        if token.code == token:
-            token.activated = True
-            token.save()
-            return JsonResponse({"status": "success", "message": "Token validated successfully"})
-        else:
-            return JsonResponse({"status": "error", "message": "Invalid token"}, status=401)
 
 @require_POST
 def add_transaction(request):
