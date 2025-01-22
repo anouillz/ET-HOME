@@ -123,7 +123,6 @@ def register_view(request):
 def category_view(request):
     return render(request, 'categories.html')
 
-
 @login_required
 def add_account_view(request):
     return render(request, 'add_account.html')
@@ -345,7 +344,6 @@ def add_category(request):
 
     return JsonResponse({"new category status": "error", "message": "Invalid request method"}, status=400)
 
-
 @login_required
 def delete_category(request):
     if request.method == "POST":
@@ -445,6 +443,7 @@ def change_password(request):
     return render(request, "change_password")
 
 
+# export data
 def export_data(request):
     if request.method == 'POST':
 

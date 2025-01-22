@@ -97,3 +97,12 @@ class FinancialInsight(models.Model):
     description = models.TextField()
     date_generated = models.DateTimeField(auto_now_add=True)
 '''
+
+class AppToken(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    bank_token_id = models.UUIDField(editable=False)  # Reference to the bank token ID
+    account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)  # Adjust as needed for the app's structure
+    code = models.CharField(editable=False, max_length=128)
+    created_at = models.DateTimeField(editable=False)
+    expires_at = models.DateTimeField(editable=False)
+    activated = models.BooleanField(default=False)
