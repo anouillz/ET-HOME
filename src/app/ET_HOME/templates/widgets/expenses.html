@@ -3,6 +3,7 @@
 {% block title %}Expenses{% endblock %}
 {% block content %}
     <div class="filters">
+        {% include "elements/multi_select.html" with id='expenses-categories' text_all='All categories' text_singular='category' text_plural='categories' %}
         <div class="select-wrapper">
             <select id="expenses-account">
                 <option value="all">All accounts</option>

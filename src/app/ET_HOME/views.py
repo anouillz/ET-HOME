@@ -69,6 +69,20 @@ def get_all_transactions(request):
     ]
     return transactions_data
 
+@login_required
+def get_categories(request):
+    categories = SpendingCategory.objects.filter(user=request.user)
+
+    categories_data = [
+        {
+            "id": str(category.id),
+            "name": category.name,
+            "default": category.is_default
+        }
+        for category in categories
+    ]
+    return JsonResponse({"categories": categories_data}, status=HTTP_200_OK)
+
 def get_category(request, id):
     try:
         spending_category = SpendingCategory.objects.get(id=id)

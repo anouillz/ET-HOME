@@ -36,6 +36,81 @@ function formatDate(date, format) {
     return result
 }
 
+function initMultiSelects() {
+    document.querySelectorAll(".multi-select").forEach(elmt => {
+        let btn = elmt.querySelector(".preview")
+        btn.addEventListener("click", () => {
+            if (elmt.classList.contains("open")) {
+                elmt.classList.remove("open")
+            } else {
+                elmt.classList.add("open")
+            }
+        })
+        window.addEventListener("mousedown", e => {
+            if (e.target !== elmt && !elmt.contains(e.target)) {
+                elmt.classList.remove("open")
+            }
+        })
+        setMultiSelectOptions(elmt, [])
+    })
+}
+
+function setMultiSelectOptions(elmt, options) {
+    let template = elmt.querySelector(".template.choice").cloneNode(true)
+    template.classList.remove("template")
+
+    let optList = elmt.querySelector(".popup")
+    optList.innerHTML = ""
+
+    let allOpt = template.cloneNode(true)
+    allOpt.classList.add("all")
+    let allCb = allOpt.querySelector("input")
+    allCb.value = "*"
+    allCb.checked = true
+    allOpt.querySelector(".text").innerText = elmt.dataset.txtAll
+    optList.appendChild(allOpt)
+
+    let checkboxes = []
+    options.forEach(option => {
+        let opt = template.cloneNode(true)
+        let cb = opt.querySelector("input")
+        cb.value = option.value
+        opt.querySelector(".text").innerText = option.name
+        optList.appendChild(opt)
+        checkboxes.push(cb)
+    })
+
+    allCb.addEventListener("change", () => {
+        checkboxes.forEach(cb2 => {
+            cb2.checked = allCb.checked
+        })
+    })
+
+    optList.querySelectorAll("input").forEach(cb => {
+        cb.addEventListener("change", () => {
+            if (!cb.checked) {
+                if (cb.value !== "*") {
+                    allCb.checked = false
+                }
+            } else if (checkboxes.every(cb2 => cb2.checked)) {
+                allCb.checked = true
+            }
+            let value, preview
+            if (allCb.checked) {
+                value = "*"
+                preview = elmt.dataset.txtAll
+            } else {
+                let values = checkboxes.filter(cb2 => cb2.checked).map(cb2 => cb2.value)
+                value = values.join(",")
+                preview = values.length + " "
+                preview += values.length <= 1 ? elmt.dataset.singular : elmt.dataset.plural
+            }
+            elmt.setAttribute("value", value)
+            elmt.querySelector(".preview").innerText = preview
+        })
+    })
+}
+
 function notify(msg) {
 
 }
@@ -98,7 +173,7 @@ function toggleNotificationMenu() {
 function clearAllNotifications() {
     const container = document.getElementById('notification-container');
     for(let child of container.childNodes){
-        if(child.id != undefined){
+        if(child.id !== undefined){
             apiGet("read_notification/"+child.id)
         }
     }
@@ -171,9 +246,9 @@ function closeNotification(notification) {
 }
 
 function fetchNotifications(){
-    var timer = setInterval(function(){
+    let timer = setInterval(function(){
         apiGet("get_notifications",false).then(data => {
-            for(let notification of data.notifications){
+            for (let notification of data.notifications) {
                 showNotification(notification)
             }
         })
@@ -193,4 +268,7 @@ function updateNotificationBadge(change) {
     }
 }
 
-fetchNotifications()
+window.addEventListener("load", () => {
+    fetchNotifications()
+    initMultiSelects()
+})

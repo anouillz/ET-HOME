@@ -109,6 +109,7 @@ async function refreshDashboard() {
     categories = categories.sort((c1, c2) => c2.total - c1.total)
     showTopCategories(categories)
     showAccounts()
+    resizeGraph()
     await updateGraph()
 }
 
@@ -226,6 +227,11 @@ async function updateGraph() {
         url = `accounts/${accountFilter.value}/` + url
     }
     let transactions = (await apiGet(url)).transactions
+    let categories = document.getElementById("expenses-categories").getAttribute("value") ?? "*"
+    if (categories !== "*") {
+        categories = categories.split(",")
+        transactions = transactions.filter(t => categories.includes(t.category))
+    }
 
     incomes = {}
     outcomes = {}
@@ -469,7 +475,19 @@ window.addEventListener("load", () => {
         }
     }).then(refreshDashboard)
 
-    let filters = document.querySelectorAll("#expenses .filters select")
+    apiGet("categories/").then(res => {
+        if (res.categories) {
+            let categorySelect = document.getElementById("expenses-categories")
+            setMultiSelectOptions(categorySelect, res.categories.map(category => {
+                return {
+                    name: category.name,
+                    value: category.id
+                }
+            }))
+        }
+    })
+
+    let filters = document.querySelectorAll("#expenses .filters select, #expenses-categories")
     filters.forEach(filter => {
         filter.addEventListener("change", () => updateGraph())
     })

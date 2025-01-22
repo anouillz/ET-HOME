@@ -42,6 +42,7 @@ urlpatterns = [
     path("api/get_outcomes/<date:first_date>/<date:second_date>/", views.get_outcomes, name="get_outcomes"),
     path("api/get_incomes/<date:first_date>/<date:second_date>/", views.get_incomes, name="get_incomes"),
     path("api/get_bankAccount_info/<uuid:id>/", views.get_bankAccount_info, name="get_bankAccount_info"),
+    path("api/categories/", views.get_categories, name="get_categories"),
     path("api/get_category/<uuid:id>/", views.get_category, name="get_category"),
     path("api/get_accounts/", views.get_accounts, name="get_accounts"),
     path("api/add_transaction/", views.add_transactions, name="add_transactions"),

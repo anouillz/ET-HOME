@@ -1,0 +1,13 @@
+<div id="{{ id }}" class="multi-select {{ classes|default:'' }}" data-txt-all="{{ text_all }}" data-singular="{{ text_singular }}" data-plural="{{ text_plural }}">
+    <label class="template choice">
+        <input type="checkbox" checked>
+        <div class="text"></div>
+    </label>
+    <button type="button" class="preview">{{ text_all }}</button>
+    <div class="popup">
+        <label class="choice all">
+            <input type="checkbox" checked value="*">
+            <div class="text">{{ text_all }}</div>
+        </label>
+    </div>
+</div>
