@@ -47,6 +47,7 @@ class SpendingCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=None, null=True)
     is_default = models.BooleanField(default=False)
     default_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_active = models.BooleanField(default=True)  # Whether the category is active
     # if user want to modify the default budget
     user_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     # for print testing

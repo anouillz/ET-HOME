@@ -123,8 +123,12 @@ def register_view(request):
 
     return render(request, 'register.html')
 
+@login_required
 def categories_view(request):
-    return render(request, "categories.html")
+    categories = SpendingCategory.objects.filter(user=request.user)
+    print(categories)  # Check the fetched categories
+    return render(request, "categories.html", {"categories": categories})
+
 
 @login_required
 def add_account_view(request):
