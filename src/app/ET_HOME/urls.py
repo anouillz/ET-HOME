@@ -37,7 +37,8 @@ urlpatterns = [
 
     #Application API
     path("api/", views.api_access, name="api"),
-    path("api/get_transactions/<date:first_date>/<date:second_date>/", views.get_transactions, name="get_transactions"),
+    path("api/accounts/<uuid:id>/transactions/<date:first_date>/<date:second_date>/", views.get_account_transactions, name="get_account_transactions"),
+    path("api/transactions/<date:first_date>/<date:second_date>/", views.get_transactions, name="get_transactions"),
     path("api/get_outcomes/<date:first_date>/<date:second_date>/", views.get_outcomes, name="get_outcomes"),
     path("api/get_incomes/<date:first_date>/<date:second_date>/", views.get_incomes, name="get_incomes"),
     path("api/get_bankAccount_info/<uuid:id>/", views.get_bankAccount_info, name="get_bankAccount_info"),

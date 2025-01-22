@@ -45,6 +45,12 @@ async function refreshDashboard() {
     let byCategory = {}
     let categoryNames = {}
     curMonthDay.setDate(1)
+    let accountFilter = document.getElementById("expenses-account")
+    accountFilter.innerHTML = ""
+    let opt = document.createElement("option")
+    opt.value = "all"
+    opt.innerText = "All accounts"
+    accountFilter.appendChild(opt)
     accounts.forEach(account => {
         let promise = apiGet(`get_bankAccount_info/${account.id}`).then(info => {
             console.log(info)
@@ -75,6 +81,11 @@ async function refreshDashboard() {
             })
         })
         accountsPromises.push(promise)
+
+        let opt = document.createElement("option")
+        opt.value = account.id
+        opt.innerText = `#${account.account_number.slice(-4)} (${account.bank})`
+        accountFilter.appendChild(opt)
     })
 
     await Promise.all(accountsPromises)
@@ -209,7 +220,12 @@ async function updateGraph() {
     let startDate = new Date(today.valueOf() - (rangeDays - 1) * 24 * 60 * 60 * 1000)
     let start = formatDate(startDate, "Y-m-d")
     let end = formatDate(today, "Y-m-d")
-    let transactions = (await apiGet(`get_transactions/${start}/${end}/`)).transactions
+    let url = `transactions/${start}/${end}/`
+    let accountFilter = document.getElementById("expenses-account")
+    if (accountFilter.value !== "all") {
+        url = `accounts/${accountFilter.value}/` + url
+    }
+    let transactions = (await apiGet(url)).transactions
 
     incomes = {}
     outcomes = {}
@@ -342,6 +358,21 @@ function showExpenses() {
         date = new Date(date.valueOf() + 24 * 60 * 60 * 1000)
     }
 
+    if (incomePts.length === 0 && outcomePts.length === 0) {
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.font = "bold 16pt 'Arial', sans-serif"
+        let m = ctx.measureText("No Data")
+        let w = m.width
+        let h = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+        let x = ox + innerWidth / 2
+        let y = oy - innerHeight / 2
+        ctx.fillStyle = "white"
+        ctx.fillRect(x - w / 2 - 8, y - h / 2 - 8, w + 16, h + 16)
+        ctx.fillStyle = gridColor
+        ctx.fillText("No Data", x, y)
+    }
+
     let start = formatDate(graphStartDate, "Y-m-d")
     let addedOrigin = false
     if (!(start in outcomes)) {
@@ -438,5 +469,8 @@ window.addEventListener("load", () => {
         }
     }).then(refreshDashboard)
 
-    document.getElementById("expenses-range").addEventListener("change", () => updateGraph())
+    let filters = document.querySelectorAll("#expenses .filters select")
+    filters.forEach(filter => {
+        filter.addEventListener("change", () => updateGraph())
+    })
 })

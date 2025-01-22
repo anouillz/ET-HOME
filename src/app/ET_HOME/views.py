@@ -36,6 +36,24 @@ def get_transactions(request, first_date, second_date):
         })
     return JsonResponse({"transactions": transactions_data})
 
+def get_account_transactions(request, id, first_date, second_date):
+    transactions = Transaction.objects.filter(
+        account_id=id,
+        date__gte=first_date,
+        date__lte=second_date
+    ).order_by("date")
+    transactions_data = []
+    for transaction in transactions:
+        transactions_data.append({
+            "id": str(transaction.id),
+            "account": transaction.account.id,
+            "amount": float(transaction.amount),
+            "date": transaction.date.isoformat(),
+            "description": transaction.description,
+            "category": transaction.category.id if transaction.category else None,
+        })
+    return JsonResponse({"transactions": transactions_data})
+
 def get_all_transactions(request):
     transactions = Transaction.objects.all()
     transactions_data = [
