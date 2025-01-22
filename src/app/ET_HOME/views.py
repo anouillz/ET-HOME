@@ -123,8 +123,10 @@ def register_view(request):
 
     return render(request, 'register.html')
 
-def category_view(request):
-    return render(request, 'categories.html')
+def categories_view(request):
+    categories = SpendingCategory.objects.filter(user=request.user)
+    return render(request, "categories.html", {"categories": categories})
+
 
 @login_required
 def add_account_view(request):
@@ -344,7 +346,6 @@ def add_category(request):
             return JsonResponse({"new category status": "error", "message": str(e)}, status=500)
 
     return JsonResponse({"new category status": "error", "message": "Invalid request method"}, status=400)
-
 def delete_category(request):
     if request.method == "POST":
         category_name = request.POST.get("name")
@@ -361,48 +362,40 @@ def delete_category(request):
                 {"delete category status": "error", "message": "Category not found or cannot be deleted"}, status=404)
     else:
         return JsonResponse({"delete category status": "error", "message": "Invalid request method"}, status=400)
+@login_required
+@require_POST
+def toggle_category(request):
+    try:
+        category_id = request.POST.get("category_id")
+        is_active = request.POST.get("is_active") == "true"
 
-def modify_category(request):
-    if request.method == "POST":
-        category_name = request.POST.get("name")
+        category = SpendingCategory.objects.get(id=category_id, user=request.user)
+        category.is_active = is_active
+        category.save()
 
-        # depends on what the user wants to modify
-        new_name = request.POST.get("new_name")
-        new_budget = request.POST.get("new_budget")
+        return JsonResponse({"status": "success", "message": "Category toggled successfully."})
+    except SpendingCategory.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Category not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+@login_required
+@require_POST
+def update_category_budget(request):
+    try:
+        category_id = request.POST.get("category_id")
+        new_budget = float(request.POST.get("new_budget"))
 
-        if not category_name or not new_name or not new_budget:
-            return JsonResponse({
-                "modify category status": "error",
-                "message": "Name, new name, and new budget are required"
-            }, status=400)
+        category = SpendingCategory.objects.get(id=category_id, user=request.user)
+        category.user_budget = new_budget
+        category.save()
 
-        try:
-            # ensure the category belongs to the user and is not a default category
-            category = SpendingCategory.objects.get(name=category_name, user=request.user, is_default=False)
-
-            # check if the new name is already in use by another category
-            if SpendingCategory.objects.filter(name=new_name, user=request.user).exclude(id=category.id).exists():
-                return JsonResponse({
-                    "modify category status": "error",
-                    "message": "A category with the new name already exists"
-                }, status=400)
-
-            # Update the category
-            category.name = new_name
-            category.user_budget = new_budget
-            category.save()
-
-            return JsonResponse({"modify category status": "success"})
-        except SpendingCategory.DoesNotExist:
-            return JsonResponse({
-                "modify category status": "error",
-                "message": "Category not found or cannot be modified"
-            }, status=404)
-    else:
-        return JsonResponse({
-            "modify category status": "error",
-            "message": "Invalid request method"
-        }, status=400)
+        return JsonResponse({"status": "success", "message": "Budget updated successfully."})
+    except SpendingCategory.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Category not found."}, status=404)
+    except ValueError:
+        return JsonResponse({"status": "error", "message": "Invalid budget value."}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 # change password
 def change_password(request):
@@ -556,7 +549,7 @@ def validate_token_view(request):
         return {"status": "error", "message": "Token is not active"}
 
     # if token doesnt exist
-    # TODO can regenrate token
+    # TODO can regenerate token
     if not token_id:
         return JsonResponse({"status": "error", "message": "Token ID is required"}, status=400)
 
