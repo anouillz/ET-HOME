@@ -124,9 +124,7 @@ def register_view(request):
     return render(request, 'register.html')
 
 def categories_view(request):
-    categories = SpendingCategory.objects.filter(user=request.user)
-    return render(request, "categories.html", {"categories": categories})
-
+    return render(request, "categories.html")
 
 @login_required
 def add_account_view(request):
@@ -135,7 +133,6 @@ def add_account_view(request):
 @login_required
 def account_view(request):
     return render(request, 'account.html')
-
 
 def dashboard_view(request):
     """

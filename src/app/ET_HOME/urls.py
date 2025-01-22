@@ -34,10 +34,6 @@ urlpatterns = [
     path("settings/", views.settings_view, name="settings"),
     path("logout/", views.logout_view, name="logout"),
     path("categories/", views.categories_view, name="categories"),
-    path("categories/add/", views.add_category, name="add_category"),
-    path("categories/delete/", views.delete_category, name="delete_category"),
-    path("categories/toggle/", views.toggle_category, name="toggle_category"),
-    path("categories/update_budget/", views.update_category_budget, name="update_category_budget"),
 
 
     #Application API
@@ -54,6 +50,12 @@ urlpatterns = [
     path("api/export/", views.export_data, name="export_data"),
     path("api/get_notifications",views.get_notifications, name="get_notifications"),
     path("api/read_notification/<str:id>",views.read_notification, name="read_notification"),
-    path("api/validate_token/", views.validate_token_view, name="validate_token")
+    path("api/validate_token/", views.validate_token_view, name="validate_token"),
+
+    #Categories page
+    path("categories/add/", views.add_category, name="add_category"),
+    path("categories/delete/", views.delete_category, name="delete_category"),
+    path("categories/toggle/", views.toggle_category, name="toggle_category"),
+    path("categories/update_budget/", views.update_category_budget, name="update_category_budget")
 
 ]
