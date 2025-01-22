@@ -191,7 +191,6 @@ def get_bankAccount_info(request, id):
         return JsonResponse({"account_data" : account_data, "transactions": transactions_data})
 
     except ValueError as e:
-        print(e)
         return JsonResponse({"error": "Wrong account number."}, status=404)
 
 @login_required
@@ -447,20 +446,22 @@ def change_password(request):
 
 def export_data(request):
     if request.method == 'POST':
-
         try:
             data = json.loads(request.body)
-            user_id = data.get('user_id')
+            username = data.get('username')
+            password = data.get('password')
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON received."}, status=400)
+            return JsonResponse({"error": "Invalid JSON data."}, status=400)
 
-        if not user_id:
-            return JsonResponse({"error": "User ID is required."}, status=400)
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return JsonResponse({"error": "Invalid username or password."}, status=400)
 
+        user_id = user.id
         bank_accounts = BankAccount.objects.filter(user_id=user_id)
 
         if not bank_accounts.exists():
-            return JsonResponse({"error": "No data found for the given user ID."}, status=404)
+            return JsonResponse({"error": "No data found for the given user."}, status=404)
 
         export_file = {
             "user_id": user_id,
@@ -484,13 +485,16 @@ def export_data(request):
                     "amount": float(transaction.amount),
                     "date": transaction.date.isoformat(),
                     "description": transaction.description,
-                    "category": category.name,
+                    "category": category.name if category else "Unknown",
                 }
                 bank_account_data["transactions"].append(transaction_data)
 
             export_file["bank_accounts"].append(bank_account_data)
 
-        return JsonResponse(export_file, safe=False, status=200)
+        return JsonResponse(export_file, status=200)
+
+    return JsonResponse({"error": "Method not allowed."}, status=405)
+
 
 
 
