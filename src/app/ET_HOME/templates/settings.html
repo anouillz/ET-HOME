@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-</head>
-<body>
-    <h2>Settings</h2>
-    <p>Exporting data:</p>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Settings{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/settings.css' %}">
+    <script src="{% static 'js/settings.js' %}"></script>
+{% endblock %}
+
+{% block header %}
 
     <form id="exportForm" method="post">
         {% csrf_token %}
@@ -20,48 +21,47 @@
         <button type="submit" id="exportButton">Export Data</button>
     </form>
 
-        <script>
-            document.getElementById('exportForm').addEventListener('submit', function(event) {
-                event.preventDefault();
+    <script>
+        document.getElementById('exportForm').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-                const data = {
-                    username: username,
-                    password: password
-                };
+            const data = {
+                username: username,
+                password: password
+            };
 
-                fetch('/api/export/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Success:', data);
+            fetch('/api/export/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
 
-                    if (data.error) {
-                        alert('Error: ' + data.error);
-                        return;
-                    }
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
 
-                    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'exported_data.json';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while processing the request.');
-                });
+                const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'exported_data.json';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the request.');
             });
-        </script>
-</body>
-</html>
+        });
+    </script>
+{% endblock %}
