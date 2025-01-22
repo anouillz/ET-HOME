@@ -13,5 +13,5 @@ urlpatterns = [
     path("transactions/get",views.filter_transaction,name="filter_transactions"),
     path("transactions/<uuid:id>",views.get_transaction,name="get_transaction"),
     path("auth/secret", views.generate_secret, name="gen_secret"),
-    path("auth/token", views.generate_token, name="gen_token"),
+    path("auth/token", views.generate_token, name="gen_token")
 ]

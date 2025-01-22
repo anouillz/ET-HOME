@@ -9,6 +9,7 @@ from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from django.views.decorators.http import require_GET, require_POST
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from ET_HOME.models import AppToken
 
 from .serializers import TransactionSerializer,SpendingCategorySerializer,BankAccountSerializer
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
@@ -84,6 +85,7 @@ def get_account(request, id):
         "data": BankAccountSerializer(account)
     })
 
+# bank - app authentication
 def generate_secret(request):
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
@@ -123,10 +125,7 @@ def generate_secret(request):
         "secret": secret_code,
         "id": secret.id
     })
-
-
 def generate_token(request):
-
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
@@ -144,21 +143,31 @@ def generate_token(request):
 
     # If no token_id is provided, create a new token with a challenge
     if not token_id:
-        # TODO, dk if challenge/token should be random
         # Generate a random challenge
         challenge = secrets.token_hex(16)
 
         # Generate a random token value
         token_value = secrets.token_hex(64)
 
-        # Create the token in the database
+        # Create the token in the bank database
         token = Token.objects.create(
             account=secret.account,
             secret=secret,
             code=token_value,
             challenge=challenge,
             created_at=now(),
-            expires_at=now() + timedelta(minutes=60)  # Tokens expire in 60 minutes
+            expires_at=now() + timedelta(minutes=60),  # Tokens expire in 60 minutes
+        )
+
+        # Also store the token in the app database
+        AppToken.objects.create(
+            id=token.id,  # Match the bank token ID
+            bank_token_id=token.id,  # Reference the bank token ID
+            account=secret.account,  # Match the bank account
+            code=token.code,  # Same token value
+            created_at=token.created_at,
+            expires_at=token.expires_at,
+            activated=token.activated,
         )
 
         # Return the challenge and token ID
@@ -199,27 +208,6 @@ def generate_token(request):
             "message": "Token validated successfully",
             "token_value": token.code
         })
-
-
-def validate_token(request):
-    if request.method != "POST":
-        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
-
-    # get token
-    token = request.POST.get("token")
-    token_id = request.POST.get("token_id")
-
-    if not token_id:
-        return JsonResponse({"status": "error", "message": "Token is required"}, status=400)
-    else:
-        token = get_object_or_404(Token, id=token_id)
-
-        if token.code == token:
-            token.activated = True
-            token.save()
-            return JsonResponse({"status": "success", "message": "Token validated successfully"})
-        else:
-            return JsonResponse({"status": "error", "message": "Invalid token"}, status=401)
 
 @require_POST
 def add_transaction(request):

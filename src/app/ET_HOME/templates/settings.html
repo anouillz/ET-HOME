@@ -1,70 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-</head>
-<body>
-    <h2>Settings</h2>
-    <p> Exporting data : </p>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Settings{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/settings.css' %}">
+    <script src="{% static 'js/settings.js' %}"></script>
+{% endblock %}
+
+{% block header %}
 
     <form id="exportForm" method="post">
         {% csrf_token %}
         <div class="field">
-            <label for="user_id">User ID:</label>
-            <input type="number" name="user_id" id="user_id" required>
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" required>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
         </div>
         <button type="submit" id="exportButton">Export Data</button>
     </form>
 
-        <script>
-        document.getElementById("exportForm").addEventListener("submit", async function(event) {
-            event.preventDefault();  // Prevent the form from refreshing the page
+    <script>
+        document.getElementById('exportForm').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-            const userId = document.getElementById("user_id").value;
-            if (!userId) {
-                alert("Please enter a valid User ID.");
-                return;
-            }
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-            try {
-                // Send the POST request to the server using fetch
-                const response = await fetch('/api/export/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    },
-                    body: JSON.stringify({ user_id: userId })  // Send the user_id as JSON
-                });
+            const data = {
+                username: username,
+                password: password
+            };
 
-                // If the request was successful
-                if (response.ok) {
-                    const data = await response.json();  // Get the JSON response from the server
+            fetch('/api/export/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
 
-                    // Create a Blob with the response data (JSON)
-                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-
-                    // Create a temporary link to trigger the file download
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `user_${userId}_data.json`;  // Set the download filename
-                    document.body.appendChild(a);
-                    a.click();  // Trigger the download
-                    document.body.removeChild(a);  // Clean up the DOM
-
-                    // Clean up the object URL
-                    URL.revokeObjectURL(a.href);
-                } else {
-                    alert("Failed to export data. Please try again.");
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
                 }
-            } catch (error) {
-                alert("An error occurred. Please try again.");
-                console.error(error);
-            }
+
+                const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'exported_data.json';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the request.');
+            });
         });
     </script>
-
-</body>
-</html>
+{% endblock %}

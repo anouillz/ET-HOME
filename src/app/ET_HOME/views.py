@@ -1,6 +1,8 @@
 import time
 from datetime import datetime
 import json
+import requests
+from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -12,7 +14,8 @@ from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
 from .serializers import NotificationSerializer
 from .core import bank_auth
-from .models import Transaction, SpendingCategory, User, BankAccount,Notification
+from .models import Transaction, SpendingCategory, User, BankAccount, Notification, AppToken
+from bank.models import Token
 
 
 def api_access(request):
@@ -106,7 +109,7 @@ def get_category(request, id):
 
 
 # main views
-@login_required
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -152,8 +155,11 @@ def register_view(request):
 
     return render(request, 'register.html')
 
-def category_view(request):
-    return render(request, 'categories.html')
+@login_required
+def categories_view(request):
+    categories = SpendingCategory.objects.filter(user=request.user)
+    print(categories)  # Check the fetched categories
+    return render(request, "categories.html", {"categories": categories})
 
 
 @login_required
@@ -164,7 +170,6 @@ def add_account_view(request):
 def account_view(request):
     return render(request, 'account.html')
 
-@login_required
 def dashboard_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
@@ -223,7 +228,6 @@ def get_bankAccount_info(request, id):
         return JsonResponse({"account_data" : account_data, "transactions": transactions_data})
 
     except ValueError as e:
-        print(e)
         return JsonResponse({"error": "Wrong account number."}, status=404)
 
 @login_required
@@ -349,7 +353,6 @@ def test_secret(request):
     return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
 
 # categories functions
-@login_required
 def add_category(request):
     if request.method == "POST":
         category_name = request.POST.get("name")
@@ -376,9 +379,6 @@ def add_category(request):
             return JsonResponse({"new category status": "error", "message": str(e)}, status=500)
 
     return JsonResponse({"new category status": "error", "message": "Invalid request method"}, status=400)
-
-
-@login_required
 def delete_category(request):
     if request.method == "POST":
         category_name = request.POST.get("name")
@@ -395,52 +395,42 @@ def delete_category(request):
                 {"delete category status": "error", "message": "Category not found or cannot be deleted"}, status=404)
     else:
         return JsonResponse({"delete category status": "error", "message": "Invalid request method"}, status=400)
-
 @login_required
-def modify_category(request):
-    if request.method == "POST":
-        category_name = request.POST.get("name")
+@require_POST
+def toggle_category(request):
+    try:
+        category_id = request.POST.get("category_id")
+        is_active = request.POST.get("is_active") == "true"
 
-        # depends on what the user wants to modify
-        new_name = request.POST.get("new_name")
-        new_budget = request.POST.get("new_budget")
+        category = SpendingCategory.objects.get(id=category_id, user=request.user)
+        category.is_active = is_active
+        category.save()
 
-        if not category_name or not new_name or not new_budget:
-            return JsonResponse({
-                "modify category status": "error",
-                "message": "Name, new name, and new budget are required"
-            }, status=400)
+        return JsonResponse({"status": "success", "message": "Category toggled successfully."})
+    except SpendingCategory.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Category not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+@login_required
+@require_POST
+def update_category_budget(request):
+    try:
+        category_id = request.POST.get("category_id")
+        new_budget = float(request.POST.get("new_budget"))
 
-        try:
-            # ensure the category belongs to the user and is not a default category
-            category = SpendingCategory.objects.get(name=category_name, user=request.user, is_default=False)
+        category = SpendingCategory.objects.get(id=category_id, user=request.user)
+        category.user_budget = new_budget
+        category.save()
 
-            # check if the new name is already in use by another category
-            if SpendingCategory.objects.filter(name=new_name, user=request.user).exclude(id=category.id).exists():
-                return JsonResponse({
-                    "modify category status": "error",
-                    "message": "A category with the new name already exists"
-                }, status=400)
-
-            # Update the category
-            category.name = new_name
-            category.user_budget = new_budget
-            category.save()
-
-            return JsonResponse({"modify category status": "success"})
-        except SpendingCategory.DoesNotExist:
-            return JsonResponse({
-                "modify category status": "error",
-                "message": "Category not found or cannot be modified"
-            }, status=404)
-    else:
-        return JsonResponse({
-            "modify category status": "error",
-            "message": "Invalid request method"
-        }, status=400)
+        return JsonResponse({"status": "success", "message": "Budget updated successfully."})
+    except SpendingCategory.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Category not found."}, status=404)
+    except ValueError:
+        return JsonResponse({"status": "error", "message": "Invalid budget value."}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 # change password
-@login_required
 def change_password(request):
     if request.method == "POST":
         current_password = request.POST.get("current_password")
@@ -477,22 +467,25 @@ def change_password(request):
     return render(request, "change_password")
 
 
+# export data
 def export_data(request):
     if request.method == 'POST':
-
         try:
             data = json.loads(request.body)
-            user_id = data.get('user_id')
+            username = data.get('username')
+            password = data.get('password')
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON received."}, status=400)
+            return JsonResponse({"error": "Invalid JSON data."}, status=400)
 
-        if not user_id:
-            return JsonResponse({"error": "User ID is required."}, status=400)
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return JsonResponse({"error": "Invalid username or password."}, status=400)
 
+        user_id = user.id
         bank_accounts = BankAccount.objects.filter(user_id=user_id)
 
         if not bank_accounts.exists():
-            return JsonResponse({"error": "No data found for the given user ID."}, status=404)
+            return JsonResponse({"error": "No data found for the given user."}, status=404)
 
         export_file = {
             "user_id": user_id,
@@ -516,14 +509,15 @@ def export_data(request):
                     "amount": float(transaction.amount),
                     "date": transaction.date.isoformat(),
                     "description": transaction.description,
-                    "category": category.name,
+                    "category": category.name if category else "Unknown",
                 }
                 bank_account_data["transactions"].append(transaction_data)
 
             export_file["bank_accounts"].append(bank_account_data)
 
-        return JsonResponse(export_file, safe=False, status=200)
+        return JsonResponse(export_file, status=200)
 
+    return JsonResponse({"error": "Method not allowed."}, status=405)
 
 
 def get_notifications(request):
@@ -533,7 +527,6 @@ def get_notifications(request):
         "status":"success",
         "notifications":NotificationSerializer(notifications,many=True).data
     })
-
 
 def read_notification(request,id):
     notification = Notification.objects.filter(user=request.user,id=id).first()
@@ -548,3 +541,53 @@ def read_notification(request,id):
         "message":"notification does not exist",
         "status":"error"
     })
+
+# authentication with bank
+def validate_token_locally(token_id):
+    try:
+        # Retrieve the token from the Bank's database
+        token = Token.objects.get(id=token_id)
+
+        # Check if the token has expired
+        if token.expires_at < now():
+            return {"status": "error", "message": "Token has expired"}
+
+        # Check if the token is activated
+        if not token.activated:
+            return {"status": "error", "message": "Token is not active"}
+
+        # Token is valid
+        return {"status": "success", "message": "Token is valid"}
+
+    except Token.DoesNotExist:
+        # Token does not exist
+        return {"status": "error", "message": "Token does not exist"}
+
+def validate_token_view(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    # Extract the token ID from the POST data
+    token_id = request.POST.get("token_id")
+
+    # get token
+    token = Token.objects.get(id=token_id)
+
+    # check if token expired
+    if token.expires_at < now():
+        return {"status": "error", "message": "Token has expired"}
+
+    # Check if the token is activated
+    if not token.activated:
+        return {"status": "error", "message": "Token is not active"}
+
+    # if token doesnt exist
+    # TODO can regenerate token
+    if not token_id:
+        return JsonResponse({"status": "error", "message": "Token ID is required"}, status=400)
+
+    # Token is valid
+    return {"status": "success", "message": "Token is valid"}
+
+
+

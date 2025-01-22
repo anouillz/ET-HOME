@@ -1,12 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-</head>
-<body>
-    <h1>{{ message }}</h1>
-    <h2>Categories</h2>
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Manage Categories{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/categories.css' %}">
+    <script src="{% static 'js/categories.js' %}"></script>
+{% endblock %}
+{% block main %}
+<div class="categories-container">
+    <h1>Manage Your Categories</h1>
+
+    <p>Total categories: {{ categories|length }}</p>
+
+    <div class="categories-list">
+        {% for category in categories %}
+        <div class="category-item" data-id="{{ category.id }}">
+            <input
+                type="checkbox"
+                class="toggle-category"
+                {% if category.is_active %}checked{% endif %}
+                data-id="{{ category.id }}"
+            />
+            <span class="category-name">{{ category.name }}</span>
+            <input
+                type="number"
+                class="category-budget"
+                value="{{ category.user_budget }}"
+                data-id="{{ category.id }}"
+            />
+            <button class="delete-category" data-id="{{ category.id }}">Delete</button>
+        </div>
+        {% empty %}
+        <p>No categories available. Add one below!</p>
+        {% endfor %}
+    </div>
+    <button id="add-category-btn">+ Add Category</button>
+</div>
+{% endblock %}

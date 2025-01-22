@@ -47,6 +47,7 @@ class SpendingCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=None, null=True)
     is_default = models.BooleanField(default=False)
     default_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_active = models.BooleanField(default=True)  # Whether the category is active
     # if user want to modify the default budget
     user_budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     # for print testing
@@ -97,3 +98,13 @@ class FinancialInsight(models.Model):
     description = models.TextField()
     date_generated = models.DateTimeField(auto_now_add=True)
 '''
+
+# store bank token
+class AppToken(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    bank_token_id = models.UUIDField(editable=False)  # Reference to the bank token ID
+    account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)  # Adjust as needed for the app's structure
+    code = models.CharField(editable=False, max_length=128)
+    created_at = models.DateTimeField(editable=False)
+    expires_at = models.DateTimeField(editable=False)
+    activated = models.BooleanField(default=False)
