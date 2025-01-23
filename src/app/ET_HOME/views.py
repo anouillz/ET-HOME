@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
 from .serializers import NotificationSerializer
 from .core import bank_auth
-from .models import Transaction, SpendingCategory, User, BankAccount, Notification, AppToken
+from .models import Transaction, SpendingCategory, User, BankAccount, Notification, AppToken,Budget,NotificationType
 from bank.models import Token
 
 
@@ -169,7 +169,7 @@ def add_account_view(request):
 @login_required
 def account_view(request):
     return render(request, 'account.html')
-
+@login_required
 def dashboard_view(request):
     """
     Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
@@ -293,18 +293,43 @@ def get_incomes(request, first_date, second_date):
         return JsonResponse({"dates": {"start_date": first_date, "end_date": second_date}, "income": incomes, "transactions": transactions_data})
     except ValueError:
         return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
+    
 
-def add_transactions(request):
+def check_category(request,category:SpendingCategory):
+    accounts = BankAccount.objects.filter(user=request.user)
+    transactions = Transaction.objects.filter(account__in=accounts,category=category)
+    calc = 0
+    for t in transactions:
+        calc += t.amount
+    budget = Budget.objects.filter(user=request.user,category=category).first()
+    if budget:
+        if calc > budget.amount:
+            delta = calc - budget.amount
+            message = "You have exceeded your budget by "+str(delta)+" for the category "+category.name
+            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=budget.id,message=message)
+        elif calc == budget.amount:
+            message = "You have used all your budget for the category "+category.name+" please, be carefull"
+            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=budget.id,message=message)
+        elif budget.amount - calc < 30:
+            delta = str(budget.amount-calc)
+            message = "Be carefull !, you have " +delta+" left in your budget for the category "+category.name
+            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=budget.id,message=message)
+
+
+
+
+def add_transaction(request):
     if request.method == "POST":
+        category = SpendingCategory.objects.get(user=request.user,id=request.POST['category_id'])
         transaction = Transaction.objects.create(
-            id = request.POST['id'],
-            account_id = request.POST['account id'],
+            account_id = request.POST['account_id'],
             amount = request.POST['amount'],
             date = request.POST['date'],
             description = request.POST['description'],
-            category_id = request.POST['category id'],
+            category=category,
         )
         transaction.save()
+        check_category(request,category)
         return JsonResponse({"new transaction status": "success"})
     else:
         return JsonResponse({"new transaction status": "error"}, status=400)
@@ -333,6 +358,8 @@ def add_bank_account(request):
         return JsonResponse({
             "id": account.id
         }, status=HTTP_201_CREATED)
+    message = "successfully added new bank account into your app (id:"+account.id+")"
+    Notification.objects.create(user=request.user,related_object_id=account.id,type=NotificationType.ACCOUNT,message=message)
     return JsonResponse({"error": "An error occurred"}, status=HTTP_400_BAD_REQUEST)
 
 @require_POST
