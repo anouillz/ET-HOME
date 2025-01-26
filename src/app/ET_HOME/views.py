@@ -505,6 +505,10 @@ def export_data(request):
             return JsonResponse({"error": "Invalid JSON data."}, status=400)
 
         user = authenticate(request, username=username, password=password)
+
+        if request.user.username != username:
+            return JsonResponse({"error": "The provided username does not match the logged-in user."}, status=403)
+
         if user is None:
             return JsonResponse({"error": "Invalid username or password."}, status=400)
 

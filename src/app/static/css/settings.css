@@ -1,11 +1,43 @@
 body {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
     min-height: 100vh;
     margin: 0;
     background: #f0f0f0; /* Change this to any background color or image */
 }
+
+/* Add this CSS rule to align ET-HOME to the left */
+#sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 20px;
+    background-color: #000000;
+    color: white;
+    height: 100vh; /* Full height of the screen */
+    width: 2px; /* Adjust the width as needed */
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#sidebar h1 {
+    margin: 0;
+    font-size: 24px;
+    text-align: left; /* Ensures it's aligned to the left */
+}
+
+/* Adjust your content area */
+#main-content {
+    margin-left: 220px; /* Matches the width of the sidebar */
+    padding: 20px;
+    flex-grow: 1;
+    background: #f0f0f0;
+    min-height: 100vh;
+}
+
 
 #exportForm {
     padding: 20px;
@@ -59,11 +91,11 @@ body {
 h2 {
     font-size: 24px;
     margin-bottom: 20px;
-    text-align: center;
+    text-align: left;
 }
 
 p {
     font-size: 16px;
     margin-bottom: 15px;
-    text-align: center;
+    text-align: left;
 }
