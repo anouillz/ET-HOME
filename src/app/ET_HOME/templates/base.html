@@ -3,6 +3,7 @@
 <html lang="en">
     <head>
         <title>{% block title %}Title{% endblock %}</title>
+        <link rel="shortcut icon" href="{% static "images/logo.svg" %}" type="image/svg+xml">
         <link rel="stylesheet" href="{% static 'css/base.css' %}">
         <script src="{% static 'js/base.js' %}"></script>
         {% block head %}{% endblock head %}
@@ -10,7 +11,7 @@
     <body>
         <input type="hidden" id="userId" value="{{ user.id }}">
         <aside class="sidebar">
-            <h2>ET-HOME</h2>
+            <h2><img class="logo" src="{% static "images/logo.svg" %}" alt="ET-HOME logo">ET-HOME</h2>
             <nav>
                 {% for link in nav_links %}
                     <a href="{% url link.url_name %}" class="{% if request.resolver_match.url_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
