@@ -181,6 +181,16 @@ def sync_transactions(request, account: BankAccount, from_date: Optional[datetim
             return False
 
         data = data["data"]
+
+        current_transactions = Transaction.objects.filter(
+            account=account,
+            bank_transaction_id__isnull=False
+        )
+        if from_date is not None:
+            current_transactions = current_transactions.filter(date__gte=from_date)
+
+        current_ids = current_transactions.values_list("bank_transaction_id", flat=True)
+
         transactions = []
         for t in data:
             try:
@@ -202,9 +212,22 @@ def sync_transactions(request, account: BankAccount, from_date: Optional[datetim
 
             transactions.append(transaction)
 
-        Transaction.objects.bulk_create(
+        transactions = Transaction.objects.bulk_create(
             transactions,
-            ignore_conflicts=True
+            update_conflicts=True,
+            unique_fields=["bank_transaction_id"],
+            update_fields=["date", "amount", "description"]
         )
+        new_ids = {
+            str(t.bank_transaction_id)
+            for t in transactions
+        }
+
+        current_ids = set(map(str, current_ids))
+        deleted_ids = current_ids - new_ids
+
+        # Delete missing transactions
+        Transaction.objects.filter(bank_transaction_id__in=list(deleted_ids)).delete()
+
         return True
     return False

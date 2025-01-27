@@ -1,6 +1,6 @@
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
@@ -22,11 +22,11 @@ from .serializers import NotificationSerializer
 def api_access(request):
     return render(request, 'api.html')
 
-def get_transactions(request, first_date, second_date):
+def get_transactions(request, first_date: datetime.date, second_date: datetime.date):
     transactions = Transaction.objects.filter(
         account__user=request.user,
         date__gte=first_date,
-        date__lte=second_date
+        date__lt=second_date + timedelta(days=1)
     ).order_by("date")
     transactions_data = []
     for transaction in transactions:
@@ -44,7 +44,7 @@ def get_account_transactions(request, id, first_date, second_date):
     transactions = Transaction.objects.filter(
         account_id=id,
         date__gte=first_date,
-        date__lte=second_date
+        date__lt=second_date + timedelta(days=1)
     ).order_by("date")
     transactions_data = []
     for transaction in transactions:

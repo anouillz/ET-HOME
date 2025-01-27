@@ -347,7 +347,9 @@ def transactions_view(request):
 @require_POST
 def delete_transaction(request, id):
     transaction = get_object_or_404(Transaction, id=id)
+    account = transaction.account
     transaction.delete()
+    trigger_sync(request, account)
     return JsonResponse({"status": "success"}, status=HTTP_200_OK)
 
 @require_POST
@@ -411,6 +413,8 @@ def edit_transaction(request, id):
     transaction.amount = amount
     transaction.description = description
     transaction.save()
+
+    trigger_sync(request, account)
 
     return JsonResponse({
         "status": "success",
