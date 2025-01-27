@@ -58,11 +58,11 @@ class SpendingCategory(models.Model):
 class Transaction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
-    bank_transaction_id = models.UUIDField(null=True, default=True)
+    bank_transaction_id = models.UUIDField(null=True, default=None, unique=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(default=now)
     description = models.CharField(max_length=200)
-    category = models.ForeignKey(SpendingCategory,on_delete=models.DO_NOTHING)
+    category = models.ForeignKey(SpendingCategory, null=True, on_delete=models.DO_NOTHING)
     
 class Budget(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -103,7 +103,7 @@ class FinancialInsight(models.Model):
 # store bank token
 class AppToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    bank_token_id = models.UUIDField(editable=False)  # Reference to the bank token ID
+    bank_token_id = models.UUIDField(editable=False, unique=True)  # Reference to the bank token ID
     account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)  # Adjust as needed for the app's structure
     code = models.CharField(editable=False, max_length=128)
     created_at = models.DateTimeField(editable=False, default=now)

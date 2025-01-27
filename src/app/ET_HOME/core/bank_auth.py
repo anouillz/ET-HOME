@@ -1,12 +1,13 @@
 import hmac
-from datetime import timedelta
+from datetime import timedelta, datetime
+from typing import Optional
 
 import requests
 from django.middleware.csrf import get_token
 from django.urls import reverse
 from django.utils.timezone import now
 
-from ET_HOME.models import BankAccount, AppToken
+from ET_HOME.models import BankAccount, AppToken, Transaction, SpendingCategory
 
 
 def generate_secret(request, user_id, account_number, password):
@@ -151,7 +152,7 @@ def post_req(request, account, url, data):
         }
     )
 
-def sync_account(request, account):
+def sync_account(request, account, from_date: Optional[datetime] = None):
     res = get_req(request, account, reverse("bank:get_account"))
     if res is not None and res.status_code == 200:
         data = res.json()
@@ -163,6 +164,47 @@ def sync_account(request, account):
         account.account_number = data["account_number"]
         account.bank_name = data["bank_name"]
         account.save()
-        return True
+
+        return sync_transactions(request, account, from_date)
     else:
         return False
+
+def sync_transactions(request, account: BankAccount, from_date: Optional[datetime] = None):
+    if from_date is None:
+        res = get_req(request, account, reverse("bank:get_transactions"))
+    else:
+        res = get_req(request, account, reverse("bank:get_transactions_from", kwargs={"from_date": from_date}))
+
+    if res is not None and res.status_code == 200:
+        data = res.json()
+        if data["status"] != "success":
+            return False
+
+        data = data["data"]
+        transactions = []
+        for t in data:
+            try:
+                category = SpendingCategory.objects.get(
+                    user=account.user,
+                    name__iexact=t["category"]
+                )
+            except SpendingCategory.DoesNotExist:
+                category = None
+
+            transaction = Transaction(
+                account=account,
+                bank_transaction_id=t["id"],
+                amount=t["amount"],
+                category=category,
+                date=t["date"],
+                description=t["description"]
+            )
+
+            transactions.append(transaction)
+
+        Transaction.objects.bulk_create(
+            transactions,
+            ignore_conflicts=True
+        )
+        return True
+    return False

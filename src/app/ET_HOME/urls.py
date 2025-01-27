@@ -52,7 +52,10 @@ urlpatterns = [
     path("api/export/", views.export_data, name="export_data"),
     path("api/get_notifications",views.get_notifications, name="get_notifications"),
     path("api/read_notification/<str:id>",views.read_notification, name="read_notification"),
-    path("api/sync/", views.sync_data, name="sync_data"),
+    path("api/accounts/<str:account_number>/sync/<date:from_date>", views.sync_account, name="sync_account_from"),
+    path("api/accounts/<str:account_number>/sync/", views.sync_account, name="sync_account"),
+    path("api/sync/<date:from_date>/", views.sync_user, name="sync_user_from"),
+    path("api/sync/", views.sync_user, name="sync_user"),
 
     #Categories page
     path("categories/add/", views.add_category, name="add_category"),

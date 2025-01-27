@@ -68,14 +68,16 @@ async function refreshDashboard() {
                 } else {
                     curMonthTrx.push(t)
                     curMonthTotal += t.amount
-                    if (!(t.category.id in byCategory)) {
-                        byCategory[t.category.id] = 0
-                    }
-                    if (!(t.category.id in categoryNames)) {
-                        categoryNames[t.category.id] = t.category.name
-                    }
-                    if (t.amount < 0) {
-                        byCategory[t.category.id] += t.amount
+                    if (t.category !== null) {
+                        if (!(t.category.id in byCategory)) {
+                            byCategory[t.category.id] = 0
+                        }
+                        if (!(t.category.id in categoryNames)) {
+                            categoryNames[t.category.id] = t.category.name
+                        }
+                        if (t.amount < 0) {
+                            byCategory[t.category.id] += t.amount
+                        }
                     }
                 }
             })

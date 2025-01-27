@@ -1,10 +1,13 @@
 import hmac
 import json
 import secrets
-from datetime import timedelta
+from datetime import timedelta, datetime
+from typing import Optional
 
+import requests
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from django.views.decorators.http import require_GET, require_POST
@@ -32,6 +35,27 @@ def get_transaction(request, transactionId):
             "message": "transaction not found"
         }, status=404)
 
+@require_GET
+@token_protected
+def get_transactions(request, from_date: Optional[datetime] = None):
+    kwargs = {}
+    if from_date is not None:
+        kwargs["date__gte"] = from_date.isoformat()
+    transactions = Transaction.objects.filter(
+        account=request.account,
+        **kwargs
+    )
+    data = [
+        {
+            "id": transaction.id,
+            "date": transaction.date,
+            "category": transaction.category.name,
+            "amount": transaction.amount,
+            "description": transaction.description
+        }
+        for transaction in transactions
+    ]
+    return JsonResponse({"status": "success", "data": data}, status=HTTP_200_OK)
 
 @require_POST
 @token_protected
@@ -83,7 +107,12 @@ def get_account(request):
     account = get_object_or_404(BankAccount, id=request.account.id)
     return JsonResponse({
         "status": "success",
-        "data": BankAccountSerializer(account).data
+        "data": {
+            "id": account.id,
+            "account_number": account.account_number,
+            "balance": account.balance,
+            "bank_name": account.bank_name
+        }
     })
 
 # bank - app authentication
@@ -200,7 +229,7 @@ def generate_token(request):
             "status": "success",
             "message": "Token validated successfully",
             "token": {
-                "id": str(token.id),
+                "id": token.id,
                 "code": token.code,
                 "expires_at": token.expires_at.isoformat()
             }
@@ -228,6 +257,8 @@ def add_transaction(request):
             description=description,
             category=category,
         )
+        trigger_sync(request, account, transaction.date)
+
         return JsonResponse({
             "status": "success",
             "message": "Transaction added successfully.",
@@ -356,6 +387,8 @@ def edit_account(request, id):
     account.user = user
     account.save()
 
+    trigger_sync(request, account)
+
     return JsonResponse({
         "status": "success",
         "message": "Account modified successfully."
@@ -407,3 +440,16 @@ def add_client(request):
     client.last_name = lastname
     client.save()
     return JsonResponse({"status": "success", "message": "Client created successfully."})
+
+
+def trigger_sync(request, account: BankAccount, from_date: Optional[datetime] = None):
+    view_name = "sync_account"
+    kwargs = {
+        "account_number": account.account_number
+    }
+    if from_date is not None:
+        view_name = "sync_account_from"
+        kwargs["from_date"] = from_date
+
+    url = reverse(view_name, kwargs=kwargs)
+    requests.post(request.build_absolute_uri(url))

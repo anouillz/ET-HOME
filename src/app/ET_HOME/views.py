@@ -1,6 +1,7 @@
 import json
 import time
 from datetime import datetime
+from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -9,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
 
@@ -204,13 +206,13 @@ def get_bankAccount_info(request, id):
 
         transactions_data = [
             {
-                "id": str(transaction.id),
+                "id": transaction.id,
                 "account": transaction.account.id,
                 "amount": float(transaction.amount),
                 "date": transaction.date.isoformat(),
                 "description": transaction.description,
-                "category": {
-                    "id": str(transaction.category.id),
+                "category": None if transaction.category is None else {
+                    "id": transaction.category.id,
                     "name": transaction.category.name
                 }
             }
@@ -219,10 +221,10 @@ def get_bankAccount_info(request, id):
         ]
 
         account_data = {
-            "id" : str(account.id),
-            "account_number" : account.account_number,
-            "balance" : float(account.balance),
-            "bank_name" : account.bank_name,
+            "id": account.id,
+            "account_number": account.account_number,
+            "balance": account.balance,
+            "bank_name": account.bank_name,
         }
 
         return JsonResponse({"account_data" : account_data, "transactions": transactions_data})
@@ -579,14 +581,35 @@ def read_notification(request,id):
         "status":"error"
     })
 
-#@require_POST
-def sync_data(request):
-    accounts = BankAccount.objects.filter(user=request.user)
+@require_POST
+@login_required
+@csrf_exempt
+def sync_user(request, from_date: Optional[datetime] = None):
+    user = None
+    if request.user.is_authenticated:
+        user = request.user
+    user_id = request.POST.get("user_id")
+    if user_id is not None:
+        user = get_object_or_404(User, id=user_id)
+
+    if user is None:
+        return JsonResponse({"status": "error", "error": "No user set"}, status=HTTP_400_BAD_REQUEST)
+
+    accounts = BankAccount.objects.filter(user=user)
 
     data = {}
     for account in accounts:
         print(f"Syncing account {account.id}")
-        synched = bank_auth.sync_account(request, account)
-        data[account.id] = synched
+        synched = bank_auth.sync_account(request, account, from_date)
+        data[str(account.id)] = synched
 
     return JsonResponse({"status": "success", "data": data})
+
+@require_POST
+@csrf_exempt
+def sync_account(request, account_number, from_date: Optional[datetime] = None):
+    account = get_object_or_404(BankAccount, account_number=account_number)
+    print(f"Syncing account {account.id}")
+    synced = bank_auth.sync_account(request, account, from_date)
+
+    return JsonResponse({"status": "success", "synced": synced})
