@@ -622,5 +622,14 @@ def validate_token_view(request):
     # Token is valid
     return {"status": "success", "message": "Token is valid"}
 
+#@require_POST
+def sync_data(request):
+    accounts = BankAccount.objects.filter(user=request.user)
 
+    data = {}
+    for account in accounts:
+        print(f"Syncing account {account.id}")
+        synched = bank_auth.sync_account(request, account)
+        data[account.id] = synched
 
+    return JsonResponse({"status": "success", "data": data})

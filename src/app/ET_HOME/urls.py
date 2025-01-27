@@ -53,6 +53,7 @@ urlpatterns = [
     path("api/get_notifications",views.get_notifications, name="get_notifications"),
     path("api/read_notification/<str:id>",views.read_notification, name="read_notification"),
     path("api/validate_token/", views.validate_token_view, name="validate_token"),
+    path("api/sync/", views.sync_data, name="sync_data"),
 
     #Categories page
     path("categories/add/", views.add_category, name="add_category"),
