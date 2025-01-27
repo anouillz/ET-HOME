@@ -9,11 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
-from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
 
-from bank.models import Token
 from .core import bank_auth
 from .models import Transaction, SpendingCategory, User, BankAccount, Notification, Budget, NotificationType
 from .serializers import NotificationSerializer
@@ -357,11 +355,17 @@ def add_bank_account(request):
             secret=res.get("secret"),
             secret_id=res.get("id")
         )
+
+        message = f"Successfully added new bank account into your app (id: {account.id})"
+        Notification.objects.create(
+            user=request.user,
+            related_object_id=account.id,
+            type=NotificationType.ACCOUNT,
+            message=message
+        )
         return JsonResponse({
             "id": account.id
         }, status=HTTP_201_CREATED)
-    message = "successfully added new bank account into your app (id:"+account.id+")"
-    Notification.objects.create(user=request.user,related_object_id=account.id,type=NotificationType.ACCOUNT,message=message)
     return JsonResponse({"error": "An error occurred"}, status=HTTP_400_BAD_REQUEST)
 
 @require_POST
@@ -574,53 +578,6 @@ def read_notification(request,id):
         "message":"notification does not exist",
         "status":"error"
     })
-
-# authentication with bank
-def validate_token_locally(token_id):
-    try:
-        # Retrieve the token from the Bank's database
-        token = Token.objects.get(id=token_id)
-
-        # Check if the token has expired
-        if token.expires_at < now():
-            return {"status": "error", "message": "Token has expired"}
-
-        # Check if the token is activated
-        if not token.activated:
-            return {"status": "error", "message": "Token is not active"}
-
-        # Token is valid
-        return {"status": "success", "message": "Token is valid"}
-
-    except Token.DoesNotExist:
-        # Token does not exist
-        return {"status": "error", "message": "Token does not exist"}
-
-def validate_token_view(request):
-    if request.method != "POST":
-        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
-
-    # Extract the token ID from the POST data
-    token_id = request.POST.get("token_id")
-
-    # get token
-    token = Token.objects.get(id=token_id)
-
-    # check if token expired
-    if token.expires_at < now():
-        return {"status": "error", "message": "Token has expired"}
-
-    # Check if the token is activated
-    if not token.activated:
-        return {"status": "error", "message": "Token is not active"}
-
-    # if token doesnt exist
-    # TODO can regenerate token
-    if not token_id:
-        return JsonResponse({"status": "error", "message": "Token ID is required"}, status=400)
-
-    # Token is valid
-    return {"status": "success", "message": "Token is valid"}
 
 #@require_POST
 def sync_data(request):
