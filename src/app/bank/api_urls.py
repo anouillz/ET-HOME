@@ -5,6 +5,7 @@ urlpatterns = [
     path('clients/add', views.add_client, name='add_client'),
     path('categories/add', views.add_category, name='add_category'),
     path('accounts/add', views.add_account, name='add_account'),
+    path('account/', views.get_account, name='get_account'),
     path('accounts/<uuid:id>/delete', views.delete_account, name='delete_account'),
     path('accounts/<uuid:id>/edit', views.edit_account, name='edit_account'),
     path('transactions/add', views.add_transaction, name='add_transaction'),

@@ -74,5 +74,5 @@ def generate_token(request, account_number, secret, secret_id):
     if response.status_code != 200 or res.get("status") == "error":
         return None, res.get("message", "An error occurred while validating the challenge")
 
-    token_value = res["token_value"]
-    return token_value, None
+    token_data = res["token"]
+    return token_data, None

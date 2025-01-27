@@ -1,8 +1,7 @@
+import json
 import time
 from datetime import datetime
-import json
-import requests
-from django.utils.timezone import now
+
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -10,12 +9,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
-from .serializers import NotificationSerializer
-from .core import bank_auth
-from .models import Transaction, SpendingCategory, User, BankAccount, Notification, AppToken,Budget,NotificationType
+
 from bank.models import Token
+from .core import bank_auth
+from .models import Transaction, SpendingCategory, User, BankAccount, Notification, Budget, NotificationType
+from .serializers import NotificationSerializer
 
 
 def api_access(request):
@@ -169,6 +170,7 @@ def add_account_view(request):
 @login_required
 def account_view(request):
     return render(request, 'account.html')
+
 @login_required
 def dashboard_view(request):
     """
@@ -293,7 +295,7 @@ def get_incomes(request, first_date, second_date):
         return JsonResponse({"dates": {"start_date": first_date, "end_date": second_date}, "income": incomes, "transactions": transactions_data})
     except ValueError:
         return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
-    
+
 
 def check_category(request,category:SpendingCategory):
     accounts = BankAccount.objects.filter(user=request.user)
@@ -366,7 +368,7 @@ def add_bank_account(request):
 @login_required
 def test_secret(request):
     account = get_object_or_404(BankAccount, id=request.POST.get("account_id"))
-    token, error = bank_auth.generate_token(
+    data, error = bank_auth.generate_token(
         request,
         account.account_number,
         account.secret,
@@ -375,7 +377,7 @@ def test_secret(request):
 
     # Artificial delay
     time.sleep(3)
-    if token is not None:
+    if data is not None:
         return JsonResponse({"status": "Connection successful"}, status=HTTP_200_OK)
     return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
 

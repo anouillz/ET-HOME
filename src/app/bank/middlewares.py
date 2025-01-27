@@ -1,32 +1,38 @@
-from django.shortcuts import redirect
-from django.urls import reverse
+from functools import wraps
 
-class TokenVerificationMiddleware:
-    """
-    Custom middleware that mimics the behavior of the `login_required` decorator.
-    It checks if the user is logged in before allowing access to the view.
-    If the user is not logged in, they will be redirected to the login page.
-    """
+from django.http import HttpResponse
+from django.utils.timezone import now
+from rest_framework.status import HTTP_401_UNAUTHORIZED
 
-    def checkTokenValidiy(request):
-        pass
-    
-    def __init__(self, get_response):
-        self.get_response = get_response
+from bank.models import Token
 
-    def __call__(self, request):
-        # List of URLs where login is required (can be expanded based on your needs)
-        exempted_url = [
-            '/login/',  # Add your restricted URL patterns here
-            '/register/',
-        ]
-        '''
-        # Check if the current path is one of the restricted URLs
-        if request.path not in exempted_url and self.checkTokenValidiy(request):
-            # Redirect to login page if not authenticated
-            return redirect(reverse('login'))  # Adjust 'login' to the actual name of your login view
-        '''
 
-        # If the user is authenticated or the URL is not restricted, continue processing the request
-        response = self.get_response(request)
-        return response
+def check_token_validity(request):
+    token_code = request.META.get("HTTP_AUTHORIZATION")
+    if not isinstance(token_code, str) or not token_code.startswith("Bearer "):
+        return False
+    token_code = token_code.replace("Bearer ", "")
+    try:
+        token = Token.objects.get(code=token_code)
+    except Token.DoesNotExist:
+        print("Token does not exist")
+        return False
+
+    if not token.activated:
+        print("Token is not activated")
+        return False
+
+    if token.expires_at < now():
+        print("Token has expired")
+        return False
+
+    request.account = token.account
+    return True
+
+def token_protected(view_function):
+    @wraps(view_function)
+    def wrap(request, *args, **kwargs):
+        if not check_token_validity(request):
+            return HttpResponse("Unauthorized", status=HTTP_401_UNAUTHORIZED)
+        return view_function(request, *args, **kwargs)
+    return wrap

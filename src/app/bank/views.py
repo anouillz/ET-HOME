@@ -9,13 +9,14 @@ from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from django.views.decorators.http import require_GET, require_POST
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from ET_HOME.models import AppToken
 
-from .serializers import TransactionSerializer,SpendingCategorySerializer,BankAccountSerializer
+from .middlewares import token_protected
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
+from .serializers import TransactionSerializer, BankAccountSerializer
 
 
 @require_GET
+@token_protected
 def get_transaction(request, transactionId):
     transaction = Transaction.objects.filter(account=request.account, id=transactionId).first()
     if transaction:
@@ -33,6 +34,7 @@ def get_transaction(request, transactionId):
 
 
 @require_POST
+@token_protected
 def filter_transaction(request):
     try:
         data = json.loads(request.body)
@@ -76,13 +78,12 @@ def filter_transaction(request):
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 @require_GET
-def get_account(request, id):
-    account = BankAccount.objects.filter(id=request.account.id)
-    request.account = account
+@token_protected
+def get_account(request):
+    account = get_object_or_404(BankAccount, id=request.account.id)
     return JsonResponse({
-        "message": f"client {id} accounts",
         "status": "success",
-        "data": BankAccountSerializer(account)
+        "data": BankAccountSerializer(account).data
     })
 
 # bank - app authentication
@@ -159,17 +160,6 @@ def generate_token(request):
             expires_at=now() + timedelta(minutes=60),  # Tokens expire in 60 minutes
         )
 
-        # Also store the token in the app database
-        AppToken.objects.create(
-            id=token.id,  # Match the bank token ID
-            bank_token_id=token.id,  # Reference the bank token ID
-            account=secret.account,  # Match the bank account
-            code=token.code,  # Same token value
-            created_at=token.created_at,
-            expires_at=token.expires_at,
-            activated=token.activated,
-        )
-
         # Return the challenge and token ID
         return JsonResponse({
             "status": "success",
@@ -202,11 +192,18 @@ def generate_token(request):
                 "message": "Incorrect response"
             }, status=401)
 
+        token.activated = True
+        token.save()
+
         # Return the token value
         return JsonResponse({
             "status": "success",
             "message": "Token validated successfully",
-            "token_value": token.code
+            "token": {
+                "id": str(token.id),
+                "code": token.code,
+                "expires_at": token.expires_at.isoformat()
+            }
         })
 
 @require_POST
