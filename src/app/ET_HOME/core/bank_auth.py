@@ -7,7 +7,7 @@ from django.middleware.csrf import get_token
 from django.urls import reverse
 from django.utils.timezone import now
 
-from ET_HOME.models import BankAccount, AppToken, Transaction, SpendingCategory
+from ET_HOME.models import BankAccount, AppToken, Transaction, SpendingCategory,Notification,NotificationType
 
 
 def generate_secret(request, account_number, password):
@@ -164,9 +164,11 @@ def sync_account(request, account, from_date: Optional[datetime] = None):
         account.bank_name = data["bank_name"]
         account.save()
 
-        return sync_transactions(request, account, from_date)
-    else:
-        return False
+        if sync_transactions(request, account, from_date):
+            message ="successfully synchronised account"+account.id+" with bank"
+            Notification.objects.create(user=request.user,type=NotificationType.ACCOUNT,related_object_id=account.id,message=message)
+            return True
+    return False
 
 def sync_transactions(request, account: BankAccount, from_date: Optional[datetime] = None):
     if from_date is None:
@@ -227,6 +229,9 @@ def sync_transactions(request, account: BankAccount, from_date: Optional[datetim
 
         # Delete missing transactions
         Transaction.objects.filter(bank_transaction_id__in=list(deleted_ids)).delete()
+        
+        
+
 
         return True
     return False

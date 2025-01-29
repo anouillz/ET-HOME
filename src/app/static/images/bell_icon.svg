@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 64 64.000003"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="bell_icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="6.9165572"
+     inkscape:cx="20.675026"
+     inkscape:cy="33.5427"
+     inkscape:window-width="1536"
+     inkscape:window-height="792"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:pageshadow="0">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="1"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="8"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       style="fill:none"
+       id="g958"
+       transform="matrix(1.3443682,0,0,1.3443682,15.866378,15.866507)">
+      <path
+         d="m 12.0009,5 c 1.4322,0 2.8057,0.50571 3.8184,1.40589 1.0127,0.90017 1.5816,2.12107 1.5816,3.39411 0,1.9691 0.4451,3.4436 1.0223,4.5279 0.7374,1.3854 1.1061,2.0781 1.0856,2.2363 -0.0239,0.1847 -0.0544,0.2355 -0.2062,0.3433 C 19.1725,17 18.5254,17 17.2311,17 H 6.77066 C 5.47638,17 4.82925,17 4.69916,16.9075 4.54741,16.7997 4.51692,16.7489 4.493,16.5642 4.47249,16.406 4.8412,15.7133 5.57863,14.3279 6.1558,13.2436 6.60089,11.7691 6.60089,9.8 6.60089,8.52696 7.16982,7.30606 8.18251,6.40589 9.19521,5.50571 10.5687,5 12.0009,5 Z m 0,0 V 3 M 9.35489,20 c 0.70621,0.6233 1.63391,1.0016 2.65001,1.0016 1.016,0 1.9437,-0.3783 2.65,-1.0016"
+         stroke="#000000"
+         stroke-width="2"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path949" />
+    </g>
+  </g>
+</svg>

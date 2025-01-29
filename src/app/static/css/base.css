@@ -124,8 +124,8 @@ header input{
 }
 
 .notification-toggle {
-    background: white;
     border: none;
+    background:none;
     width: 3rem;
     height: 3rem;
     border-radius: 50%;
@@ -133,19 +133,29 @@ header input{
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
-    transition: transform 0.2s ease;
 }
 
-.notification-toggle:hover {
-    transform: translateY(-2px);
+.notification-toggle img {
+    transition: transform 0.2s;
 }
+
+.notification-toggle img:hover {
+    animation: shake 0.5s infinite;
+}
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
 
 .notification-bell {
     width: 1.5rem;
     height: 1.5rem;
-    color: #4b5563;
+    color:transparent
 }
 
 .notification-badge {
@@ -235,16 +245,13 @@ header input{
 
 .notification {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     padding: 1rem;
     border-radius: 0.5rem;
     margin-bottom: 0.5rem;
     animation: slideDown 0.3s ease-out forwards;
     position: relative;
-}
-
-.notification.new {
-    animation: highlight 2s ease-out;
+    gap:0.4em
 }
 
 .notification.success {
@@ -316,6 +323,7 @@ header input{
     color: #333; /* Text color */
     border: 1px solid #ddd; /* Optional border */
     text-transform: uppercase; /* Ensure text is uppercase */
+    flex-shrink: 0;
 }
 
 

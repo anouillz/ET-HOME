@@ -298,24 +298,24 @@ def get_incomes(request, first_date, second_date):
 
 
 def check_category(request,category:SpendingCategory):
-    accounts = BankAccount.objects.filter(user=request.user)
-    transactions = Transaction.objects.filter(account__in=accounts,category=category)
+    transactions = Transaction.objects.filter(account__user=request.user,category=category)
     calc = 0
     for t in transactions:
-        calc += t.amount
-    budget = Budget.objects.filter(user=request.user,category=category).first()
-    if budget:
-        if calc > budget.amount:
-            delta = calc - budget.amount
+        if t.amount < 0:
+            calc += (-t.amount)
+    amount = category.user_budget
+    if category:
+        if calc > amount:
+            delta = calc - amount
             message = "You have exceeded your budget by "+str(delta)+" for the category "+category.name
-            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=budget.id,message=message)
-        elif calc == budget.amount:
+            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=category.id,message=message)
+        elif calc == amount:
             message = "You have used all your budget for the category "+category.name+" please, be carefull"
-            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=budget.id,message=message)
-        elif budget.amount - calc < 30:
-            delta = str(budget.amount-calc)
+            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=category.id,message=message)
+        elif (amount - calc) / amount < 0.1:
+            delta = str(amount-calc)
             message = "Be carefull !, you have " +delta+" left in your budget for the category "+category.name
-            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=budget.id,message=message)
+            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=category.id,message=message)
 
 
 
@@ -420,7 +420,6 @@ def delete_category(request):
         category_name = request.POST.get("name")
         if not category_name:
             return JsonResponse({"delete category status": "error", "message": "Category name is required"}, status=400)
-
         try:
             # ensure the category belongs to the user and is not a default category
             category = SpendingCategory.objects.get(name=category_name, user=request.user, is_default=False)
