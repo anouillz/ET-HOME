@@ -13,26 +13,24 @@
 
     <div class="categories-list">
         {% for category in categories %}
-        <div class="category-item" data-id="{{ category.id }}">
-            <input
-                type="checkbox"
-                class="toggle-category"
-                {% if category.is_active %}checked{% endif %}
-                data-id="{{ category.id }}"
-            />
-            <span class="category-name">{{ category.name }}</span>
-            <input
-                type="number"
-                class="category-budget"
-                value="{{ category.user_budget }}"
-                data-id="{{ category.id }}"
-            />
-            <button class="delete-category" data-id="{{ category.id }}">Delete</button>
+        <div class="category-item widget-box" data-id="{{ category.id }}">
+            <div class="category-left">
+                <span class="category-name">{{ category.name }}</span>
+            </div>
+            <div class="category-right">
+                <input
+                    type="number"
+                    class="category-budget"
+                    value="{{ category.user_budget }}"
+                    data-id="{{ category.id }}"
+                />
+                <button class="delete-category" data-id="{{ category.id }}">Delete </button>
+            </div>
         </div>
         {% empty %}
         <p>No categories available. Add one below!</p>
         {% endfor %}
     </div>
-    <button id="add-category-btn">+ Add Category</button>
+    <button id="add-category-btn" class="add-category-btn">+ Add Category </button>
 </div>
 {% endblock %}

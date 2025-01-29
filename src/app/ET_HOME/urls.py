@@ -60,7 +60,6 @@ urlpatterns = [
     #Categories page
     path("categories/add/", views.add_category, name="add_category"),
     path("categories/delete/", views.delete_category, name="delete_category"),
-    path("categories/toggle/", views.toggle_category, name="toggle_category"),
     path("categories/update_budget/", views.update_category_budget, name="update_category_budget")
 
 ]
