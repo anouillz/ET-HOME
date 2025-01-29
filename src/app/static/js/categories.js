@@ -10,18 +10,39 @@ document.addEventListener("DOMContentLoaded", function () {
     const closeSuccessModal = document.getElementById("close-success-modal");
     const successDeleteMessage = document.getElementById("success-delete-message");
 
+    const addCategoryModal = document.getElementById("add-category-modal");
+    const confirmAddCategoryBtn = document.getElementById("confirm-add-category");
+    const cancelAddCategoryBtn = document.getElementById("cancel-add-category");
+    const newCategoryNameInput = document.getElementById("new-category-name");
+    const newCategoryBudgetInput = document.getElementById("new-category-budget");
+
     // ✅ Assurer que les modales sont cachées au chargement de la page
     document.getElementById("budget-modal").style.display = "none";
     document.getElementById("confirm-delete-modal").style.display = "none";
     document.getElementById("success-delete-modal").style.display = "none";
+    document.getElementById("add-category-modal").style.display = "none";
 
-    // 🔥 Ajout d'une nouvelle catégorie
+    // 🔥 Ajout d'une nouvelle catégorie avec une modale
     document.getElementById("add-category-btn").addEventListener("click", function () {
-        const categoryName = prompt("Enter category name:");
-        if (!categoryName) return;  // Si l'utilisateur annule
+        addCategoryModal.style.display = "flex";
+    });
 
-        const categoryBudget = prompt("Enter category budget:");
-        if (!categoryBudget) return;
+    // ✅ Annuler l'ajout et fermer la modale
+    cancelAddCategoryBtn.addEventListener("click", function () {
+        addCategoryModal.style.display = "none";
+        newCategoryNameInput.value = "";
+        newCategoryBudgetInput.value = "";
+    });
+
+    // ✅ Ajouter la catégorie lorsqu'on clique sur "Add"
+    confirmAddCategoryBtn.addEventListener("click", function () {
+        const categoryName = newCategoryNameInput.value.trim();
+        const categoryBudget = newCategoryBudgetInput.value.trim();
+
+        if (!categoryName || !categoryBudget) {
+            alert("Please enter a category name and budget!");
+            return;
+        }
 
         fetch("/categories/add/", {
             method: "POST",
@@ -35,6 +56,9 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((data) => {
             if (data.status === "success") {
                 console.log("✅ Category added successfully!");
+                addCategoryModal.style.display = "none";
+                newCategoryNameInput.value = "";
+                newCategoryBudgetInput.value = "";
                 location.reload(); // Recharger la page pour afficher la nouvelle catégorie
             } else {
                 console.error("🔴 Error adding category:", data.message);
@@ -82,8 +106,6 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             categoryToDelete = this.dataset.id;
             categoryNameToDelete = this.closest(".category-item").querySelector(".category-name").innerText;
-
-            // Afficher la boîte modale de confirmation
             confirmDeleteModal.style.display = "flex";
         });
     });
@@ -104,11 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((data) => {
             if (data.status === "success") {
                 console.log("✅ Category deleted successfully!");
-
-                // Cacher la modale de confirmation
                 confirmDeleteModal.style.display = "none";
-
-                // Mettre le message et afficher la modale de succès
                 successDeleteMessage.innerText = `Category "${categoryNameToDelete}" deleted successfully!`;
                 successDeleteModal.style.display = "flex";
             } else {
@@ -135,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".toggle-category").forEach((checkbox) => {
         checkbox.addEventListener("change", function () {
             const categoryId = this.dataset.id;
-            const isActive = this.checked; // true si la case est cochée
+            const isActive = this.checked;
 
             fetch("/categories/toggle/", {
                 method: "POST",

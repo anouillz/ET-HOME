@@ -69,7 +69,7 @@
     transition: background-color 0.2s ease;
 }
 
-/* Styles pour la boîte modale */
+/* Modal styles */
 .modal {
     display: none; /* Cachée par défaut */
     position: fixed;
@@ -93,6 +93,21 @@
     min-width: 300px;
 }
 
+.modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.modal-buttons {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
 .modal-content button {
     background-color: #007bff;
     color: white;
@@ -100,15 +115,9 @@
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 10px;
+    transition: background-color 0.2s;
 }
 
 .modal-content button:hover {
     background-color: #0056b3;
 }
-
-
-.add-category-btn:hover {
-    background-color: #0056b3;
-}
-
