@@ -389,65 +389,60 @@ def test_secret(request):
     return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
 
 # categories functions
+@login_required
 def add_category(request):
     if request.method == "POST":
         category_name = request.POST.get("name")
         user_budget = request.POST.get("user_budget")
 
         if not category_name or not user_budget:
-            return JsonResponse({"new category status": "error", "message": "Category name and budget are required"}, status=400)
+            return JsonResponse({"status": "error", "message": "Category name and budget are required"}, status=400)
 
         try:
             # Check if a category with the same name already exists for this user
             if SpendingCategory.objects.filter(name=category_name, user=request.user).exists():
-                return JsonResponse({"new category status": "error", "message": "Category with this name already exists"}, status=400)
+                return JsonResponse({"status": "error", "message": "Category already exists"}, status=400)
 
-            # Create the new category with the custom budget
-            category = SpendingCategory.objects.create(
+            # Create the new category
+            SpendingCategory.objects.create(
                 name=category_name,
                 user=request.user,
                 user_budget=user_budget,
-                is_default=False
+                is_active=True  # Default to active
             )
-            category.save()
-            return JsonResponse({"new category status": "success", "category_id": category.id})
+            return JsonResponse({"status": "success", "message": "Category added successfully"})
         except Exception as e:
-            return JsonResponse({"new category status": "error", "message": str(e)}, status=500)
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
-    return JsonResponse({"new category status": "error", "message": "Invalid request method"}, status=400)
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=400)
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import SpendingCategory
+
+@login_required  # 🔒 Empêche les utilisateurs non connectés d'accéder à cette vue
 def delete_category(request):
     if request.method == "POST":
-        category_name = request.POST.get("name")
-        if not category_name:
-            return JsonResponse({"delete category status": "error", "message": "Category name is required"}, status=400)
+        category_id = request.POST.get("category_id")
+
+        if not category_id:
+            return JsonResponse({"status": "error", "message": "Category ID is required"}, status=400)
+
         try:
-            # ensure the category belongs to the user and is not a default category
-            category = SpendingCategory.objects.get(name=category_name, user=request.user, is_default=False)
+            category = SpendingCategory.objects.get(id=category_id, user=request.user, is_default=False)
             category.delete()
-            return JsonResponse({"delete category status": "success"})
+            return JsonResponse({"status": "success"})
+
         except SpendingCategory.DoesNotExist:
             return JsonResponse(
-                {"delete category status": "error", "message": "Category not found or cannot be deleted"}, status=404)
-    else:
-        return JsonResponse({"delete category status": "error", "message": "Invalid request method"}, status=400)
-@login_required
-@require_POST
-def toggle_category(request):
-    try:
-        category_id = request.POST.get("category_id")
-        is_active = request.POST.get("is_active") == "true"
+                {"status": "error", "message": "Category not found or unauthorized"}, status=403  # 🔒 Retourne 403 si l'utilisateur essaie de supprimer une catégorie qui ne lui appartient pas
+            )
 
-        category = SpendingCategory.objects.get(id=category_id, user=request.user)
-        category.is_active = is_active
-        category.save()
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=400)
 
-        return JsonResponse({"status": "success", "message": "Category toggled successfully."})
-    except SpendingCategory.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Category not found."}, status=404)
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
-@login_required
-@require_POST
+
+
+
 def update_category_budget(request):
     try:
         category_id = request.POST.get("category_id")
