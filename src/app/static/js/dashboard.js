@@ -54,7 +54,7 @@ async function refreshDashboard() {
     accounts.forEach(account => {
         let promise = apiGet(`accounts/${account.id}`).then(info => {
             console.log(info)
-            if (info.error) {
+            if (info.status !== "success") {
                 return
             }
             let transactions = info.transactions
@@ -64,10 +64,10 @@ async function refreshDashboard() {
                 let d = new Date(t.date)
                 if (d < curMonthDay) {
                     lastMonthTrx.push(t)
-                    lastMonthTotal += t.amount
+                    lastMonthTotal += +t.amount
                 } else {
                     curMonthTrx.push(t)
-                    curMonthTotal += t.amount
+                    curMonthTotal += +t.amount
                     if (t.category !== null) {
                         if (!(t.category.id in byCategory)) {
                             byCategory[t.category.id] = 0
@@ -76,7 +76,7 @@ async function refreshDashboard() {
                             categoryNames[t.category.id] = t.category.name
                         }
                         if (t.amount < 0) {
-                            byCategory[t.category.id] += t.amount
+                            byCategory[t.category.id] += +t.amount
                         }
                     }
                 }
@@ -86,7 +86,7 @@ async function refreshDashboard() {
 
         let opt = document.createElement("option")
         opt.value = account.id
-        opt.innerText = `#${account.account_number.slice(-4)} (${account.bank})`
+        opt.innerText = `#${account.account_number.slice(-4)} (${account.bank_name})`
         accountFilter.appendChild(opt)
     })
 
@@ -203,7 +203,7 @@ function showAccounts() {
     accounts.forEach(account => {
         let entry = template.cloneNode(true)
         entry.querySelector(".id").innerText = "#" + account.account_number.slice(-4)
-        entry.querySelector(".bank").innerText = "(" + account.bank + ")"
+        entry.querySelector(".bank").innerText = "(" + account.bank_name + ")"
         entry.querySelector(".balance").innerText = formatMoney(account.balance)
         list.appendChild(entry)
     })
@@ -232,7 +232,7 @@ async function updateGraph() {
     let categories = document.getElementById("expenses-categories").getAttribute("value") ?? "*"
     if (categories !== "*") {
         categories = categories.split(",")
-        transactions = transactions.filter(t => categories.includes(t.category))
+        transactions = transactions.filter(t => t.category !== null && categories.includes(t.category.id))
     }
 
     incomes = {}
@@ -471,14 +471,14 @@ window.addEventListener("load", () => {
     window.addEventListener("resize", resizeGraph)
     resizeGraph()
 
-    apiGet("get_accounts").then(res => {
-        if (res.accounts) {
+    apiGet("accounts/").then(res => {
+        if (res.status === "success") {
             accounts = res.accounts
         }
     }).then(refreshDashboard)
 
     apiGet("categories/").then(res => {
-        if (res.categories) {
+        if (res.status === "success") {
             let categorySelect = document.getElementById("expenses-categories")
             setMultiSelectOptions(categorySelect, res.categories.map(category => {
                 return {

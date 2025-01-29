@@ -111,10 +111,6 @@ function setMultiSelectOptions(elmt, options) {
     })
 }
 
-function notify(msg) {
-
-}
-
 function apiGet(endpoint, bank=false) {
     return fetch((bank ? "/bank/api/" : "/api/") + endpoint, {
         method: "GET",
@@ -122,9 +118,14 @@ function apiGet(endpoint, bank=false) {
             "Accept": "application/json"
         }
     }).then(res => {
-        return res.json()
+        if (res.ok) {
+            return res.json()
+        }
+        return res.json().catch(() => {
+            return {status: "error", error: `Error ${res.status}`}
+        })
     }).catch(err => {
-        notify("An error occurred: " + err)
+        alert(err)
         return {
             error: err.toString()
         }
@@ -146,9 +147,14 @@ function apiPost(endpoint, data, bank=false) {
         body: data,
         headers: headers
     }).then(res => {
-        return res.json()
+        if (res.ok) {
+            return res.json()
+        }
+        return res.json().catch(() => {
+            return {status: "error", error: `Error ${res.status}`}
+        })
     }).catch(err => {
-        notify("An error occured: " + err)
+        alert(err)
         return {
             error: err.toString()
         }

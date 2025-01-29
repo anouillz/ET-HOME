@@ -9,6 +9,7 @@
     <h1>Welcome back, {{ user.username }}</h1>
 {% endblock %}
 {% block main %}
+    {% csrf_token %}
     <section class="widgets">
         {% include "widgets/spendings.html" with id='current-month' icon='images/icon_current_month.svg' %}
         {% include "widgets/accounts.html" with id='accounts' icon='images/icon_accounts.svg' %}
