@@ -56,7 +56,8 @@ class SpendingCategory(models.Model):
 
 class Transaction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    account = models.ForeignKey(BankAccount, null=True, on_delete=models.CASCADE, default=None)
     bank_transaction_id = models.UUIDField(null=True, default=None, unique=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(default=now)

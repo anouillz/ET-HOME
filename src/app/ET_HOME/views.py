@@ -324,22 +324,25 @@ def check_category(request,category:SpendingCategory):
 
 
 
-
+@require_POST
 def add_transaction(request):
-    if request.method == "POST":
-        category = SpendingCategory.objects.get(user=request.user,id=request.POST['category_id'])
-        transaction = Transaction.objects.create(
-            account_id = request.POST['account_id'],
-            amount = request.POST['amount'],
-            date = request.POST['date'],
-            description = request.POST['description'],
-            category=category,
-        )
-        transaction.save()
-        check_category(request,category)
-        return JsonResponse({"new transaction status": "success"})
-    else:
-        return JsonResponse({"new transaction status": "error"}, status=400)
+    category = get_object_or_404(SpendingCategory, user=request.user, id=request.POST.get("category_id"))
+    amount = request.POST.get("amount")
+    date = request.POST.get("date")
+    description = request.POST.get("description")
+    if not amount or not date or not description:
+        return JsonResponse({"status": "error", "error": "Amount, date and description are required"})
+
+    transaction = Transaction.objects.create(
+        user = request.user,
+        amount = amount,
+        date = date,
+        description = description,
+        category = category,
+    )
+    transaction.save()
+    check_category(request, category)
+    return JsonResponse({"status": "success", "id": transaction.id})
 
 @require_POST
 @login_required
@@ -507,7 +510,7 @@ def change_password(request):
         return redirect('account.html')  # Replace "profile" with the desired redirect URL
 
     # create a form to change the password
-    return render(request, "change_password")
+    return render(request, "change_password.html")
 
 
 # export data

@@ -203,6 +203,7 @@ def sync_transactions(request, account: BankAccount, from_date: Optional[datetim
                 category = None
 
             transaction = Transaction(
+                user=account.user,
                 account=account,
                 bank_transaction_id=t["id"],
                 amount=t["amount"],
