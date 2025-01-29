@@ -3,4 +3,4 @@ from .models import SpendingCategory
 
 @admin.register(SpendingCategory)
 class SpendingCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "default_budget")
+    list_display = ("name", "user_budget")

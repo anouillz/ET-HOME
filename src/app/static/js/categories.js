@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let categoryToDelete = null;
     let categoryNameToDelete = "";
 
-    // Sélection des modales et boutons
+    // modals and buttons
     const confirmDeleteModal = document.getElementById("confirm-delete-modal");
     const successDeleteModal = document.getElementById("success-delete-modal");
     const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
@@ -16,25 +16,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const newCategoryNameInput = document.getElementById("new-category-name");
     const newCategoryBudgetInput = document.getElementById("new-category-budget");
 
-    // ✅ Assurer que les modales sont cachées au chargement de la page
+    // modals hidden by default
     document.getElementById("budget-modal").style.display = "none";
     document.getElementById("confirm-delete-modal").style.display = "none";
     document.getElementById("success-delete-modal").style.display = "none";
     document.getElementById("add-category-modal").style.display = "none";
 
-    // 🔥 Ajout d'une nouvelle catégorie avec une modale
+    // add category modal
     document.getElementById("add-category-btn").addEventListener("click", function () {
         addCategoryModal.style.display = "flex";
     });
 
-    // ✅ Annuler l'ajout et fermer la modale
+    // close modal when clicking outside
     cancelAddCategoryBtn.addEventListener("click", function () {
         addCategoryModal.style.display = "none";
         newCategoryNameInput.value = "";
         newCategoryBudgetInput.value = "";
     });
 
-    // ✅ Ajouter la catégorie lorsqu'on clique sur "Add"
+    // add category if user clicks "Add"
     confirmAddCategoryBtn.addEventListener("click", function () {
         const categoryName = newCategoryNameInput.value.trim();
         const categoryBudget = newCategoryBudgetInput.value.trim();
@@ -55,21 +55,21 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
-                console.log("✅ Category added successfully!");
+                console.log("Category added successfully!");
                 addCategoryModal.style.display = "none";
                 newCategoryNameInput.value = "";
                 newCategoryBudgetInput.value = "";
-                location.reload(); // Recharger la page pour afficher la nouvelle catégorie
+                location.reload(); // Reload to show new category
             } else {
-                console.error("🔴 Error adding category:", data.message);
+                console.error("Error adding category:", data.message);
             }
         })
         .catch((error) => {
-            console.error("🔴 Error:", error);
+            console.error("Error:", error);
         });
     });
 
-    // 🔥 Mise à jour du budget avec la touche "Enter"
+    // update budget with enter key
     document.querySelectorAll(".category-budget").forEach((input) => {
         input.addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
@@ -95,13 +95,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 })
                 .catch((error) => {
-                    console.error("🔴 Error:", error);
+                    console.error("Error:", error);
                 });
             }
         });
     });
 
-    // 🔥 Suppression de catégorie avec modale
+    // delete category with modal
     document.querySelectorAll(".delete-category").forEach((button) => {
         button.addEventListener("click", function () {
             categoryToDelete = this.dataset.id;
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // ✅ Si l'utilisateur clique sur "Yes" pour supprimer
+    // validate delete
     confirmDeleteBtn.addEventListener("click", function () {
         if (!categoryToDelete) return;
 
@@ -125,65 +125,42 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
-                console.log("✅ Category deleted successfully!");
+                console.log("Category deleted successfully!");
                 confirmDeleteModal.style.display = "none";
                 successDeleteMessage.innerText = `Category "${categoryNameToDelete}" deleted successfully!`;
                 successDeleteModal.style.display = "flex";
             } else {
-                console.error("🔴 Error deleting category:", data.message);
+                console.error("Error deleting category:", data.message);
             }
         })
         .catch((error) => {
-            console.error("🔴 Error:", error);
+            console.error("Error:", error);
         });
     });
 
-    // ✅ Si l'utilisateur clique sur "No", fermer la modale
+    // if user doesnt want to delete
     cancelDeleteBtn.addEventListener("click", function () {
         confirmDeleteModal.style.display = "none";
     });
 
-    // ✅ Si l'utilisateur clique sur "OK" après suppression, fermer la modale et recharger
+    // if user wants to close success modal
     closeSuccessModal.addEventListener("click", function () {
         successDeleteModal.style.display = "none";
         location.reload();
     });
 
-    // 🔥 Activation/Désactivation d'une catégorie avec la checkbox
+    // checkbox
     document.querySelectorAll(".toggle-category").forEach((checkbox) => {
-        checkbox.addEventListener("change", function () {
-            const categoryId = this.dataset.id;
-            const isActive = this.checked;
 
-            fetch("/categories/toggle/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: `category_id=${encodeURIComponent(categoryId)}&is_active=${isActive}`,
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.status === "success") {
-                    console.log(`✅ Category ${categoryId} toggled to ${isActive}`);
-                } else {
-                    console.error("🔴 Error toggling category:", data.message);
-                }
-            })
-            .catch((error) => {
-                console.error("🔴 Error:", error);
-            });
-        });
     });
 
-    // ✅ Bouton pour fermer la boîte modale du budget
+    // close budget modal
     document.getElementById("close-modal").addEventListener("click", function () {
         document.getElementById("budget-modal").style.display = "none";
     });
 });
 
-// 🔥 Fonction pour récupérer le token CSRF
+// get cookie
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {

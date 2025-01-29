@@ -2,6 +2,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from typing import Optional
+import traceback
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -73,6 +74,25 @@ def get_all_transactions(request):
     ]
     return transactions_data
 
+
+def create_default_categories(user):
+    default_categories = [
+        {"name": "Food", "budget": 200.00},
+        {"name": "Transport", "budget": 100.00},
+        {"name": "Entertainment", "budget": 150.00},
+        {"name": "Health", "budget": 80.00},
+        {"name": "Gifts", "budget": 50.00},
+        {"name": "Bills", "budget": 100.00},
+    ]
+
+    for category in default_categories:
+        SpendingCategory.objects.create(
+            name=category["name"],
+            user=user,
+            is_default=True,  # category cannot be deleted
+            user_budget=category["budget"]
+        )
+
 @login_required
 def get_categories(request):
     categories = SpendingCategory.objects.filter(user=request.user)
@@ -135,22 +155,7 @@ def register_view(request):
         user.last_name = request.POST["lastname"]
         user.save()
 
-        default_categories = [
-            {"name": "Food", "default_budget": 1000.00},
-            {"name": "Bills", "default_budget": 1500.00},
-            {"name": "Entertainment", "default_budget": 200.00},
-            {"name": "Health", "default_budget": 300.00},
-            {"name": "Gifts", "default_budget": 100.00},
-            {"name": "Transport", "default_budget": 200.00}
-        ]
-
-        for category in default_categories:
-            SpendingCategory.objects.create(
-                user=user,
-                name=category["name"],
-                default_budget=category["default_budget"],
-                is_default=True
-            )
+        create_default_categories(user)
 
         return redirect("login")
 
@@ -399,28 +404,25 @@ def add_category(request):
             return JsonResponse({"status": "error", "message": "Category name and budget are required"}, status=400)
 
         try:
-            # Check if a category with the same name already exists for this user
+            # check if the category already exists
             if SpendingCategory.objects.filter(name=category_name, user=request.user).exists():
                 return JsonResponse({"status": "error", "message": "Category already exists"}, status=400)
 
-            # Create the new category
-            SpendingCategory.objects.create(
+            category = SpendingCategory.objects.create(
                 name=category_name,
                 user=request.user,
-                user_budget=user_budget,
-                is_active=True  # Default to active
+                user_budget=float(user_budget)
             )
-            return JsonResponse({"status": "success", "message": "Category added successfully"})
+
+            return JsonResponse({"status": "success"})
+
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=400)
 
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from .models import SpendingCategory
 
-@login_required  # 🔒 Empêche les utilisateurs non connectés d'accéder à cette vue
+@login_required
 def delete_category(request):
     if request.method == "POST":
         category_id = request.POST.get("category_id")
@@ -435,7 +437,7 @@ def delete_category(request):
 
         except SpendingCategory.DoesNotExist:
             return JsonResponse(
-                {"status": "error", "message": "Category not found or unauthorized"}, status=403  # 🔒 Retourne 403 si l'utilisateur essaie de supprimer une catégorie qui ne lui appartient pas
+                {"status": "error", "message": "Category not found or unauthorized"}, status=403
             )
 
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=400)
