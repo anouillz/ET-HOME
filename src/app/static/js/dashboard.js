@@ -52,7 +52,7 @@ async function refreshDashboard() {
     opt.innerText = "All accounts"
     accountFilter.appendChild(opt)
     accounts.forEach(account => {
-        let promise = apiGet(`get_bankAccount_info/${account.id}`).then(info => {
+        let promise = apiGet(`accounts/${account.id}`).then(info => {
             console.log(info)
             if (info.error) {
                 return

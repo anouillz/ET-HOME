@@ -14,7 +14,7 @@ async function confirm() {
     step1.classList.add("finished")
     step2.classList.add("active")
 
-    let accountId = await apiPost("add_bank_account", data).then(res => {
+    let accountId = await apiPost("add_bank_account/", data).then(res => {
         if (res.error) {
             throw new Error(res.error)
         }

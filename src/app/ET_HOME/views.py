@@ -1,27 +1,29 @@
-import json
 import time
 from datetime import datetime, timedelta
 from typing import Optional
-import traceback
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 
 from .core import bank_auth
-from .models import Transaction, SpendingCategory, User, BankAccount, Notification, Budget, NotificationType
-from .serializers import NotificationSerializer
+from .models import Transaction, SpendingCategory, User, BankAccount, Notification, NotificationType
+from .serializers import NotificationSerializer, TransactionSerializer, FullSpendingCategorySerializer, \
+    TransactionWithoutCategorySerializer, FullBankAccountSerializer, \
+    TransactionWithoutAccountSerializer, UserSerializer, BareTransactionSerializer
 
 
 def api_access(request):
     return render(request, 'api.html')
+
 
 def get_transactions(request, first_date: datetime.date, second_date: datetime.date):
     transactions = Transaction.objects.filter(
@@ -29,17 +31,11 @@ def get_transactions(request, first_date: datetime.date, second_date: datetime.d
         date__gte=first_date,
         date__lt=second_date + timedelta(days=1)
     ).order_by("date")
-    transactions_data = []
-    for transaction in transactions:
-        transactions_data.append({
-            "id": str(transaction.id),
-            "account": transaction.account.id,
-            "amount": float(transaction.amount),
-            "date": transaction.date.isoformat(),
-            "description": transaction.description,
-            "category": transaction.category.id if transaction.category else None,
-        })
-    return JsonResponse({"transactions": transactions_data})
+    return JsonResponse({
+        "status": "success",
+        "transactions": TransactionSerializer(transactions, many=True).data
+    })
+
 
 def get_account_transactions(request, id, first_date, second_date):
     transactions = Transaction.objects.filter(
@@ -47,32 +43,10 @@ def get_account_transactions(request, id, first_date, second_date):
         date__gte=first_date,
         date__lt=second_date + timedelta(days=1)
     ).order_by("date")
-    transactions_data = []
-    for transaction in transactions:
-        transactions_data.append({
-            "id": str(transaction.id),
-            "account": transaction.account.id,
-            "amount": float(transaction.amount),
-            "date": transaction.date.isoformat(),
-            "description": transaction.description,
-            "category": transaction.category.id if transaction.category else None,
-        })
-    return JsonResponse({"transactions": transactions_data})
-
-def get_all_transactions(request):
-    transactions = Transaction.objects.all()
-    transactions_data = [
-        {
-            "id": str(transaction.id),
-            "account": transaction.account.id,
-            "amount": float(transaction.amount),
-            "date": transaction.date.isoformat(),
-            "description": transaction.description,
-            "category": transaction.category.name if transaction.category else None,
-        }
-        for transaction in transactions
-    ]
-    return transactions_data
+    return JsonResponse({
+        "status": "success",
+        "transactions": TransactionSerializer(transactions, many=True).data
+    })
 
 
 def create_default_categories(user):
@@ -93,55 +67,38 @@ def create_default_categories(user):
             user_budget=category["budget"]
         )
 
+
 @login_required
 def get_categories(request):
     categories = SpendingCategory.objects.filter(user=request.user)
+    return JsonResponse({
+        "status": "success",
+        "categories": FullSpendingCategorySerializer(categories, many=True).data
+    })
 
-    categories_data = [
-        {
-            "id": str(category.id),
-            "name": category.name,
-            "default": category.is_default
-        }
-        for category in categories
-    ]
-    return JsonResponse({"categories": categories_data}, status=HTTP_200_OK)
 
 def get_category(request, id):
-    try:
-        spending_category = SpendingCategory.objects.get(id=id)
-        transactions = Transaction.objects.filter(category=spending_category)
+    category = get_object_or_404(SpendingCategory, id=id)
+    transactions = Transaction.objects.filter(category=category)
+    return JsonResponse({
+        "status": "success",
+        "category": FullSpendingCategorySerializer(category).data,
+        "transactions": TransactionWithoutCategorySerializer(transactions, many=True).data
+    })
 
-        transactions_data = [
-            {
-                "id": str(transaction.id),
-                "account": transaction.account.id,
-                "amount": float(transaction.amount),
-                "date": transaction.date.isoformat(),
-                "description": transaction.description,
-                "category": transaction.category.name,
-            }
-            for transaction in transactions
-        ]
-        return JsonResponse({"category": spending_category.name, "transactions": transactions_data})
-
-    except SpendingCategory.DoesNotExist:
-        return JsonResponse({"error": "Spending category not found."}, status=404)
-
-
-# main views
 
 def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('dashboard')  # Redirige vers une page d'accueil
+            return redirect("dashboard")
         else:
-            messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
-    return render(request, 'login.html')
+            messages.error(request, "Invalid username or password")
+    return render(request, "login.html")
+
 
 def register_view(request):
     if request.method == "POST":
@@ -161,188 +118,173 @@ def register_view(request):
 
     return render(request, 'register.html')
 
+
 @login_required
 def categories_view(request):
-    categories = SpendingCategory.objects.filter(user=request.user)
-    print(categories)  # Check the fetched categories
-    return render(request, "categories.html", {"categories": categories})
+    context = {
+        "categories": SpendingCategory.objects.filter(user=request.user)
+    }
+    return render(request, "categories.html", context)
 
 
 @login_required
 def add_account_view(request):
-    return render(request, 'add_account.html')
+    return render(request, "add_account.html")
+
 
 @login_required
 def account_view(request):
-    return render(request, 'account.html')
+    return render(request, "account.html")
+
 
 @login_required
 def dashboard_view(request):
-    """
-    Vue de la page d'accueil. Affiche une page d'accueil avec un message de bienvenue.
-    """
     context = {
         "user": request.user
     }
-    return render(request, 'dashboard.html', context)
+    return render(request, "dashboard.html", context)
+
 
 @login_required
 def settings_view(request):
-    return render(request, 'settings.html')
+    return render(request, "settings.html")
+
 
 @login_required
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect("login")
+
 
 @login_required
-def get_bankAccount_info(request, id):
-    try:
-        account = BankAccount.objects.get(id=id)
-        # Only get transactions from the beginning of last month
-        today = datetime.today()
-        start_date = datetime(today.year, today.month, 1)
-        start_date += relativedelta(months=-1)
-        start_date = start_date.date()
-        transactions = Transaction.objects.filter(
-            account_id=id,
-            date__gte=start_date.isoformat()
-        )
+def get_account(request, id):
+    account = get_object_or_404(BankAccount, id=id, user=request.user)
 
-        transactions_data = [
-            {
-                "id": transaction.id,
-                "account": transaction.account.id,
-                "amount": float(transaction.amount),
-                "date": transaction.date.isoformat(),
-                "description": transaction.description,
-                "category": None if transaction.category is None else {
-                    "id": transaction.category.id,
-                    "name": transaction.category.name
-                }
-            }
-            for transaction in transactions
-            if start_date <= transaction.date.date()
-        ]
+    # Only get transactions from the beginning of last month
+    today = datetime.today()
+    start_date = datetime(today.year, today.month, 1)
+    start_date += relativedelta(months=-1)
+    start_date = start_date.date()
+    transactions = Transaction.objects.filter(
+        account=account,
+        date__gte=start_date
+    )
 
-        account_data = {
-            "id": account.id,
-            "account_number": account.account_number,
-            "balance": account.balance,
-            "bank_name": account.bank_name,
-        }
+    return JsonResponse({
+        "status": "success",
+        "account": FullBankAccountSerializer(account).data,
+        "transactions": TransactionWithoutAccountSerializer(transactions, many=True).data
+    })
 
-        return JsonResponse({"account_data" : account_data, "transactions": transactions_data})
-
-    except ValueError as e:
-        return JsonResponse({"error": "Wrong account number."}, status=404)
 
 @login_required
 def get_accounts(request):
-    try:
-        accounts = BankAccount.objects.filter(user__id=request.user.id)
-        accounts_data = [
-            {
-                "id": str(account.id),
-                "bank": account.bank_name,
-                "balance": float(account.balance),
-                "account_number": account.account_number
-            }
-            for account in accounts
-        ]
+    accounts = BankAccount.objects.filter(user=request.user)
+    return JsonResponse({
+        "status": "success",
+        "accounts": FullBankAccountSerializer(accounts, many=True).data
+    })
 
-        return JsonResponse({"accounts": accounts_data})
-    except ValueError:
-        return JsonResponse({"error": "An error occured"}, status=500)
 
+@login_required
 def get_outcomes(request, first_date, second_date):
-    try:
-        transactions = Transaction.objects.all()
-        outcome = 0
-        transactions_data = []
-        for transaction in transactions:
-            transaction_date = transaction.date.date()
-            if first_date <= transaction_date <= second_date and transaction.amount < 0:
-                outcome += transaction.amount
-                transactions_data.append(
-                    {
-                        "id": str(transaction.id),
-                        "account": transaction.account.id,
-                        "amount": float(transaction.amount),
-                        "date": transaction.date.isoformat(),
-                        "description": transaction.description,
-                        "category": transaction.category.id if transaction.category else None,
-                    }
-                )
-        return JsonResponse({"dates": {"start_date": first_date, "end_date": second_date}, "outcome": outcome, "transactions": transactions_data})
-    except ValueError:
-        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
+    transactions = Transaction.objects.filter(
+        user=request.user,
+        date__gte=first_date,
+        date__lte=second_date,
+        amount__lt=0
+    )
+    total = transactions.aggregate(total=Sum("amount"))["total"]
 
+    return JsonResponse({
+        "status": "success",
+        "dates": {
+            "start_date": first_date,
+            "end_date": second_date
+        },
+        "total_outcome": -total,
+        "transactions": TransactionSerializer(transactions, many=True).data
+    })
+
+
+@login_required
 def get_incomes(request, first_date, second_date):
-    try:
-        transactions = Transaction.objects.all()
-        incomes = 0
-        transactions_data = []
-        for transaction in transactions:
-            transaction_date = transaction.date.date()
-            if first_date <= transaction_date <= second_date and transaction.amount >= 0:
-                incomes += transaction.amount
-                transactions_data.append(
-                    {
-                        "id": str(transaction.id),
-                        "account": transaction.account.id,
-                        "amount": float(transaction.amount),
-                        "date": transaction.date.isoformat(),
-                        "description": transaction.description,
-                        "category": transaction.category.id if transaction.category else None,
-                    }
-                )
-        return JsonResponse({"dates": {"start_date": first_date, "end_date": second_date}, "income": incomes, "transactions": transactions_data})
-    except ValueError:
-        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS."}, status=400)
+    transactions = Transaction.objects.filter(
+        user=request.user,
+        date__gte=first_date,
+        date__lte=second_date,
+        amount__gt=0
+    )
+    total = transactions.aggregate(total=Sum("amount"))["total"]
+
+    return JsonResponse({
+        "status": "success",
+        "dates": {
+            "start_date": first_date,
+            "end_date": second_date
+        },
+        "total_income": total,
+        "transactions": TransactionSerializer(transactions, many=True).data
+    })
 
 
-def check_category(request,category:SpendingCategory):
-    transactions = Transaction.objects.filter(account__user=request.user,category=category)
-    calc = 0
-    for t in transactions:
-        if t.amount < 0:
-            calc += (-t.amount)
-    amount = category.user_budget
+def check_category(request, category: SpendingCategory):
+    transactions = Transaction.objects.filter(
+        account__user=request.user,
+        category=category,
+        amount__lt=0
+    )
+    total = transactions.aggregate(total=Sum("amount"))["total"]
+    budget = category.user_budget
     if category:
-        if calc > amount:
-            delta = calc - amount
-            message = "You have exceeded your budget by "+str(delta)+" for the category "+category.name
-            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=category.id,message=message)
-        elif calc == amount:
-            message = "You have used all your budget for the category "+category.name+" please, be carefull"
-            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=category.id,message=message)
-        elif (amount - calc) / amount < 0.1:
-            delta = str(amount-calc)
-            message = "Be carefull !, you have " +delta+" left in your budget for the category "+category.name
-            Notification.objects.create(user=request.user,type=NotificationType.BUDGET,related_object_id=category.id,message=message)
+        message = None
+        if total > budget:
+            delta = total - budget
+            message = f"You have exceeded your budget by CHF {delta} for the category {category.name}"
 
+        elif total == budget:
+            message = f"You have used all your budget for the category {category.name}, please be careful"
+
+        elif (budget - total) / budget < 0.1:
+            delta = budget - total
+            message = f"Be careful ! You have CHF {delta} left in your budget for the category {category.name}"
+
+        if message is not None:
+            Notification.objects.create(
+                user=request.user,
+                type=NotificationType.BUDGET,
+                related_object_id=category.id,
+                message=message
+            )
 
 
 @require_POST
 def add_transaction(request):
-    category = get_object_or_404(SpendingCategory, user=request.user, id=request.POST.get("category_id"))
+    category_id = request.POST.get("category_id")
+    category = get_object_or_404(SpendingCategory, user=request.user, id=category_id)
     amount = request.POST.get("amount")
     date = request.POST.get("date")
     description = request.POST.get("description")
     if not amount or not date or not description:
-        return JsonResponse({"status": "error", "error": "Amount, date and description are required"})
+        return JsonResponse({
+            "status": "error",
+            "error": "Amount, date and description are required"
+        }, status=HTTP_400_BAD_REQUEST)
 
     transaction = Transaction.objects.create(
-        user = request.user,
-        amount = amount,
-        date = date,
-        description = description,
-        category = category,
+        user=request.user,
+        amount=amount,
+        date=date,
+        description=description,
+        category=category
     )
     transaction.save()
     check_category(request, category)
-    return JsonResponse({"status": "success", "id": transaction.id})
+    return JsonResponse({
+        "status": "success",
+        "transaction": TransactionSerializer(transaction).data
+    })
+
 
 @require_POST
 @login_required
@@ -367,7 +309,7 @@ def add_bank_account(request):
 
         bank_auth.sync_account(request, account)
 
-        message = f"Successfully added new bank account into your app (id: {account.id})"
+        message = f"Successfully added new bank account into your app ({account.account_number})"
         Notification.objects.create(
             user=request.user,
             related_object_id=account.id,
@@ -375,14 +317,21 @@ def add_bank_account(request):
             message=message
         )
         return JsonResponse({
-            "id": account.id
+            "status": "success",
+            "account": FullBankAccountSerializer(account).data
         }, status=HTTP_201_CREATED)
-    return JsonResponse({"error": "An error occurred"}, status=HTTP_400_BAD_REQUEST)
+
+    return JsonResponse({
+        "status": "error",
+        "error": "An error occurred, could not generate secret"
+    }, status=HTTP_400_BAD_REQUEST)
+
 
 @require_POST
 @login_required
 def test_secret(request):
-    account = get_object_or_404(BankAccount, id=request.POST.get("account_id"))
+    account_id = request.POST.get("account_id")
+    account = get_object_or_404(BankAccount, id=account_id)
     data, error = bank_auth.generate_token(
         request,
         account.account_number,
@@ -393,59 +342,67 @@ def test_secret(request):
     # Artificial delay
     time.sleep(3)
     if data is not None:
-        return JsonResponse({"status": "Connection successful"}, status=HTTP_200_OK)
-    return JsonResponse({"error": error}, status=HTTP_400_BAD_REQUEST)
+        return JsonResponse({
+            "status": "success"
+        })
+    return JsonResponse({
+        "status": "error",
+        "error": error
+    }, status=HTTP_400_BAD_REQUEST)
 
-# categories functions
+
+@require_POST
 @login_required
 def add_category(request):
-    if request.method == "POST":
-        category_name = request.POST.get("name")
-        user_budget = request.POST.get("user_budget")
+    category_name = request.POST.get("name")
+    user_budget = request.POST.get("user_budget")
 
-        if not category_name or not user_budget:
-            return JsonResponse({"status": "error", "message": "Category name and budget are required"}, status=400)
-
-        try:
-            # check if the category already exists
-            if SpendingCategory.objects.filter(name=category_name, user=request.user).exists():
-                return JsonResponse({"status": "error", "message": "Category already exists"}, status=400)
-
-            category = SpendingCategory.objects.create(
-                name=category_name,
-                user=request.user,
-                user_budget=float(user_budget)
-            )
-
-            return JsonResponse({"status": "success"})
-
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=500)
-
-    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=400)
+    if not category_name or not user_budget:
+        return JsonResponse({
+            "status": "error",
+            "error": "Category name and budget are required"
+        }, status=HTTP_400_BAD_REQUEST)
 
 
+    # check if the category already exists
+    if SpendingCategory.objects.filter(name=category_name, user=request.user).exists():
+        return JsonResponse({
+            "status": "error",
+            "error": "Category already exists"
+        }, status=HTTP_400_BAD_REQUEST)
+
+    category = SpendingCategory.objects.create(
+        name=category_name,
+        user=request.user,
+        user_budget=user_budget
+    )
+
+    return JsonResponse({
+        "status": "success",
+        "category": FullSpendingCategorySerializer(category).data
+    })
+
+
+@require_POST
 @login_required
 def delete_category(request):
-    if request.method == "POST":
-        category_id = request.POST.get("category_id")
+    category_id = request.POST.get("category_id")
 
-        if not category_id:
-            return JsonResponse({"status": "error", "message": "Category ID is required"}, status=400)
+    if not category_id:
+        return JsonResponse({
+            "status": "error",
+            "error": "Category ID is required"
+        }, status=HTTP_400_BAD_REQUEST)
 
-        try:
-            category = SpendingCategory.objects.get(id=category_id, user=request.user, is_default=False)
-            category.delete()
-            return JsonResponse({"status": "success"})
+    category = get_object_or_404(SpendingCategory, id=category_id, user=request.user)
+    if category.is_default:
+        return JsonResponse({
+            "status": "error",
+            "error": "Cannot delete default category"
+        })
 
-        except SpendingCategory.DoesNotExist:
-            return JsonResponse(
-                {"status": "error", "message": "Category not found or unauthorized"}, status=403
-            )
-
-    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=400)
-
-
+    category.delete()
+    return JsonResponse({"status": "success"})
 
 @login_required
 def transactions_view(request):
@@ -460,22 +417,24 @@ def transactions_view(request):
 
 
 def update_category_budget(request):
-    try:
-        category_id = request.POST.get("category_id")
-        new_budget = float(request.POST.get("new_budget"))
+    category_id = request.POST.get("category_id")
+    new_budget = float(request.POST.get("new_budget"))
+    if not category_id or not new_budget:
+        return JsonResponse({
+            "status": "error",
+            "error": "category_id and new_budget are required"
+        }, status=HTTP_400_BAD_REQUEST)
 
-        category = SpendingCategory.objects.get(id=category_id, user=request.user)
-        category.user_budget = new_budget
-        category.save()
+    category = get_object_or_404(SpendingCategory, id=category_id, user=request.user)
+    category.user_budget = new_budget
+    category.save()
+    return JsonResponse({
+        "status": "success",
+        "category": FullSpendingCategorySerializer(category).data
+    })
 
-        return JsonResponse({"status": "success", "message": "Budget updated successfully."})
-    except SpendingCategory.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Category not found."}, status=404)
-    except ValueError:
-        return JsonResponse({"status": "error", "message": "Invalid budget value."}, status=400)
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+# TODO
 # change password
 def change_password(request):
     if request.method == "POST":
@@ -513,84 +472,47 @@ def change_password(request):
     return render(request, "change_password.html")
 
 
-# export data
+@require_POST
+@login_required
 def export_data(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            username = data.get('username')
-            password = data.get('password')
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data."}, status=400)
+    password = request.POST.get("password")
 
-        user = authenticate(request, username=username, password=password)
-
-        if request.user.username != username:
-            return JsonResponse({"error": "The provided username does not match the logged-in user."}, status=403)
-
-        if user is None:
-            return JsonResponse({"error": "Invalid username or password."}, status=400)
-
-        user_id = user.id
-        bank_accounts = BankAccount.objects.filter(user_id=user_id)
-
-        if not bank_accounts.exists():
-            return JsonResponse({"error": "No data found for the given user."}, status=404)
-
-        export_file = {
-            "user_id": user_id,
-            "bank_accounts": []
-        }
-
-        for bank_account in bank_accounts:
-            bank_account_data = {
-                "id": str(bank_account.id),
-                "account_number": bank_account.account_number,
-                "balance": float(bank_account.balance),
-                "bank_name": bank_account.bank_name,
-                "transactions": []
-            }
-            transactions = Transaction.objects.filter(account=bank_account)
-
-            for transaction in transactions:
-                category = SpendingCategory.objects.filter(id=transaction.category_id).first()
-                transaction_data = {
-                    "id": str(transaction.id),
-                    "amount": float(transaction.amount),
-                    "date": transaction.date.isoformat(),
-                    "description": transaction.description,
-                    "category": category.name if category else "Unknown",
-                }
-                bank_account_data["transactions"].append(transaction_data)
-
-            export_file["bank_accounts"].append(bank_account_data)
-
-        return JsonResponse(export_file, status=200)
-
-    return JsonResponse({"error": "Method not allowed."}, status=405)
-
-
-def get_notifications(request):
-    notifications = Notification.objects.filter(user=request.user,is_read=False)
-    return JsonResponse({
-        "message":"user not readed notifications",
-        "status":"success",
-        "notifications":NotificationSerializer(notifications,many=True).data
-    })
-
-def read_notification(request,id):
-    notification = Notification.objects.filter(user=request.user,id=id).first()
-    if notification:
-        notification.is_read = True
-        notification.save()
+    if not request.user.check_password(password):
         return JsonResponse({
-            "message":"notification"+id+" successfully read",
-            "status":"success"
-        })
+            "status": "error",
+            "error": "Invalid password"
+        }, status=HTTP_401_UNAUTHORIZED)
+
+    bank_accounts = BankAccount.objects.filter(user=request.user)
+    categories = SpendingCategory.objects.filter(user=request.user)
+    transactions = Transaction.objects.filter(user=request.user)
+
+    export_file = {
+        "user": UserSerializer(request.user).data,
+        "accounts": FullBankAccountSerializer(bank_accounts, many=True).data,
+        "categories": FullSpendingCategorySerializer(categories, many=True).data,
+        "transactions": BareTransactionSerializer(transactions, many=True).data
+    }
+
+    return JsonResponse(export_file)
+
+
+@login_required
+def get_notifications(request):
+    notifications = Notification.objects.filter(user=request.user, is_read=False)
     return JsonResponse({
-        "message":"notification does not exist",
-        "status":"error"
+        "status": "success",
+        "notifications": NotificationSerializer(notifications, many=True).data
     })
+
+@require_POST
+@login_required
+def read_notification(request, id):
+    notification = get_object_or_404(Notification, user=request.user, id=id)
+    notification.is_read = True
+    notification.save()
+    return JsonResponse({"status": "success"})
+
 
 @require_POST
 @login_required
@@ -611,10 +533,11 @@ def sync_user(request, from_date: Optional[datetime] = None):
     data = {}
     for account in accounts:
         print(f"Syncing account {account.id}")
-        synched = bank_auth.sync_account(request, account, from_date)
-        data[str(account.id)] = synched
+        synced = bank_auth.sync_account(request, account, from_date)
+        data[str(account.id)] = synced
 
     return JsonResponse({"status": "success", "data": data})
+
 
 @require_POST
 @csrf_exempt

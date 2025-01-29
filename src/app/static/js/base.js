@@ -174,7 +174,7 @@ function clearAllNotifications() {
     const container = document.getElementById('notification-container');
     for(let child of container.childNodes){
         if(child.id !== undefined){
-            apiGet("read_notification/"+child.id)
+            apiPost(`notifications/${child.id}/read/`)
         }
     }
     container.innerHTML = '<div class="empty-state">No notifications yet</div>';
@@ -241,13 +241,13 @@ function closeNotification(notification) {
             container.innerHTML = '<div class="empty-state">No notifications yet</div>';
         }
 
-    apiGet("read_notification/"+notification.id)
+        apiPost(`notifications/${notification.id}/read/`)
     });
 }
 
 function fetchNotifications(){
     let timer = setInterval(function(){
-        apiGet("get_notifications",false).then(data => {
+        apiGet("notifications/",false).then(data => {
             for (let notification of data.notifications) {
                 showNotification(notification)
             }
