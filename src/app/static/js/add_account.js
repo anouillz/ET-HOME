@@ -2,13 +2,11 @@ let confirmBtn
 let step1, step2, step3
 
 async function confirm() {
-    let userId = document.getElementById("bankUserId").value
     let bankName = document.getElementById("bankName").value
     let accountNum = document.getElementById("bankAccountNumber").value
     let password = document.getElementById("bankUserPassword").value
     confirmBtn.disabled = true
     let data = new FormData()
-    data.set("user_id", userId)
     data.set("bank_name", bankName)
     data.set("account_number", accountNum)
     data.set("password", password)
@@ -22,12 +20,11 @@ async function confirm() {
         }
         return res.id
     }).catch(err => {
-        console.error(err)
         confirmBtn.disabled = false
         step1.classList.remove("finished")
         step2.classList.remove("active")
     })
-    if (accountId === null) {
+    if (!accountId) {
         return
     }
 
@@ -42,7 +39,6 @@ async function confirm() {
         step3.classList.add("finished")
         setTimeout(() => window.location.href = "/", 1000)
     }).catch(err => {
-        console.error(err)
         confirmBtn.disabled = false
         step2.classList.remove("finished")
         step3.classList.remove("active")

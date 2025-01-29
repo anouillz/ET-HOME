@@ -341,7 +341,6 @@ def add_transaction(request):
 def add_bank_account(request):
     res = bank_auth.generate_secret(
         request,
-        request.POST.get("user_id"),
         request.POST.get("account_number"),
         request.POST.get("password")
     )
@@ -357,6 +356,8 @@ def add_bank_account(request):
             secret=res.get("secret"),
             secret_id=res.get("id")
         )
+
+        bank_auth.sync_account(request, account)
 
         message = f"Successfully added new bank account into your app (id: {account.id})"
         Notification.objects.create(

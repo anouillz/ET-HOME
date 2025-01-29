@@ -10,12 +10,11 @@ from django.utils.timezone import now
 from ET_HOME.models import BankAccount, AppToken, Transaction, SpendingCategory
 
 
-def generate_secret(request, user_id, account_number, password):
+def generate_secret(request, account_number, password):
     csrf_token = get_token(request)
     response = requests.post(
         request.build_absolute_uri(reverse("bank:gen_secret")),
         {
-            "user_id": user_id,
             "account_number": account_number,
             "password": password
         },

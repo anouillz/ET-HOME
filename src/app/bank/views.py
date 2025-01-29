@@ -122,25 +122,19 @@ def generate_secret(request):
 
     # ------- Verify user password
     # Extract data from the request
-    user_id = request.POST.get("user_id")
     given_password = request.POST.get("password")
     account_number = request.POST.get("account_number")
 
-    if not user_id or not given_password or not account_number:
-        return JsonResponse({"status": "error", "message": "User ID, password, and account number are required"}, status=400)
+    if not given_password or not account_number:
+        return JsonResponse({"status": "error", "message": "Account number and password are required"}, status=400)
 
     # Get the client instance
-    user = get_object_or_404(Client, id=user_id)
+    bank_account = get_object_or_404(BankAccount, account_number=account_number)
+    user = bank_account.user
 
     # Validate the password using check_password
     if not user.check_password(given_password):
         return JsonResponse({"status": "error", "message": "Invalid password"}, status=401)
-
-    # Fetch the bank account associated with the user
-    try:
-        bank_account = BankAccount.objects.get(user=user, account_number=account_number)
-    except BankAccount.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Bank account not found"}, status=404)
 
     # -------- Generate a secure secret
     secret_code = secrets.token_hex(64)
