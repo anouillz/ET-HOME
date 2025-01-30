@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Transactions{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/transactions.css' %}">
+    <script src="{% static 'js/transactions.js' %}"></script>
+{% endblock %}
+{% block header %}
+    <h1>Transactions</h1>
+{% endblock %}
+{% block main %}
+    {% csrf_token %}
+    <div class="transaction">
+        <div class="header-transaction">
+            <button class="add-expense"> + Add Expense</button>
+            <ul>
+                <li class="base">Order by Date</li>
+                <li class="other">Order by Category</li>
+            </ul>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                    <tr data-id="{{ transaction.id }}">
+                        <td>{{ transaction.account.account_number }}</td>
+                        <td>{{ transaction.category.name }}</td>
+                        <td>{{ transaction.amount }}</td>
+                        <td>{{ transaction.date }}</td>
+                        <td>{{ transaction.description }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

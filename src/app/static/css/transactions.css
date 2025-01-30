@@ -1,0 +1,43 @@
+.transaction {
+    margin-top: 20px;
+    background-color: white;
+    border-radius: 20px;
+}
+
+.transaction-header {
+    display: flex;
+}
+
+
+.other {
+    display: none;
+}
+
+
+.header-transaction {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 20px;
+}
+
+.header-transaction button {
+    text-align: center;
+    color: white;
+    background-color: black;
+    border-radius: 20px;
+    padding: 10px;
+}
+
+.header-transaction ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 10px;
+}
+
+.header-transaction li {
+    cursor: pointer;
+}

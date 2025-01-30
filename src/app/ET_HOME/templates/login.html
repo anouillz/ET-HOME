@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <title>Login</title>
 </head>
@@ -17,11 +18,16 @@
         {% endif %}
         <form method="post">
             {% csrf_token %}
-            <input type="text" name="username" placeholder="Username" id="username" required="required"/><br />
-            <input type="password" name="password" placeholder="Password" id="password" required="required" /><br />
-            <button type="submit">Login</button>
+            <h3>Username</h3>
+            <input type="text" name="username"  id="username" required="required"/><br />
+            <h3>Password</h3>
+            <input type="password" name="password"  id="password" required="required" /><br/>
+            <button class="login-button" type="submit">Login</button>
         </form>
-        Don't have an account? <a href="{% url 'register' %}">Register here</a>
+        <div class="register">
+            Don't have an account?
+            <button class="register-button" href="{% url 'register' %}">Register here</button>
+        </div>
     </div>
 </body>
 </html>

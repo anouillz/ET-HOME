@@ -1,12 +1,14 @@
 body {
     background-color: white;
+
 }
 
-div {
-    background-color: #f1f1f1;
+.login {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--dark-4);
     position: absolute;
-    width: 300px;
-    height: 500px;
+    width: 30%;
+    height: 60%;
     border-radius: 25px;
     top: 50%;
     left : 50%;
@@ -19,31 +21,43 @@ div img {
     margin-right: auto;
 }
 
-h1 {
+h2 {
     text-align: center;
     font-size: 30px;
-    margin-top: 20px;
+    margin-top: 50px;
     margin-bottom: 20px;
+}
+
+h3 {
+    color: white;
 }
 
 input {
     display: block;
-    background-color: 67ADB0;
-    border-color: #4C4C4C;
-    border-width: 3px;
+    background-color: white;
+    border: none;
     width: 90%;
+    height: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-button {
-    display: block;
-    float : right;
-    border-right: 10%;
+.login-button {
+    width: 90%;
+    height: 30px;
+
 }
 
 div * {
     margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
+}
+
+div .register {
+    display: block;
+    background-color: white;
+    width: 90%;
 }
 
 form {

@@ -34,6 +34,8 @@ urlpatterns = [
     path("settings/", views.settings_view, name="settings"),
     path("logout/", views.logout_view, name="logout"),
     path("categories/", views.categories_view, name="categories"),
+    path("transactions/", views.transactions_view, name="transactions"),
+
 
 
     #Application API
