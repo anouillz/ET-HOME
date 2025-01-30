@@ -444,6 +444,17 @@ def delete_category(request):
 
 
 
+@login_required
+def transactions_view(request):
+    context = {
+        "transactions": Transaction.objects.filter(account__user=request.user)
+    }
+    return render(request, "transactions.html", context)
+
+
+
+
+
 
 def update_category_budget(request):
     try:
