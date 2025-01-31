@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -69,22 +70,64 @@ def create_default_categories(user):
 
 
 @login_required
-def get_categories(request):
-    categories = SpendingCategory.objects.filter(user=request.user)
-    return JsonResponse({
-        "status": "success",
-        "categories": FullSpendingCategorySerializer(categories, many=True).data
-    })
+def categories(request):
+    if request.method == "GET":
+        categories = SpendingCategory.objects.filter(user=request.user)
+        return JsonResponse({
+            "status": "success",
+            "categories": FullSpendingCategorySerializer(categories, many=True).data
+        })
+    elif request.method == "POST":
+        name = request.POST.get("name")
+        budget = request.POST.get("user_budget")
+
+        try:
+            category = SpendingCategory.objects.create(
+                name=name,
+                user_budget=budget,
+                user=request.user
+            )
+        except IntegrityError:
+            return JsonResponse({
+                "status": "error",
+                "error": "Already exists"
+            })
+
+        return JsonResponse({
+            "status": "success",
+            "category": FullSpendingCategorySerializer(category).data
+        })
 
 
-def get_category(request, id):
-    category = get_object_or_404(SpendingCategory, id=id)
-    transactions = Transaction.objects.filter(category=category)
-    return JsonResponse({
-        "status": "success",
-        "category": FullSpendingCategorySerializer(category).data,
-        "transactions": TransactionWithoutCategorySerializer(transactions, many=True).data
-    })
+@login_required
+def category(request, id):
+    category = get_object_or_404(SpendingCategory, id=id, user=request.user)
+    if request.method == "GET":
+        transactions = Transaction.objects.filter(category=category)
+        return JsonResponse({
+            "status": "success",
+            "category": FullSpendingCategorySerializer(category).data,
+            "transactions": TransactionWithoutCategorySerializer(transactions, many=True).data
+        })
+    elif request.method == "POST":
+        if not category.is_default:
+            category.name = request.POST.get("name", category.name)
+        category.user_budget = request.POST.get("user_budget", category.user_budget)
+        category.save()
+        return JsonResponse({
+            "status": "success",
+            "category": FullSpendingCategorySerializer(category).data
+        })
+    elif request.method == "DELETE":
+        category.delete()
+        return JsonResponse({
+            "status": "success"
+        })
+    else:
+        return JsonResponse({
+            "status": "error",
+            "error": "Unsupported method"
+        }, status=HTTP_400_BAD_REQUEST)
 
 
 def login_view(request):

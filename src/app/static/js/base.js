@@ -161,6 +161,30 @@ function apiPost(endpoint, data, bank=false) {
     })
 }
 
+function apiDelete(endpoint, bank=false) {
+    let csrftoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
+    let headers = {
+        "Accept": "application/json",
+        "X-CSRFToken": csrftoken
+    }
+    return fetch((bank ? "/bank/api/" : "/api/") + endpoint, {
+        method: "DELETE",
+        headers: headers
+    }).then(res => {
+        if (res.ok) {
+            return res.json()
+        }
+        return res.json().catch(() => {
+            return {status: "error", error: `Error ${res.status}`}
+        })
+    }).catch(err => {
+        alert(err)
+        return {
+            error: err.toString()
+        }
+    })
+}
+
 function toggleNotificationMenu() {
     const panel = document.querySelector('.notification-panel');
     const badge = document.querySelector('.notification-badge');

@@ -15,16 +15,15 @@ async function confirm() {
     step2.classList.add("active")
 
     let accountId = await apiPost("add_bank_account/", data).then(res => {
-        if (res.error) {
-            throw new Error(res.error)
+        if (res.status === "success") {
+            return res.id
         }
-        return res.id
-    }).catch(err => {
         confirmBtn.disabled = false
         step1.classList.remove("finished")
         step2.classList.remove("active")
+        return null
     })
-    if (!accountId) {
+    if (accountId === null) {
         return
     }
 
@@ -32,16 +31,15 @@ async function confirm() {
     step3.classList.add("active")
     data = new FormData()
     data.set("account_id", accountId)
-    apiPost("test_secret", data).then(res => {
-        if (res.error !== undefined) {
-            throw new Error(res.error)
+    apiPost("test_secret/", data).then(res => {
+        if (res.status === "success") {
+            step3.classList.add("finished")
+            setTimeout(() => window.location.href = "/", 1000)
+        } else {
+            confirmBtn.disabled = false
+            step2.classList.remove("finished")
+            step3.classList.remove("active")
         }
-        step3.classList.add("finished")
-        setTimeout(() => window.location.href = "/", 1000)
-    }).catch(err => {
-        confirmBtn.disabled = false
-        step2.classList.remove("finished")
-        step3.classList.remove("active")
     })
 }
 
