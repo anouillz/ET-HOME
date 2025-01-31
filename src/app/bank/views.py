@@ -15,7 +15,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from .middlewares import token_protected
 from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, Token
-from .serializers import TransactionSerializer, BankAccountSerializer
+from .serializers import TransactionSerializer
 
 
 @require_GET
@@ -441,12 +441,12 @@ def add_client(request):
 
 
 def trigger_sync(request, account: BankAccount, from_date: Optional[datetime] = None):
-    view_name = "sync_account"
+    view_name = "api:sync_account"
     kwargs = {
         "account_number": account.account_number
     }
     if from_date is not None:
-        view_name = "sync_account_from"
+        view_name = "api:sync_account_from"
         kwargs["from_date"] = from_date
 
     url = reverse(view_name, kwargs=kwargs)
