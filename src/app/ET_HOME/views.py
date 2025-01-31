@@ -6,11 +6,13 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import AccessMixin
 from django.db import IntegrityError
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
@@ -21,6 +23,15 @@ from .serializers import NotificationSerializer, TransactionSerializer, FullSpen
     TransactionWithoutCategorySerializer, FullBankAccountSerializer, \
     TransactionWithoutAccountSerializer, UserSerializer, BareTransactionSerializer
 
+
+class LoginRequiredJSONMixin(AccessMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                "status": "error",
+                "error": "Unauthorized"
+            }, status=HTTP_401_UNAUTHORIZED)
+        return super().dispatch(request, *args, **kwargs)
 
 def api_access(request):
     return render(request, 'api.html')
@@ -70,7 +81,7 @@ def create_default_categories(user):
 
 
 @login_required
-def categories(request):
+def categories_api(request):
     if request.method == "GET":
         categories = SpendingCategory.objects.filter(user=request.user)
         return JsonResponse({
@@ -99,17 +110,18 @@ def categories(request):
         })
 
 
-@login_required
-def category(request, id):
-    category = get_object_or_404(SpendingCategory, id=id, user=request.user)
-    if request.method == "GET":
+class CategoryAPI(LoginRequiredJSONMixin, View):
+    def get(self, request, id):
+        category = get_object_or_404(SpendingCategory, id=id, user=request.user)
         transactions = Transaction.objects.filter(category=category)
         return JsonResponse({
             "status": "success",
             "category": FullSpendingCategorySerializer(category).data,
             "transactions": TransactionWithoutCategorySerializer(transactions, many=True).data
         })
-    elif request.method == "POST":
+    
+    def post(self, request, id):
+        category = get_object_or_404(SpendingCategory, id=id, user=request.user)
         if not category.is_default:
             category.name = request.POST.get("name", category.name)
         category.user_budget = request.POST.get("user_budget", category.user_budget)
@@ -118,17 +130,13 @@ def category(request, id):
             "status": "success",
             "category": FullSpendingCategorySerializer(category).data
         })
-    elif request.method == "DELETE":
+    
+    def delete(self, request, id):
+        category = get_object_or_404(SpendingCategory, id=id, user=request.user)
         category.delete()
         return JsonResponse({
             "status": "success"
         })
-    else:
-        return JsonResponse({
-            "status": "error",
-            "error": "Unsupported method"
-        }, status=HTTP_400_BAD_REQUEST)
-
 
 def login_view(request):
     if request.method == "POST":
@@ -221,12 +229,50 @@ def get_account(request, id):
 
 
 @login_required
-def get_accounts(request):
-    accounts = BankAccount.objects.filter(user=request.user)
-    return JsonResponse({
-        "status": "success",
-        "accounts": FullBankAccountSerializer(accounts, many=True).data
-    })
+def accounts_api(request):
+    if request.method == "GET":
+        accounts = BankAccount.objects.filter(user=request.user)
+        return JsonResponse({
+            "status": "success",
+            "accounts": FullBankAccountSerializer(accounts, many=True).data
+        })
+    elif request.method == "POST":
+        res = bank_auth.generate_secret(
+            request,
+            request.POST.get("account_number"),
+            request.POST.get("password")
+        )
+
+        # Artificial delay
+        time.sleep(3)
+        if res is not None:
+            account = BankAccount.objects.create(
+                account_number=request.POST.get("account_number"),
+                balance=0,
+                bank_name=request.POST.get("bank_name"),
+                user=request.user,
+                secret=res.get("secret"),
+                secret_id=res.get("id")
+            )
+
+            bank_auth.sync_account(request, account)
+
+            message = f"Successfully added new bank account into your app ({account.account_number})"
+            Notification.objects.create(
+                user=request.user,
+                related_object_id=account.id,
+                type=NotificationType.ACCOUNT,
+                message=message
+            )
+            return JsonResponse({
+                "status": "success",
+                "account": FullBankAccountSerializer(account).data
+            }, status=HTTP_201_CREATED)
+
+        return JsonResponse({
+            "status": "error",
+            "error": "An error occurred, could not generate secret"
+        }, status=HTTP_400_BAD_REQUEST)
 
 
 @login_required
@@ -327,47 +373,6 @@ def add_transaction(request):
         "status": "success",
         "transaction": TransactionSerializer(transaction).data
     })
-
-
-@require_POST
-@login_required
-def add_bank_account(request):
-    res = bank_auth.generate_secret(
-        request,
-        request.POST.get("account_number"),
-        request.POST.get("password")
-    )
-
-    # Artificial delay
-    time.sleep(3)
-    if res is not None:
-        account = BankAccount.objects.create(
-            account_number=request.POST.get("account_number"),
-            balance=0,
-            bank_name=request.POST.get("bank_name"),
-            user=request.user,
-            secret=res.get("secret"),
-            secret_id=res.get("id")
-        )
-
-        bank_auth.sync_account(request, account)
-
-        message = f"Successfully added new bank account into your app ({account.account_number})"
-        Notification.objects.create(
-            user=request.user,
-            related_object_id=account.id,
-            type=NotificationType.ACCOUNT,
-            message=message
-        )
-        return JsonResponse({
-            "status": "success",
-            "account": FullBankAccountSerializer(account).data
-        }, status=HTTP_201_CREATED)
-
-    return JsonResponse({
-        "status": "error",
-        "error": "An error occurred, could not generate secret"
-    }, status=HTTP_400_BAD_REQUEST)
 
 
 @require_POST

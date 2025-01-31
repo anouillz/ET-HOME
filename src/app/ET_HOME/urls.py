@@ -27,8 +27,6 @@ urlpatterns = [
     path("register/", views.register_view,name="register"),
     path("", views.dashboard_view,name="dashboard"),
     path("bank/", include("bank.urls", namespace="bank")),
-
-    #Dashboard
     path("addAccount/", views.add_account_view, name="add_bank"),
     path("account/", views.account_view, name="account"),
     path("settings/", views.settings_view, name="settings"),
@@ -46,10 +44,9 @@ urlpatterns = [
     path("api/transactions/", views.add_transaction, name="add_transactions"),
     path("api/outcomes/<date:first_date>/<date:second_date>/", views.get_outcomes, name="get_outcomes"),
     path("api/incomes/<date:first_date>/<date:second_date>/", views.get_incomes, name="get_incomes"),
-    path("api/categories/<uuid:id>/", views.category, name="category"),
-    path("api/categories/", views.categories, name="categories"),
-    path("api/accounts/", views.get_accounts, name="get_accounts"),
-    path("api/add_bank_account/", views.add_bank_account, name="add_bank_account"),
+    path("api/categories/<uuid:id>/", views.CategoryAPI.as_view(), name="category"),
+    path("api/categories/", views.categories_api, name="categories"),
+    path("api/accounts/", views.accounts_api, name="accounts"),
     path("api/test_secret", views.test_secret, name="test_secret"),
     path("api/export/", views.export_data, name="export_data"),
     path("api/notifications/",views.get_notifications, name="get_notifications"),
@@ -57,11 +54,5 @@ urlpatterns = [
     path("api/accounts/<str:account_number>/sync/<date:from_date>", views.sync_account, name="sync_account_from"),
     path("api/accounts/<str:account_number>/sync/", views.sync_account, name="sync_account"),
     path("api/sync/<date:from_date>/", views.sync_user, name="sync_user_from"),
-    path("api/sync/", views.sync_user, name="sync_user"),
-
-    #Categories page
-    path("categories/add/", views.add_category, name="add_category"),
-    path("categories/delete/", views.delete_category, name="delete_category"),
-    path("categories/update_budget/", views.update_category_budget, name="update_category_budget")
-
+    path("api/sync/", views.sync_user, name="sync_user")
 ]
