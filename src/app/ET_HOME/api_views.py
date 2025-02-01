@@ -385,7 +385,7 @@ def export_data(request):
         "transactions": BareTransactionSerializer(transactions, many=True).data
     }
 
-    return JsonResponse(export_file)
+    return JsonResponse({"status": "success", "data": export_file})
 
 
 @login_required
