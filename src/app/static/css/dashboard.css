@@ -28,7 +28,6 @@
     display: flex;
     flex-direction: column;
     gap: 1em;
-    cursor: pointer;
     transition: box-shadow 0.2s;
     min-width: 10em;
 }
@@ -51,6 +50,8 @@
 .widget .title .text {
     font-size: 120%;
     font-weight: bold;
+    display: flex;
+    flex-grow: 1;
 }
 
 .widget .title .icon {
@@ -83,8 +84,10 @@
     font-weight: bold;
 }
 
-#add-expense {
-    align-self: flex-start;
+.small-widgets {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
 }
 
 .widget.last-month .diff {
@@ -105,6 +108,10 @@
 
 .widget.last-month .diff .value {
     font-size: 80%;
+}
+
+.widget.add-transaction, .widget.add-account {
+    cursor: pointer;
 }
 
 .widget.top-categories .content {
@@ -145,6 +152,30 @@
 .widget.accounts {
     grid-row: 1 / 3;
     grid-column: 2;
+}
+
+.widget .title .goto-btn {
+    margin-left: auto;
+    width: 1.2em;
+    height: 1.2em;
+    border-radius: 4px;
+    position: relative;
+
+    &:hover {
+        background-color: var(--light-3);
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        width: 0.4em;
+        height: 0.4em;
+        border: var(--dark-3) 0.2em;
+        border-style: solid solid none none;
+        left: 50%;
+        top: 50%;
+        transform: translate(calc(-0.1em - 50%), -50%) rotate(45deg);
+    }
 }
 
 .widget.accounts .list {

@@ -33,8 +33,14 @@ body {
     flex-direction: column;
 }
 
+.sidebar .app-title {
+    color: var(--light-1);
+    text-decoration: none;
+}
+
 .sidebar h2 {
-    padding: 0 20px;
+    margin: 0;
+    padding: 1em;
     display: flex;
     align-items: center;
     gap: 0.4em;
@@ -46,7 +52,7 @@ body {
     margin-top: -4px;
 }
 
-.sidebar a {
+.sidebar .link {
     color: var(--light-3);
     text-decoration: none;
     display: block;
@@ -55,11 +61,11 @@ body {
     border-bottom-left-radius: 4px;
 }
 
-.sidebar a:hover {
+.sidebar .link:hover {
     color: var(--light-1);
 }
 
-.sidebar a.active {
+.sidebar .link.active {
     border-left: solid var(--light-1) 4px;
     padding-left: 16px;
 }
