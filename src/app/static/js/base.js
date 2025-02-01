@@ -28,6 +28,15 @@ function formatDate(date, format) {
             case "d":
                 result += date.getDate().toString().padStart(2, "0")
                 break
+            case "H":
+                result += date.getHours().toString().padStart(2, "0")
+                break
+            case "M":
+                result += date.getMinutes().toString().padStart(2, "0")
+                break
+            case "S":
+                result += date.getSeconds().toString().padStart(2, "0")
+                break
             default:
                 result += char
                 break

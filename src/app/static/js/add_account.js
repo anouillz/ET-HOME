@@ -16,7 +16,7 @@ async function confirm() {
 
     let accountId = await apiPost("accounts/", data).then(res => {
         if (res.status === "success") {
-            return res.id
+            return res.account.id
         }
         confirmBtn.disabled = false
         step1.classList.remove("finished")
