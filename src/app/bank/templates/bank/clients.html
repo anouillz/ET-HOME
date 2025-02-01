@@ -1,0 +1,31 @@
+{% extends 'bank/base.html' %}
+{% load static %}
+{% block title %}Clients{% endblock %}
+{% block head %}
+    <script src="{% static "js/bank/clients.js" %}"></script>
+{% endblock %}
+{% block page-name %}Clients{% endblock %}
+{% block main %}
+    {% csrf_token %}
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+                <tr data-id="{{ client.id }}">
+                    <td>{{ client.username }}</td>
+                    <td>{{ client.first_name }}</td>
+                    <td>{{ client.last_name }}</td>
+                    <td>{{ client.email }}</td>
+                    <td><button class="delete-btn">Delete</button></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
