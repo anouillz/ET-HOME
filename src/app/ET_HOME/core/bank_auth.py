@@ -165,7 +165,7 @@ def sync_account(request, account, from_date: Optional[datetime] = None):
         account.save()
 
         if sync_transactions(request, account, from_date):
-            message ="successfully synchronised account"+account.id+" with bank"
+            message = f"Successfully synchronised account {account.id} with bank"
             Notification.objects.create(user=request.user,type=NotificationType.ACCOUNT,related_object_id=account.id,message=message)
             return True
     return False
