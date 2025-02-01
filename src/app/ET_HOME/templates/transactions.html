@@ -39,6 +39,12 @@
                         <td>{{ transaction.amount }}</td>
                         <td>{{ transaction.date }}</td>
                         <td>{{ transaction.description }}</td>
+                        <td><button class="edit-btn">Edit</button></td>
+                        <td>
+                            {% if not transaction.account %}
+                                <button class="delete-btn">Delete</button>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

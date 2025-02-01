@@ -1,10 +1,14 @@
 function editTransaction(id) {
-    window.location.href += `/${id}`
+    window.location.href = `/transactions/${id}/`
 }
 
 function deleteTransaction(id) {
-    apiPost(`transactions/${id}/delete`, {}, true).then(res => {
-        window.location.reload()
+    apiDelete(`transactions/${id}/`).then(res => {
+        if (res.status === "success") {
+            window.location.reload()
+        } else {
+            alert(res.error)
+        }
     })
 }
 
@@ -14,7 +18,9 @@ window.addEventListener("load", () => {
         let editBtn = row.querySelector(".edit-btn")
         let deleteBtn = row.querySelector(".delete-btn")
         editBtn.addEventListener("click", () => editTransaction(id))
-        deleteBtn.addEventListener("click", () => deleteTransaction(id))
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", () => deleteTransaction(id))
+        }
     })
 })
 
