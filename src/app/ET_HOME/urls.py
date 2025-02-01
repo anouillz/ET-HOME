@@ -1,6 +1,8 @@
 from django.contrib import admin
-from django.urls import path, include, register_converter
-from . import views
+from django.urls import path, include, register_converter, re_path
+from django.views.static import serve
+
+from . import views, settings
 from .converters import DateConverter
 
 register_converter(DateConverter, "date")
@@ -21,3 +23,6 @@ urlpatterns = [
     path("transactions/", views.transactions_view, name="transactions"),
     path("addTransaction/", views.add_transaction_view, name="add_transaction"),
 ]
+
+if not settings.DEBUG:
+    urlpatterns.append(re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings._STATIC_ROOT}))

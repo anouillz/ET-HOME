@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page Not Found</title>
+    <link rel="shortcut icon" href="{% static "images/logo.svg" %}" type="image/svg+xml">
 
     <style>
         /* CSS to center the content */
@@ -44,7 +46,11 @@
         <h1>Oops! Page Not Found</h1>
         <p>We're sorry, but the page you're looking for could not be found.</p>
         <p>
-            You can go back to your <a href="{% url 'dashboard' %}">Dashboard</a> or try searching for what you're looking for.
+            {% if user.is_authenticated %}
+                You can go back to your <a href="{% url 'dashboard' %}">dashboard</a>.
+            {% else %}
+                You can go back to the <a href="{% url 'login' %}">login page</a>.
+            {% endif %}
         </p>
     </div>
 </body>
