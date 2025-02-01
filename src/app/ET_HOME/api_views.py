@@ -392,16 +392,17 @@ def update_categories(request):
             is_active = category_data.get("is_active")
             user_budget = category_data.get("budget")
             category = get_object_or_404(SpendingCategory,id=category_id)
-            category.is_active = is_active
+            category.trigger_notification = is_active
             category.user_budget = user_budget
             category.save()
         
-        Notification.objects.create(
-                user=request.user,
-                related_object_id=None,
-                type=NotificationType.BUDGET,
-                message="Successfully updated data for "+ str(len(categories))+ " categories"
-        )
+        if len(categories) >= 2 :
+            Notification.objects.create(
+                    user=request.user,
+                    related_object_id=None,
+                    type=NotificationType.BUDGET,
+                    message="Successfully updated data for "+ str(len(categories))+ " categories"
+            )
         
         return JsonResponse({"status": "success"}, status=200)
 

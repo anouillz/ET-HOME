@@ -146,8 +146,8 @@ async function update_categories(){
 
             if (response.status == "success"){
                 setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+                    window.location.reload(true);
+                }, 500);
             }
             //refresh page
         }else{
