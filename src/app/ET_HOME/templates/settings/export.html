@@ -2,9 +2,10 @@
 <div class="export">
     <p>Export all your financial data into a JSON file. Confirm your password below and press the button</p>
     <form id="export-form">
+        <input style="display:none;" type="text" name="username" autocomplete="username" value="{{ user.username }}">
         <div class="field">
             <label for="password">Password</label>
-            <input type="password" name="password" id="password">
+            <input type="password" name="password" id="password" autocomplete="current-password" required>
         </div>
         <button type="submit">Export</button>
     </form>

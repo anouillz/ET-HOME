@@ -304,45 +304,6 @@ def test_secret(request):
 
 @require_POST
 @login_required
-def change_password_view(request):
-    current_password = request.POST.get("current_password")
-
-    new_password = request.POST.get("new_password")
-    confirm_password = request.POST.get("confirm_password")
-
-    if not current_password or not new_password or not confirm_password:
-        return JsonResponse({
-            "status": "error",
-            "error": "All fields are required"
-        }, status=HTTP_400_BAD_REQUEST)
-
-    # Check if the new password and confirmation match
-    if new_password != confirm_password:
-        return JsonResponse({
-            "status": "error",
-            "error": "New password and confirmation do not match"
-        }, status=HTTP_400_BAD_REQUEST)
-
-    # Check if the current password is correct
-    if not request.user.check_password(password=current_password):
-        return JsonResponse({
-            "status": "error",
-            "error": "Current password is incorrect"
-        }, status=HTTP_400_BAD_REQUEST)
-
-    # Update the password
-    request.user.set_password(new_password)
-    request.user.save()
-
-    # Re-authenticate and log the user in after password change
-    login(request, request.user)
-    return JsonResponse({
-        "status": "success"
-    })
-
-
-@require_POST
-@login_required
 def export_data(request):
     password = request.POST.get("password")
 
@@ -478,3 +439,65 @@ class TransactionAPI(LoginRequiredJSONMixin, View):
 
         transaction.delete()
         return JsonResponse({"status": "success"})
+
+
+@require_POST
+@login_required
+def modify_user(request):
+    user = request.user
+    user.username = request.POST.get("username", user.username)
+    user.first_name = request.POST.get("first_name", user.first_name)
+    user.last_name = request.POST.get("last_name", user.last_name)
+    user.email = request.POST.get("email", user.email)
+    user.save()
+    user.refresh_from_db()
+
+    return JsonResponse({
+        "status": "success",
+        "user": UserSerializer(user).data
+    })
+
+
+@require_POST
+@login_required
+def change_password(request):
+    current_password = request.POST.get("current_password")
+
+    new_password = request.POST.get("new_password")
+    confirm_password = request.POST.get("confirm_password")
+
+    if not current_password or not new_password or not confirm_password:
+        return JsonResponse({
+            "status": "error",
+            "error": "All fields are required"
+        }, status=HTTP_400_BAD_REQUEST)
+
+    # Check if the new password and confirmation match
+    if new_password != confirm_password:
+        return JsonResponse({
+            "status": "error",
+            "error": "New password and confirmation do not match"
+        }, status=HTTP_400_BAD_REQUEST)
+
+    # Check if the current password is correct
+    if not request.user.check_password(current_password):
+        return JsonResponse({
+            "status": "error",
+            "error": "Current password is incorrect"
+        }, status=HTTP_400_BAD_REQUEST)
+
+    # Update the password
+    request.user.set_password(new_password)
+    request.user.save()
+
+    Notification.objects.create(
+        user=request.user,
+        type=NotificationType.GENERAL,
+        message="Successfully changed password"
+    )
+
+    # Re-authenticate and log the user in after password change
+    login(request, request.user)
+    return JsonResponse({
+        "status": "success"
+    })

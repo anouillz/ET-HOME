@@ -7,6 +7,9 @@ app_name = "api"
 urlpatterns = [
     path("", api_views.api_access, name="doc"),
 
+    path("user/change_password/", api_views.change_password, name="change_password"),
+    path("user/", api_views.modify_user, name="modify_user"),
+
     # Accounts
     path("accounts/<uuid:id>/transactions/<date:first_date>/<date:second_date>/", api_views.get_account_transactions, name="get_account_transactions"),
     path("accounts/<uuid:id>/", api_views.AccountAPI.as_view(), name="account_api"),

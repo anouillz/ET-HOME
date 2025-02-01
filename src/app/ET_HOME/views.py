@@ -87,7 +87,8 @@ def dashboard_view(request):
 @login_required
 def settings_view(request):
     context = {
-        "accounts": BankAccount.objects.filter(user=request.user).order_by("added_at")
+        "accounts": BankAccount.objects.filter(user=request.user).order_by("added_at"),
+        "user": request.user
     }
     return render(request, "settings.html", context)
 
