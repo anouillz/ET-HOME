@@ -13,11 +13,13 @@ function deleteTransaction(id) {
 }
 
 window.addEventListener("load", () => {
-    document.querySelectorAll("tbody tr").forEach(row => {
+    document.querySelectorAll("tbody tr[data-id]").forEach(row => {
         let id = row.dataset.id
         let editBtn = row.querySelector(".edit-btn")
         let deleteBtn = row.querySelector(".delete-btn")
-        editBtn.addEventListener("click", () => editTransaction(id))
+        if (editBtn) {
+            editBtn.addEventListener("click", () => editTransaction(id))
+        }
         if (deleteBtn) {
             deleteBtn.addEventListener("click", () => deleteTransaction(id))
         }

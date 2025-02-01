@@ -1,7 +1,7 @@
 <h2 class="title">My User Account</h2>
 <div class="account">
     <section class="info">
-        <form id="user-form">
+        <form id="user-form" class="nice-form">
             <div class="field">
                 <label for="username">Username</label>
                 <input type="text" name="username" id="username" placeholder="johnny" autocomplete="username" required value="{{ user.username }}">
@@ -29,7 +29,7 @@
 <div class="popup" id="change-pwd-popup">
     <div class="popup-container">
         <h2 class="title">Change password</h2>
-        <form id="password-form">
+        <form id="password-form" class="nice-form">
             <input style="display:none;" type="text" name="username" autocomplete="username" value="{{ user.username }}">
             <div class="field">
                 <label for="current_password">Current password</label>

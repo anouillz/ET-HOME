@@ -376,3 +376,69 @@ header input{
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
     }
 }
+
+.nice-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4em;
+
+    }
+
+    label {
+        font-style: italic;
+    }
+
+    input, select, textarea {
+        font-family: inherit;
+        font-size: inherit;
+        padding: 0.4em 0.8em;
+        border: solid var(--dark-1) 1px;
+        border-radius: 0.4em;
+    }
+
+    select {
+        cursor: pointer;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    button {
+        font-family: inherit;
+        font-size: inherit;
+        background-color: var(--dark-2);
+        color: var(--light-1);
+        padding: 0.8em 3.6em;
+        border: none;
+        border-radius: 0.8em;
+        cursor: pointer;
+        align-self: center;
+
+        &.inverted {
+            background-color: var(--light-2);
+            color: var(--dark-1);
+            border: solid var(--light-4) 1px;
+        }
+    }
+
+    button:hover {
+        background-color: var(--dark-3);
+
+        &.inverted {
+            background-color: var(--light-3);
+        }
+    }
+
+    button:disabled {
+        background-color: var(--light-4);
+        color: var(--dark-4);
+        pointer-events: none;
+        cursor: default;
+    }
+}

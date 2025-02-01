@@ -230,7 +230,7 @@ def check_category(request, category: SpendingCategory):
     )
     total = transactions.aggregate(total=Sum("amount"))["total"]
     budget = category.user_budget
-    if category:
+    if budget != 0 and category.trigger_notification:
         message = None
         if total > budget:
             delta = total - budget
@@ -452,6 +452,7 @@ class TransactionAPI(LoginRequiredJSONMixin, View):
 
         if transaction.account is None:
             transaction.amount = request.POST.get("amount", transaction.amount)
+            transaction.date = request.POST.get("date", transaction.date)
 
         transaction.category_id = request.POST.get("category_id", transaction.category_id)
         transaction.description = request.POST.get("description", transaction.description)

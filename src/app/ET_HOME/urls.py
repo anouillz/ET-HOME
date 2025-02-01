@@ -19,5 +19,5 @@ urlpatterns = [
     path("categories/", views.categories_view, name="categories"),
     path("transactions/<uuid:id>/", views.transaction_view, name="transaction"),
     path("transactions/", views.transactions_view, name="transactions"),
-    path("addExpenses", views.add_expenses_view, name="add_expenses"),
+    path("addTransaction/", views.add_transaction_view, name="add_transaction"),
 ]

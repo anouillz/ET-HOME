@@ -10,8 +10,8 @@
 {% endblock %}
 {% block main %}
     <div class="container">
-        <a class="back" href="../">Back to list</a>
-        <form data-id="{{ transaction.id }}" id="form">
+        <a class="back" href="{% url "transactions" %}">Back to list</a>
+        <form data-id="{{ transaction.id }}" id="form" class="nice-form">
             {% csrf_token %}
             {% if transaction.account %}
                 <div class="field">
@@ -30,6 +30,10 @@
             <div class="field">
                 <label for="amount">Amount</label>
                 <input type="number" name="amount" id="amount" value="{{ transaction.amount }}" step="0.01" {% if transaction.account %}disabled{% endif %}>
+            </div>
+            <div class="field">
+                <label for="date">Date</label>
+                <input type="date" name="date" id="date" value="{{ transaction.date|date:"Y-m-d" }}" {% if transaction.account %}disabled{% endif %}>
             </div>
             <div class="field">
                 <label for="description">Description</label>

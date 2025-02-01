@@ -12,7 +12,7 @@
     {% csrf_token %}
     <div class="transaction">
         <div class="header-transaction">
-            <a class="add-expense" href="{% url 'add_expenses' %}"> + Add Expense</a>
+            <a class="add-transaction" href="{% url "add_transaction" %}">Add Transaction</a>
             <div class="dropdown">
                 <div class="dropdown-toggle">Order by Date</div>
                 <ul class="dropdown-menu">
@@ -32,7 +32,7 @@
                     <th>Description</th>
                 </tr>
                 <tr class="spacer-row">
-                    <td colspan="5"></td>
+                    <td colspan="7"></td>
                 </tr>
             </thead>
 
@@ -53,7 +53,7 @@
                     </tr>
                     {% if not forloop.last %}
                         <tr class="spacer-row">
-                            <td colspan="5"></td>
+                            <td colspan="7"></td>
                         </tr>
                     {% endif %}
                 {% endfor %}

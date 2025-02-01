@@ -114,11 +114,11 @@ def transactions_view(request):
 
 
 @login_required
-def add_expenses_view(request):
+def add_transaction_view(request):
     context = {
         "categories": SpendingCategory.objects.filter(user=request.user),
     }
-    return render(request, 'add_expenses.html', context)
+    return render(request, "add_transaction.html", context)
 
 
 @login_required

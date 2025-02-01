@@ -50,38 +50,6 @@
     display: none;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-
-    .field {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4em;
-
-    }
-
-    label {
-        font-style: italic;
-    }
-
-    input {
-        font-family: inherit;
-        font-size: inherit;
-    }
-
-    input {
-        padding: 0.4em 0.8em;
-        border: solid var(--dark-1) 1px;
-        border-radius: 0.4em;
-    }
-
-    button {
-        align-self: center;
-    }
-}
-
 .tab > .account, .tab > .export {
     button {
         font-family: inherit;
