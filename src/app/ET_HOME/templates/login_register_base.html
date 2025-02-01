@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login_register.css' %}">
+    <title>{% block page-title %}{% endblock %}</title>
+</head>
+<body>
+    <div class="container">
+        <h2 class="title">{% block title %}{% endblock %}</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+        <form method="POST" action="">
+            {% csrf_token %}
+            {% block fields %}{% endblock %}
+            <button type="submit">{% block action %}{% endblock %}</button>
+        </form>
+        <div class="alternative">
+            {% block alternative %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

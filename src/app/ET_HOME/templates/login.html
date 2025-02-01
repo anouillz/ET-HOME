@@ -1,33 +1,18 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <title>Login</title>
-</head>
-<body>
-    <div class="login">
-        <h2>Login</h2>
-        {% if messages %}
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-        <form method="post">
-            {% csrf_token %}
-            <h3>Username</h3>
-            <input type="text" name="username"  id="username" required="required"/><br />
-            <h3>Password</h3>
-            <input type="password" name="password"  id="password" required="required" /><br/>
-            <button class="login-button" type="submit">Login</button>
-        </form>
-        <div class="register">
-            Don't have an account?
-            <button class="register-button" href="{% url 'register' %}">Register here</button>
-        </div>
+{% extends "login_register_base.html" %}
+{% block page-title %}Login{% endblock %}
+{% block title %}Login{% endblock %}
+{% block fields %}
+    <div class="field">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" placeholder="johnny" required/>
     </div>
-</body>
-</html>
+    <div class="field">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required/>
+    </div>
+{% endblock %}
+{% block action %}Log in{% endblock %}
+{% block alternative %}
+    <span>Don't have an account?</span>
+    <a href="{% url 'register' %}">Register here</a>
+{% endblock %}
