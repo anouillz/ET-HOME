@@ -251,6 +251,10 @@ def add_transaction(request):
             description=description,
             category=category,
         )
+        transaction.refresh_from_db()
+        account.balance += transaction.amount
+        account.save()
+
         trigger_sync(request, account, transaction.date)
 
         return JsonResponse({

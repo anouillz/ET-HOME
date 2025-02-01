@@ -167,7 +167,7 @@ def sync_account(request, account: BankAccount, from_date: Optional[datetime] = 
 
         if account.balance < 0:
             Notification.objects.create(
-                user=request.user,
+                user=account.user,
                 type=NotificationType.ACCOUNT,
                 related_object_id=account.id,
                 message=f"Account {account.account_number} balance is below 0 !"
@@ -176,7 +176,7 @@ def sync_account(request, account: BankAccount, from_date: Optional[datetime] = 
         if sync_transactions(request, account, from_date):
             message = f"Successfully synchronised account {account.account_number} with bank ({account.bank_name})"
             Notification.objects.create(
-                user=request.user,
+                user=account.user,
                 type=NotificationType.ACCOUNT,
                 related_object_id=account.id,
                 message=message
