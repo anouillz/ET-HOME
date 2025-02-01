@@ -70,16 +70,40 @@ function deleteAccount(id) {
     })
 }
 
+function saveUserInfo() {
+    let data = new FormData(document.getElementById("user-form"))
+    apiPost("user/", data).then(res => {
+        if (res.status === "success") {
+            window.location.reload()
+        } else {
+            alert(res.error)
+        }
+    })
+}
+
+function changePassword() {
+    let data = new FormData(document.getElementById("password-form"))
+    apiPost("user/change_password/", data).then(res => {
+        if (res.status === "success") {
+            window.location.reload()
+        } else {
+            alert(res.error)
+        }
+    })
+}
+
 window.addEventListener("hashchange", () => updateTab())
 
 window.addEventListener("load", () => {
     updateTab()
 
+    // Export
     document.getElementById("export-form").addEventListener("submit", e => {
         e.preventDefault()
         exportData()
     })
 
+    // Accounts
     let deletePopup = document.getElementById("confirm-delete-popup")
     deletePopup.querySelector(".actions .cancel").addEventListener("click", () => closePopups())
     deletePopup.querySelector(".actions .delete").addEventListener("click", () => deleteAccount(deletePopup.dataset.account))
@@ -91,5 +115,25 @@ window.addEventListener("load", () => {
         deleteBtn.addEventListener("click", () => {
             showDeletePopup(id, number)
         })
+    })
+
+    // User account
+    let userForm = document.getElementById("user-form")
+    userForm.addEventListener("submit", e => {
+        e.preventDefault()
+        saveUserInfo()
+    })
+    userForm.addEventListener("input", () => {
+        userForm.querySelector("button").disabled = false
+    })
+
+    let passwordPopup = document.getElementById("change-pwd-popup")
+    document.getElementById("change-pwd-btn").addEventListener("click", () => {
+        passwordPopup.classList.add("show")
+    })
+    passwordPopup.querySelector(".actions .cancel").addEventListener("click", () => closePopups())
+    document.getElementById("password-form").addEventListener("submit", e => {
+        e.preventDefault()
+        changePassword()
     })
 })

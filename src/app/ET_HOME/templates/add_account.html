@@ -24,20 +24,20 @@
         </div>
         <div class="gap"></div>
     </div>
-    <div class="info">
+    <form id="info-form" class="nice-form info">
         {% csrf_token %}
         <div class="field">
-            <label for="bankName">Bank Name</label>
-            <input type="text" id="bankName">
+            <label for="bank_name">Bank Name</label>
+            <input type="text" name="bank_name" id="bank_name" required>
         </div>
         <div class="field">
-            <label for="bankAccountNumber">Account Number</label>
-            <input type="text" id="bankAccountNumber">
+            <label for="account_number">Account Number</label>
+            <input type="text" name="account_number" id="account_number" required>
         </div>
         <div class="field">
-            <label for="bankUserPassword">Password</label>
-            <input type="password" id="bankUserPassword">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" autocomplete="current-password" required>
         </div>
-        <button type="button" id="confirmBtn">Add account</button>
-    </div>
+        <button type="submit" id="confirmBtn">Add account</button>
+    </form>
 {% endblock %}

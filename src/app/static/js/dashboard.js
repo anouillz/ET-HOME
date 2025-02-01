@@ -468,6 +468,10 @@ function drawGraph(ctx, lineColor, strokeColor, fillColor, points, hidden=[]) {
 }
 
 window.addEventListener("load", () => {
+    document.getElementById("add-expense").addEventListener("click", () => {
+        window.location.href = "/addTransaction/"
+    })
+
     graphCanvas = document.querySelector("#expenses .chart")
     window.addEventListener("resize", resizeGraph)
     resizeGraph()

@@ -2,15 +2,8 @@ let confirmBtn
 let step1, step2, step3
 
 async function confirm() {
-    let bankName = document.getElementById("bankName").value
-    let accountNum = document.getElementById("bankAccountNumber").value
-    let password = document.getElementById("bankUserPassword").value
     confirmBtn.disabled = true
-    let data = new FormData()
-    data.set("bank_name", bankName)
-    data.set("account_number", accountNum)
-    data.set("password", password)
-
+    let data = new FormData(document.getElementById("info-form"))
     step1.classList.add("finished")
     step2.classList.add("active")
 
@@ -48,5 +41,8 @@ window.addEventListener("load", () => {
     step2 = document.querySelector(".step-2")
     step3 = document.querySelector(".step-3")
     confirmBtn = document.getElementById("confirmBtn")
-    confirmBtn.addEventListener("click", confirm)
+    document.getElementById("info-form").addEventListener("submit", e => {
+        e.preventDefault()
+        confirm()
+    })
 })

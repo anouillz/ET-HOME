@@ -50,47 +50,43 @@
     display: none;
 }
 
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-
-    .field {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4em;
-
-    }
-
-    label {
-        font-style: italic;
-    }
-
-    input, button {
+.tab > .account, .tab > .export {
+    button {
         font-family: inherit;
         font-size: inherit;
-    }
-
-    input {
-        padding: 0.4em 0.8em;
-        border: solid var(--dark-1) 1px;
-        border-radius: 0.4em;
-    }
-
-    button {
         background-color: var(--dark-2);
         color: var(--light-1);
         padding: 0.8em 3.6em;
         border: none;
         border-radius: 0.8em;
-        align-self: center;
         cursor: pointer;
+
+        &.inverted {
+            background-color: var(--light-2);
+            color: var(--dark-1);
+            border: solid var(--light-4) 1px;
+        }
     }
 
     button:hover {
         background-color: var(--dark-3);
+
+        &.inverted {
+            background-color: var(--light-3);
+        }
     }
+
+    button:disabled {
+        background-color: var(--light-4);
+        color: var(--dark-4);
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+section:not(:last-child) {
+    border-bottom: solid var(--light-3) 1px;
+    padding-bottom: 2em;
 }
 
 #bank-accounts .accounts {
@@ -241,6 +237,7 @@ form {
 
                 &.cancel {
                     background-color: var(--light-3);
+                    color: var(--dark-1);
                     &:hover {
                         background-color: var(--light-2);
                     }
@@ -251,6 +248,14 @@ form {
                     color: var(--light-1);
                     &:hover {
                         background-color: #ce4848;
+                    }
+                }
+
+                &.confirm {
+                    background-color: #63bd47;
+                    color: var(--light-1);
+                    &:hover {
+                        background-color: #5aad40;
                     }
                 }
             }

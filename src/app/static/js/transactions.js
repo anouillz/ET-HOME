@@ -1,20 +1,28 @@
 function editTransaction(id) {
-    window.location.href += `/${id}`
+    window.location.href = `/transactions/${id}/`
 }
 
 function deleteTransaction(id) {
-    apiPost(`transactions/${id}/delete`, {}, true).then(res => {
-        window.location.reload()
+    apiDelete(`transactions/${id}/`).then(res => {
+        if (res.status === "success") {
+            window.location.reload()
+        } else {
+            alert(res.error)
+        }
     })
 }
 
 window.addEventListener("load", () => {
-    document.querySelectorAll("tbody tr").forEach(row => {
+    document.querySelectorAll("tbody tr[data-id]").forEach(row => {
         let id = row.dataset.id
         let editBtn = row.querySelector(".edit-btn")
         let deleteBtn = row.querySelector(".delete-btn")
-        editBtn.addEventListener("click", () => editTransaction(id))
-        deleteBtn.addEventListener("click", () => deleteTransaction(id))
+        if (editBtn) {
+            editBtn.addEventListener("click", () => editTransaction(id))
+        }
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", () => deleteTransaction(id))
+        }
     })
 })
 

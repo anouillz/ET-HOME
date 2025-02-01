@@ -60,50 +60,7 @@
 }
 
 .info {
-    display: flex;
-    flex-direction: column;
-    gap: 2em;
     max-width: 30em;
-    align-self: center;
     width: 100%;
-    padding: 1em;
-}
-
-.info .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-}
-
-.info .field input {
-    font-family: inherit;
-    font-size: inherit;
-    background-color: var(--light-3);
-    border: solid var(--dark-4) 1px;
-    border-radius: 4px;
-    padding: 0.4em;
-}
-
-.info button {
-    font-family: inherit;
-    font-size: inherit;
-    background-color: var(--dark-2);
-    color: var(--light-1);
-    padding: 0.6em 1.2em;
-    border: none;
-    border-radius: 8px;
     align-self: center;
-    cursor: pointer;
-}
-
-.info button:hover {
-    background-color: var(--dark-3);
-}
-
-.info button:active {
-    background-color: var(--dark-1);
-}
-.info button:disabled {
-    background-color: var(--light-4);
-    color: var(--dark-4);
 }

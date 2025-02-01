@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.db.models import Q
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .models import Transaction, SpendingCategory, User, BankAccount
 
@@ -86,7 +87,8 @@ def dashboard_view(request):
 @login_required
 def settings_view(request):
     context = {
-        "accounts": BankAccount.objects.filter(user=request.user).order_by("added_at")
+        "accounts": BankAccount.objects.filter(user=request.user).order_by("added_at"),
+        "user": request.user
     }
     return render(request, "settings.html", context)
 
@@ -96,20 +98,34 @@ def logout_view(request):
     logout(request)
     return redirect("login")
 
+
 @login_required
 def transactions_view(request):
     sort_param = request.GET.get("sort", "date")
-    if sort_param not in ["date", "category"]:
+    if sort_param not in ["date", "category", "amount"]:
         sort_param = "date"
     context = {
-        "transactions": Transaction.objects.filter(account__user=request.user).order_by(sort_param)
+        "transactions": Transaction.objects.filter(
+            Q(account__user=request.user) | Q(account=None)
+        ).order_by(sort_param)
     }
 
     return render(request, "transactions.html", context)
 
+
 @login_required
-def add_expenses_view(request):
+def add_transaction_view(request):
     context = {
         "categories": SpendingCategory.objects.filter(user=request.user),
     }
-    return render(request, 'add_expenses.html', context)
+    return render(request, "add_transaction.html", context)
+
+
+@login_required
+def transaction_view(request, id):
+    transaction = get_object_or_404(Transaction, id=id, user=request.user)
+    context = {
+        "transaction": transaction,
+        "categories": SpendingCategory.objects.filter(user=request.user)
+    }
+    return render(request, "transaction.html", context)

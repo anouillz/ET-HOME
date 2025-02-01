@@ -18,6 +18,10 @@ from .models import Client, BankAccount, Transaction, SpendingCategory, Secret, 
 from .serializers import TransactionSerializer
 
 
+def home_view(request):
+    return render(request, "bank/home.html")
+
+
 @require_GET
 @token_protected
 def get_transaction(request, transactionId):
@@ -34,6 +38,7 @@ def get_transaction(request, transactionId):
             "data": None,
             "message": "transaction not found"
         }, status=404)
+
 
 @require_GET
 @token_protected
@@ -56,6 +61,7 @@ def get_transactions(request, from_date: Optional[datetime] = None):
         for transaction in transactions
     ]
     return JsonResponse({"status": "success", "data": data}, status=HTTP_200_OK)
+
 
 @require_POST
 @token_protected
@@ -101,6 +107,7 @@ def filter_transaction(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+
 @require_GET
 @token_protected
 def get_account(request):
@@ -114,6 +121,7 @@ def get_account(request):
             "bank_name": account.bank_name
         }
     })
+
 
 # bank - app authentication
 def generate_secret(request):
@@ -149,6 +157,8 @@ def generate_secret(request):
         "secret": secret_code,
         "id": secret.id
     })
+
+
 def generate_token(request):
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
@@ -229,6 +239,7 @@ def generate_token(request):
             }
         })
 
+
 @require_POST
 def add_transaction(request):
     try:
@@ -266,6 +277,7 @@ def add_transaction(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+
 @require_POST
 def add_account(request):
     try:
@@ -295,6 +307,7 @@ def add_account(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+
 @require_POST
 def add_category(request):
     try:
@@ -313,12 +326,14 @@ def add_category(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+
 def add_account_view(request):
     context = {
         "clients": Client.objects.all(),
         "banks": ["UBS", "BCV", "BCVs", "Raiffeisen"]
     }
     return render(request, "bank/add_account.html", context)
+
 
 def add_transaction_view(request):
     context = {
@@ -327,8 +342,17 @@ def add_transaction_view(request):
     }
     return render(request, "bank/add_transaction.html", context)
 
+
 def add_category_view(request):
     return render(request, "bank/add_category.html")
+
+
+def clients_view(request):
+    context = {
+        "clients": Client.objects.all()
+    }
+    return render(request, "bank/clients.html", context)
+
 
 def accounts_view(request):
     context = {
@@ -336,11 +360,13 @@ def accounts_view(request):
     }
     return render(request, "bank/accounts.html", context)
 
+
 def transactions_view(request):
     context = {
         "transactions": Transaction.objects.all()
     }
     return render(request, "bank/transactions.html", context)
+
 
 @require_POST
 def delete_transaction(request, id):
@@ -350,11 +376,20 @@ def delete_transaction(request, id):
     trigger_sync(request, account)
     return JsonResponse({"status": "success"}, status=HTTP_200_OK)
 
+
+@require_POST
+def delete_client(request, id):
+    client = get_object_or_404(Client, id=id)
+    client.delete()
+    return JsonResponse({"status": "success"}, status=HTTP_200_OK)
+
+
 @require_POST
 def delete_account(request, id):
     account = get_object_or_404(BankAccount, id=id)
     account.delete()
     return JsonResponse({"status": "success"}, status=HTTP_200_OK)
+
 
 def edit_account_view(request, id):
     account = get_object_or_404(BankAccount, id=id)
@@ -364,6 +399,7 @@ def edit_account_view(request, id):
     }
     return render(request, "bank/edit_account.html", context)
 
+
 def edit_transaction_view(request, id):
     transaction = get_object_or_404(Transaction, id=id)
     context = {
@@ -372,6 +408,7 @@ def edit_transaction_view(request, id):
         "categories": SpendingCategory.objects.all()
     }
     return render(request, "bank/edit_transaction.html", context)
+
 
 @require_POST
 def edit_account(request, id):
@@ -393,6 +430,7 @@ def edit_account(request, id):
         "status": "success",
         "message": "Account modified successfully."
     }, status=HTTP_200_OK)
+
 
 @require_POST
 def edit_transaction(request, id):
@@ -419,8 +457,10 @@ def edit_transaction(request, id):
         "message": "Transaction modified successfully."
     }, status=HTTP_200_OK)
 
+
 def add_client_view(request):
     return render(request, "bank/add_client.html")
+
 
 @require_POST
 def add_client(request):

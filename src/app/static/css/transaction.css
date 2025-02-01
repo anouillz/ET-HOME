@@ -1,0 +1,36 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    margin-top: 1em;
+    background-color: white;
+    border-radius: 1em;
+    padding: 2em;
+
+    .back {
+        background-color: var(--dark-1);
+        align-self: flex-start;
+        padding: 0.6em 1.2em 0.6em 1.8em;
+        color: var(--light-1);
+        border-radius: 3em;
+        text-decoration: none;
+        position: relative;
+        transition: padding-left 0.2s;
+
+        &::before {
+            content: "";
+            position: absolute;
+            width: 0.6em;
+            height: 0.6em;
+            border: var(--light-1) 2px;
+            border-style: none none solid solid;
+            left: 1.1em;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        &:hover {
+            padding-left: 2.2em;
+        }
+    }
+}

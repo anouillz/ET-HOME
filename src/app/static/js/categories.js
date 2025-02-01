@@ -1,3 +1,33 @@
+function update_categories(){
+    let categories = document.querySelectorAll(".category-item")
+    let categoryData = []
+
+    // Loop through each category and extract data
+    categories.forEach(category => {
+        let categoryId = category.dataset.id
+        let categoryBudget = category.querySelector(".category-budget").value
+        let isActive = category.querySelector(".toggle-category").checked // Get checkbox state
+        let changed = category.querySelector(".hidden-changed-input").value
+        if (changed === "true") {
+            categoryData.push({
+                id: categoryId,
+                budget: parseFloat(categoryBudget), // Convert to number
+                is_active: isActive
+            })
+        }
+    })
+
+    if (categoryData.length > 0) {
+        apiPost("categories/update/",{ categories: categoryData }).then(res => {
+            if (res.status === "success") {
+                window.location.reload()
+            }
+        })
+    } else {
+        console.log("No category to update")
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     let categoryToDelete = null
     let categoryNameToDelete = ""
@@ -58,24 +88,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // update budget with enter key
     document.querySelectorAll(".category-budget").forEach((input) => {
-        input.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault()
-
-                const categoryId = this.dataset.id
-                const newBudget = this.value
-                const categoryName = this.closest(".category-item").querySelector(".category-name").innerText
-                let data = new FormData()
-                data.set("user_budget", newBudget)
-
-                apiPost(`categories/${categoryId}/`, data).then(res => {
-                    if (res.status === "success") {
-                        document.getElementById("modal-message").innerText = `Budget for ${categoryName} updated to ${newBudget} CHF`
-                        document.getElementById("budget-modal").style.display = "flex"
-                    } else {
-                        alert(res.error)
-                    }
-                })
+        input.addEventListener("change", function (event) {
+                const hiddenInput = this.closest(".category-item").querySelector(".hidden-changed-input")
+                if (hiddenInput) {
+                    hiddenInput.value = "true"
+                }
+        })
+    })
+    document.querySelectorAll(".toggle-category").forEach((input) => {
+        input.addEventListener("change", function (event) {
+            const hiddenInput = this.closest(".category-item").querySelector(".hidden-changed-input")
+            if (hiddenInput) {
+                hiddenInput.value = "true"
             }
         })
     })
@@ -125,4 +149,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("close-modal").addEventListener("click", function () {
         document.getElementById("budget-modal").style.display = "none"
     })
+
+    document.getElementById("update-categories-btn").addEventListener("click", () => update_categories())
 })

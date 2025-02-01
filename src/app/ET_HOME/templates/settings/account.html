@@ -1,4 +1,52 @@
 <h2 class="title">My User Account</h2>
 <div class="account">
-
+    <section class="info">
+        <form id="user-form" class="nice-form">
+            <div class="field">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="johnny" autocomplete="username" required value="{{ user.username }}">
+            </div>
+            <div class="field">
+                <label for="firstname">Firstname</label>
+                <input type="text" name="first_name" id="firstname" placeholder="John" autocomplete="given-name" required value="{{ user.first_name }}">
+            </div>
+            <div class="field">
+                <label for="lastname">Lastname</label>
+                <input type="text" name="last_name" id="lastname" placeholder="Doe" autocomplete="family-name" required value="{{ user.last_name }}">
+            </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="john@doe.com" autocomplete="email" required value="{{ user.email }}">
+            </div>
+            <button type="submit" disabled>Save changes</button>
+        </form>
+    </section>
+    <section class="password">
+        <h3>Password</h3>
+        <button id="change-pwd-btn">Change password</button>
+    </section>
+</div>
+<div class="popup" id="change-pwd-popup">
+    <div class="popup-container">
+        <h2 class="title">Change password</h2>
+        <form id="password-form" class="nice-form">
+            <input style="display:none;" type="text" name="username" autocomplete="username" value="{{ user.username }}">
+            <div class="field">
+                <label for="current_password">Current password</label>
+                <input type="password" name="current_password" id="current_password" autocomplete="current-password" required>
+            </div>
+            <div class="field">
+                <label for="new_password">New password</label>
+                <input type="password" name="new_password" id="new_password" autocomplete="new-password" required>
+            </div>
+            <div class="field">
+                <label for="confirm_password">Confirm password</label>
+                <input type="password" name="confirm_password" id="confirm_password" autocomplete="new-password" required>
+            </div>
+            <div class="actions">
+                <button type="button" class="cancel">Cancel</button>
+                <button type="submit" class="confirm">Submit</button>
+            </div>
+        </form>
+    </div>
 </div>
