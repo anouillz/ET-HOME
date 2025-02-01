@@ -151,7 +151,7 @@ def post_req(request, account, url, data):
         }
     )
 
-def sync_account(request, account, from_date: Optional[datetime] = None):
+def sync_account(request, account: BankAccount, from_date: Optional[datetime] = None):
     res = get_req(request, account, reverse("bank:get_account"))
     if res is not None and res.status_code == 200:
         data = res.json()
@@ -163,6 +163,7 @@ def sync_account(request, account, from_date: Optional[datetime] = None):
         account.account_number = data["account_number"]
         account.bank_name = data["bank_name"]
         account.save()
+        account.refresh_from_db()
 
         if account.balance < 0:
             Notification.objects.create(

@@ -3,6 +3,7 @@ const tabIds = [
 ]
 
 function updateTab() {
+    closePopups()
     let tabId = window.location.hash.slice(1)
     if (!tabIds.includes(tabId)) {
         tabId = tabIds[0]
@@ -45,6 +46,30 @@ function exportData() {
     })
 }
 
+function closePopups() {
+    document.querySelectorAll(".popup.show").forEach(popup => {
+        popup.classList.remove("show")
+    })
+}
+
+function showDeletePopup(accountId, accountNumber) {
+    closePopups()
+    let popup = document.querySelector("#confirm-delete-popup")
+    popup.dataset.account = accountId
+    popup.querySelector(".desc .num").innerText = accountNumber
+    popup.classList.add("show")
+}
+
+function deleteAccount(id) {
+    apiDelete(`accounts/${id}/`).then(res => {
+        if (res.status === "success") {
+            window.location.reload()
+        } else {
+            alert(res.error)
+        }
+    })
+}
+
 window.addEventListener("hashchange", () => updateTab())
 
 window.addEventListener("load", () => {
@@ -53,5 +78,18 @@ window.addEventListener("load", () => {
     document.getElementById("export-form").addEventListener("submit", e => {
         e.preventDefault()
         exportData()
+    })
+
+    let deletePopup = document.getElementById("confirm-delete-popup")
+    deletePopup.querySelector(".actions .cancel").addEventListener("click", () => closePopups())
+    deletePopup.querySelector(".actions .delete").addEventListener("click", () => deleteAccount(deletePopup.dataset.account))
+
+    document.querySelectorAll(".accounts .list .account").forEach(account => {
+        let id = account.dataset.id
+        let number = account.querySelector(".num").innerText
+        let deleteBtn = account.querySelector(".delete")
+        deleteBtn.addEventListener("click", () => {
+            showDeletePopup(id, number)
+        })
     })
 })
