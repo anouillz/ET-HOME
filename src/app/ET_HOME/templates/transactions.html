@@ -12,11 +12,15 @@
     {% csrf_token %}
     <div class="transaction">
         <div class="header-transaction">
-            <button class="add-expense"> + Add Expense</button>
-            <ul>
-                <li class="base">Order by Date</li>
-                <li class="other">Order by Category</li>
-            </ul>
+            <a class="add-expense" href="{% url 'add_expenses' %}"> + Add Expense</a>
+            <div class="dropdown">
+                <div class="dropdown-toggle">Order by Date</div>
+                <ul class="dropdown-menu">
+                    <li class="order-by-date" data-sort="date">Order by Date</li>
+                    <li class="order-by-category" data-sort="category">Order by Category</li>
+                    <li class="order-by-amount" data-sort="amount">Order by Amount</li>
+                </ul>
+            </div>
         </div>
         <table>
             <thead>
@@ -27,16 +31,31 @@
                     <th>Date</th>
                     <th>Description</th>
                 </tr>
+                <tr class="spacer-row">
+                    <td colspan="5"></td>
+                </tr>
             </thead>
+
             <tbody>
                 {% for transaction in transactions %}
-                    <tr data-id="{{ transaction.id }}">
+                    <tr data-id="{{ transaction.id }}" class="transaction_table">
                         <td>{{ transaction.account.account_number }}</td>
                         <td>{{ transaction.category.name }}</td>
                         <td>{{ transaction.amount }}</td>
                         <td>{{ transaction.date }}</td>
                         <td>{{ transaction.description }}</td>
+                        <td><button class="edit-btn">Edit</button></td>
+                        <td>
+                            {% if not transaction.account %}
+                                <button class="delete-btn">Delete</button>
+                            {% endif %}
+                        </td>
                     </tr>
+                    {% if not forloop.last %}
+                        <tr class="spacer-row">
+                            <td colspan="5"></td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
             </tbody>
         </table>

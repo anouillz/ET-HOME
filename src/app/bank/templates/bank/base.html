@@ -3,10 +3,11 @@
 <html lang="en">
     <head>
         <title>{% block title %}Title{% endblock %}</title>
-        <link rel="stylesheet" href="{% static 'css/base.css' %}">
-        <link rel="stylesheet" href="{% static 'css/bank/base.css' %}">
-        <script src="{% static 'js/base.js' %}"></script>
-        <script src="{% static 'js/bank/base.js' %}"></script>
+        <link rel="shortcut icon" href="{% static "images/logo.svg" %}" type="image/svg+xml">
+        <link rel="stylesheet" href="{% static "css/base.css" %}">
+        <link rel="stylesheet" href="{% static "css/bank/base.css" %}">
+        <script src="{% static "js/base.js" %}"></script>
+        <script src="{% static "js/bank/base.js" %}"></script>
         {% block head %}{% endblock head %}
     </head>
     <body>

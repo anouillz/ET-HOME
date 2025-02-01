@@ -1,101 +1,296 @@
-body {
+.container {
     display: flex;
-    justify-content: left;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background: #f0f0f0; /* Change this to any background color or image */
-}
-
-/* Add this CSS rule to align ET-HOME to the left */
-#sidebar {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    gap: 2em;
+    padding: 2em;
     align-items: flex-start;
-    padding: 20px;
-    background-color: #000000;
-    color: white;
-    height: 100vh; /* Full height of the screen */
-    width: 2px; /* Adjust the width as needed */
-    position: fixed;
-    top: 0;
-    left: 0;
+    overflow-y: auto;
 }
 
-#sidebar h1 {
-    margin: 0;
-    font-size: 24px;
-    text-align: left; /* Ensures it's aligned to the left */
+.menu, .tabs {
+    background-color: var(--light-1);
+    padding: 2em;
+    border-radius: 0.8em;
 }
 
-/* Adjust your content area */
-#main-content {
-    margin-left: 220px; /* Matches the width of the sidebar */
-    padding: 20px;
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+.menu a {
+    padding: 0.8em 1.2em;
+    min-width: 12em;
+    color: var(--dark-1);
+    text-decoration: none;
+    border-radius: 0.6em;
+}
+
+.menu a:hover {
+    background-color: var(--light-2);
+}
+
+.menu a.current {
+    background-color: var(--light-3);
+    font-weight: bold;
+}
+
+.tabs {
     flex-grow: 1;
-    background: #f0f0f0;
-    min-height: 100vh;
+    overflow-y: auto;
+    max-height: 100%;
 }
 
-
-#exportForm {
-    padding: 20px;
-    border: 10px solid #f2f2f2;
-    border-radius: 5px;
-    background-color: #f2f2f2;
+.tab {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 500px;
-    position: absolute; /* To overlay the box */
-    top: 500%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Centers the box */
 }
 
-#exportForm .field {
+.tab:not(.show) {
+    display: none;
+}
+
+form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
-    width: 100%;
+    gap: 1em;
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4em;
+
+    }
+
+    label {
+        font-style: italic;
+    }
+
+    input {
+        font-family: inherit;
+        font-size: inherit;
+    }
+
+    input {
+        padding: 0.4em 0.8em;
+        border: solid var(--dark-1) 1px;
+        border-radius: 0.4em;
+    }
+
+    button {
+        align-self: center;
+    }
 }
 
-#exportForm input[type="text"],
-#exportForm input[type="password"] {
-    width: 100%;
-    padding: 15px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.tab > .account, .tab > .export {
+    button {
+        font-family: inherit;
+        font-size: inherit;
+        background-color: var(--dark-2);
+        color: var(--light-1);
+        padding: 0.8em 3.6em;
+        border: none;
+        border-radius: 0.8em;
+        cursor: pointer;
+
+        &.inverted {
+            background-color: var(--light-2);
+            color: var(--dark-1);
+            border: solid var(--light-4) 1px;
+        }
+    }
+
+    button:hover {
+        background-color: var(--dark-3);
+
+        &.inverted {
+            background-color: var(--light-3);
+        }
+    }
+
+    button:disabled {
+        background-color: var(--light-4);
+        color: var(--dark-4);
+        pointer-events: none;
+        cursor: default;
+    }
 }
 
-#exportButton {
-    padding: 15px 30px;
-    font-size: 18px;
-    background-color: #000000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 30px;
-    width: 200px;
+section:not(:last-child) {
+    border-bottom: solid var(--light-3) 1px;
+    padding-bottom: 2em;
 }
 
-#exportButton:hover {
-    background-color: #333333;
+#bank-accounts .accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+
+    & > .add-btn {
+        align-self: flex-end;
+    }
+
+    .add-btn {
+        padding: 0.6em 1.6em;
+        border-radius: 0.6em;
+        background-color: var(--dark-2);
+        color: var(--light-1);
+        text-decoration: none;
+    }
+
+    .add-btn:hover {
+        background-color: var(--dark-3);
+    }
+
+    .list {
+        border-top: solid var(--light-4) 1px;
+        padding-top: 2em;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2em;
+    }
+
+    .no-account {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8em;
+        align-items: center;
+        color: var(--dark-2);
+        font-style: italic;
+    }
+
+    .account {
+        display: flex;
+        padding: 0.6em 1.2em;
+        border-radius: 0.8em;
+        gap: 1em;
+        align-items: center;
+        border: solid var(--dark-4) 1px;
+        flex-wrap: wrap;
+
+        &:hover {
+            background-color: var(--light-2);
+        }
+
+        .bank {
+            font-weight: bold;
+            min-width: 4em;
+        }
+
+        .num {
+            flex-grow: 1;
+        }
+
+        .balance {
+            text-align: right;
+            margin-left: auto;
+        }
+
+        .delete {
+            background-color: #cc3030;
+            width: 2.4em;
+            height: 2.4em;
+            border: none;
+            border-radius: 0.4em;
+            flex-shrink: 0;
+            position: relative;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #ce4848;
+            }
+
+            &::before {
+                content: "";
+                width: 75%;
+                height: 75%;
+                position: absolute;
+                inset: 0;
+                margin: auto;
+                background-color: var(--light-1);
+                mask-image: url("/static/images/delete_icon.svg");
+                -webkit-mask-image: url("/static/images/delete_icon.svg");
+                mask-size: contain;
+                -webkit-mask-size: contain;
+                mask-repeat: no-repeat;
+                -webkit-mask-repeat: no-repeat;
+            }
+        }
+    }
 }
 
-h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-align: left;
-}
+.popup {
+    display: grid;
+    place-items: center;
+    background-color: #00000050;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
 
-p {
-    font-size: 16px;
-    margin-bottom: 15px;
-    text-align: left;
+    &:not(.show) {
+        display: none;
+    }
+
+    .popup-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        padding: 2em;
+        border-radius: 0.8em;
+        background-color: var(--light-1);
+        max-width: 35em;
+
+        .title {
+            margin: 0;
+        }
+
+        .desc {
+            margin: 0;
+            text-align: justify;
+            line-height: 1.3;
+
+            .num {
+                font-family: monospace;
+            }
+        }
+
+        .actions {
+            display: flex;
+            gap: 1em;
+            justify-content: space-evenly;
+
+            button {
+                font-family: inherit;
+                font-size: inherit;
+                padding: 0.5em 1.5em;
+                border: none;
+                border-radius: 0.5em;
+                cursor: pointer;
+
+                &.cancel {
+                    background-color: var(--light-3);
+                    color: var(--dark-1);
+                    &:hover {
+                        background-color: var(--light-2);
+                    }
+                }
+
+                &.delete {
+                    background-color: #cc3030;
+                    color: var(--light-1);
+                    &:hover {
+                        background-color: #ce4848;
+                    }
+                }
+
+                &.confirm {
+                    background-color: #63bd47;
+                    color: var(--light-1);
+                    &:hover {
+                        background-color: #5aad40;
+                    }
+                }
+            }
+        }
+    }
 }

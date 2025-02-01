@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Add expenses{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/add_expenses.css' %}">
+    <script src="{% static 'js/add_expenses.js' %}"></script>
+{% endblock %}
+{% block header %}
+    <h1>Add Expenses</h1>
+{% endblock %}
+{% block main %}
+    <form data-endpoint="transactions/add">
+        {% csrf_token %}
+        <div class="field">
+            <label for="category_id">Category</label>
+            <select name="category_id" id="category_id">
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="amount">Amount</label>
+            <input type="number" name="amount" id="amount" step="0.01">
+        </div>
+        <div class="field">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" rows="5"></textarea>
+        </div>
+        <button type="submit">Create</button>
+    </form>
+{% endblock %}
+
+
+
+

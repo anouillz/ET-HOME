@@ -23,7 +23,7 @@ const GRAPH_RANGES = {
         step: 36.5
     }
 }
-const GRAPH_VSTEPS = [5, 10, 25, 50, 100, 250, 500, 1000, 10_000]
+const GRAPH_VSTEPS = [5, 10, 25, 50, 100, 250, 500, 1000, 10_000, 100_000, 250_000, 1_000_000]
 const GRAPH_LMARGIN = 60
 const GRAPH_RMARGIN = 10
 const GRAPH_TMARGIN = 10
@@ -40,11 +40,12 @@ async function refreshDashboard() {
     let accountsInfo = []
     let accountsPromises = []
     let curMonthDay = new Date()
+    curMonthDay.setDate(1)
+    curMonthDay.setHours(0)
     let lastMonthTotal = 0
     let curMonthTotal = 0
     let byCategory = {}
     let categoryNames = {}
-    curMonthDay.setDate(1)
     let accountFilter = document.getElementById("expenses-account")
     accountFilter.innerHTML = ""
     let opt = document.createElement("option")

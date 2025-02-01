@@ -1,0 +1,76 @@
+#app-title {
+    margin: 1em auto;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.container {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--dark-1);
+    color: var(--light-1);
+    position: absolute;
+    width: 100%;
+    max-width: 35em;
+    border-radius: 25px;
+    top: 50%;
+    left : 50%;
+    transform: translate(-50%, -50%);
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
+.title {
+    text-align: center;
+    font-size: 200%;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+label {
+    font-style: italic;
+}
+
+input {
+    background-color: white;
+    border: none;
+    padding: 0.4em 0.8em;
+    border-radius: 0.4em;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+button {
+    padding: 0.6em 2.4em;
+    background-color: var(--light-1);
+    color: var(--dark-1);
+    cursor: pointer;
+    border-radius: 0.4em;
+    border: none;
+    align-self: center;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+button:hover {
+    background-color: var(--light-3);
+}
+
+.alternative {
+    margin-top: 2em;
+}
+
+.alternative a {
+    color: var(--accent)
+}
