@@ -12,11 +12,14 @@
     {% csrf_token %}
     <div class="transaction">
         <div class="header-transaction">
-            <button class="add-expense"> + Add Expense</button>
-            <ul>
-                <li class="base">Order by Date</li>
-                <li class="other">Order by Category</li>
-            </ul>
+            <a class="add-expense" href="{% url 'add_expenses' %}"> + Add Expense</a>
+            <div class="dropdown">
+                <div class="dropdown-toggle">Order by Date</div>
+                <ul class="dropdown-menu">
+                    <li class="order-by-date" data-sort="date">Order by Date</li>
+                    <li class="order-by-category" data-sort="category">Order by Category</li>
+                </ul>
+            </div>
         </div>
         <table>
             <thead>
