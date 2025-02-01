@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from .models import Transaction, SpendingCategory, User
+from .models import Transaction, SpendingCategory, User, BankAccount
 
 
 def login_view(request):
@@ -85,7 +85,10 @@ def dashboard_view(request):
 
 @login_required
 def settings_view(request):
-    return render(request, "settings.html")
+    context = {
+        "accounts": BankAccount.objects.filter(user=request.user).order_by("added_at")
+    }
+    return render(request, "settings.html", context)
 
 
 @login_required

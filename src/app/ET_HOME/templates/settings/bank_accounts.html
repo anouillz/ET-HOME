@@ -1,4 +1,33 @@
 <h2 class="title">Bank Accounts</h2>
 <div class="accounts">
-
+    <a class="add-btn" href="{% url "add_bank" %}">Add an account</a>
+    <div class="list">
+        {% for account in accounts %}
+            <div class="account" data-id="{{ account.id }}">
+                <div class="bank">{{ account.bank_name }}</div>
+                <div class="num">{{ account.account_number }}</div>
+                <div class="balance">CHF&nbsp;{{ account.balance|floatformat:2 }}</div>
+                <button class="delete"></button>
+            </div>
+        {% empty %}
+            <div class="no-account">
+                <span>You haven't linked any bank accounts yet</span>
+                <a class="add-btn" href="{% url "add_bank" %}">Add one</a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="popup" id="confirm-delete-popup">
+        <div class="popup-container">
+            <h2 class="title">Delete account ?</h2>
+            <p class="desc">
+                Are you sure you want to delete account <span class="num"></span> ?
+                This action is <u>IRREVERSIBLE</u>. It will also delete all transactions related to this account.
+                Consider <a href="#export">exporting your data</a> first.
+            </p>
+            <div class="actions">
+                <button class="cancel">Cancel</button>
+                <button class="delete">Delete</button>
+            </div>
+        </div>
+    </div>
 </div>

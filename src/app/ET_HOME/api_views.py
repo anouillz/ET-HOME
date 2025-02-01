@@ -131,28 +131,6 @@ class CategoryAPI(LoginRequiredJSONMixin, View):
         return JsonResponse({"status": "success"})
 
 
-
-@login_required
-def get_account(request, id):
-    account = get_object_or_404(BankAccount, id=id, user=request.user)
-
-    # Only get transactions from the beginning of last month
-    today = datetime.today()
-    start_date = datetime(today.year, today.month, 1)
-    start_date += relativedelta(months=-1)
-    start_date = start_date.date()
-    transactions = Transaction.objects.filter(
-        account=account,
-        date__gte=start_date
-    )
-
-    return JsonResponse({
-        "status": "success",
-        "account": FullBankAccountSerializer(account).data,
-        "transactions": TransactionWithoutAccountSerializer(transactions, many=True).data
-    })
-
-
 @login_required
 def accounts_api(request):
     if request.method == "GET":
@@ -438,3 +416,29 @@ def sync_account(request, account_number, from_date: Optional[datetime] = None):
     synced = bank_auth.sync_account(request, account, from_date)
 
     return JsonResponse({"status": "success", "synced": synced})
+
+
+class AccountAPI(LoginRequiredJSONMixin, View):
+    def get(self, request, id):
+        account = get_object_or_404(BankAccount, id=id, user=request.user)
+
+        # Only get transactions from the beginning of last month
+        today = datetime.today()
+        start_date = datetime(today.year, today.month, 1)
+        start_date += relativedelta(months=-1)
+        start_date = start_date.date()
+        transactions = Transaction.objects.filter(
+            account=account,
+            date__gte=start_date
+        )
+
+        return JsonResponse({
+            "status": "success",
+            "account": FullBankAccountSerializer(account).data,
+            "transactions": TransactionWithoutAccountSerializer(transactions, many=True).data
+        })
+
+    def delete(self, request, id):
+        account = get_object_or_404(BankAccount, id=id, user=request.user)
+        account.delete()
+        return JsonResponse({"status": "success"})
