@@ -1,3 +1,33 @@
+function update_categories(){
+    let categories = document.querySelectorAll(".category-item")
+    let categoryData = []
+
+    // Loop through each category and extract data
+    categories.forEach(category => {
+        let categoryId = category.dataset.id
+        let categoryBudget = category.querySelector(".category-budget").value
+        let isActive = category.querySelector(".toggle-category").checked // Get checkbox state
+        let changed = category.querySelector(".hidden-changed-input").value
+        if (changed === "true") {
+            categoryData.push({
+                id: categoryId,
+                budget: parseFloat(categoryBudget), // Convert to number
+                is_active: isActive
+            })
+        }
+    })
+
+    if (categoryData.length > 0) {
+        apiPost("categories/update/",{ categories: categoryData }).then(res => {
+            if (res.status === "success") {
+                window.location.reload()
+            }
+        })
+    } else {
+        console.log("No category to update")
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     let categoryToDelete = null
     let categoryNameToDelete = ""
@@ -59,17 +89,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // update budget with enter key
     document.querySelectorAll(".category-budget").forEach((input) => {
         input.addEventListener("change", function (event) {
-                const hiddenInput = this.closest(".category-item").querySelector("#changed");
+                const hiddenInput = this.closest(".category-item").querySelector(".hidden-changed-input")
                 if (hiddenInput) {
-                    hiddenInput.value = "true"; 
+                    hiddenInput.value = "true"
                 }
         })
     })
     document.querySelectorAll(".toggle-category").forEach((input) => {
         input.addEventListener("change", function (event) {
-            const hiddenInput = this.closest(".category-item").querySelector("#changed");
+            const hiddenInput = this.closest(".category-item").querySelector(".hidden-changed-input")
             if (hiddenInput) {
-                hiddenInput.value = "true"; 
+                hiddenInput.value = "true"
             }
         })
     })
@@ -119,39 +149,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("close-modal").addEventListener("click", function () {
         document.getElementById("budget-modal").style.display = "none"
     })
+
+    document.getElementById("update-categories-btn").addEventListener("click", () => update_categories())
 })
-
-
-async function update_categories(){
-        let categories = document.querySelectorAll(".category-item");
-        let categoryData = [];
-
-        // Loop through each category and extract data
-        categories.forEach(category => {
-            let categoryId = category.getAttribute("data-id");
-            let categoryBudget = category.querySelector(".category-budget").value;
-            let isActive = category.querySelector(".toggle-category").checked; // Get checkbox state
-            let changed = category.querySelector("#changed").value
-            if(changed == "true"){
-            categoryData.push({
-                id: categoryId,
-                budget: parseFloat(categoryBudget), // Convert to number
-                is_active: isActive
-            });
-        }
-        });
-
-        if(categoryData.length > 0){
-            let response = await apiPost("categories/update",{ categories: categoryData },false)
-
-            if (response.status == "success"){
-                setTimeout(() => {
-                    window.location.reload(true);
-                }, 500);
-            }
-            //refresh page
-        }else{
-            console.log("no category to update")
-        }
-}
-document.getElementById("update-categories-btn").addEventListener("click", update_categories);

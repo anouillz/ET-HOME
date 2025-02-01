@@ -5,46 +5,46 @@
     <link rel="stylesheet" href="{% static 'css/categories.css' %}">
     <script src="{% static 'js/categories.js' %}" defer></script>
 {% endblock %}
+{% block header %}
+    <h1>Manage Your Categories</h1>
+{% endblock %}
 {% block main %}
     {% csrf_token %}
     
     <div class="categories-container">
-        <h1>Manage Your Categories</h1>
-    
         <p>Total categories: {{ categories|length }}</p>
-    
         <div class="categories-list" id="categories-list">
             {% for category in categories %}
-            <div class="category-item widget-box" data-id="{{ category.id }}">
-                <input class="hidden_changed_input" type="hidden" id="changed" value="false">
-                <div class="category-left">
-                    <input
-                        type="checkbox"
-                        class="toggle-category"
-                        {% if category.trigger_notification %}checked{% endif %}
-                        data-id="{{ category.id }}"
-                    />
-                    <span class="category-name">{{ category.name }}</span>
+                <div class="category-item widget-box" data-id="{{ category.id }}">
+                    <input class="hidden-changed-input" type="hidden" value="false">
+                    <div class="category-left">
+                        <input
+                            type="checkbox"
+                            class="toggle-category"
+                            {% if category.trigger_notification %}checked{% endif %}
+                            data-id="{{ category.id }}"
+                        />
+                        <span class="category-name">{{ category.name }}</span>
+                    </div>
+                    <div class="category-right">
+                        <input
+                            type="number"
+                            class="category-budget"
+                            value="{{ category.user_budget }}"
+                            data-id="{{ category.id }}"
+                        />
+                        {% if not category.is_default %}
+                            <button class="delete-category" data-id="{{ category.id }}">Delete</button>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="category-right">
-                    <input
-                        type="number"
-                        class="category-budget"
-                        value="{{ category.user_budget }}"
-                        data-id="{{ category.id }}"
-                    />
-                    {% if not category.is_default %}
-                    <button class="delete-category" data-id="{{ category.id }}">Delete</button>
-                    {% endif %}
-                </div>
-            </div>
             {% empty %}
-            <p>No categories available. Add one below!</p>
+                <p>No categories available. Add one below!</p>
             {% endfor %}
         </div>
         <div>
             <button id="add-category-btn" class="add-category-btn">+ Add Category</button>
-            <button id="update-categories-btn" class="add-category-btn">update categories</button>
+            <button id="update-categories-btn" class="add-category-btn">Update categories</button>
         </div>
     </div>
     
