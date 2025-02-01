@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import SpendingCategory, Transaction, User
+from ET_HOME.models import SpendingCategory, Transaction, User
 
 class UserAuthTests(TestCase):
     def setUp(self):

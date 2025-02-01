@@ -45,6 +45,7 @@ async function refreshDashboard() {
     let byCategory = {}
     let categoryNames = {}
     curMonthDay.setDate(1)
+    curMonthDay.setHours(0)
     let accountFilter = document.getElementById("expenses-account")
     accountFilter.innerHTML = ""
     let opt = document.createElement("option")
