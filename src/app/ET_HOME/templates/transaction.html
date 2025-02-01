@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Transaction{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static "css/transaction.css" %}">
+    <script src="{% static "js/transaction.js" %}"></script>
+{% endblock %}
+{% block header %}
+    <h1>Editing transaction</h1>
+{% endblock %}
+{% block main %}
+    <div class="container">
+        <a class="back" href="../">Back to list</a>
+        <form data-id="{{ transaction.id }}" id="form">
+            {% csrf_token %}
+            {% if transaction.account %}
+                <div class="field">
+                    <label for="account_number">Account number</label>
+                    <input type="text" name="account_number" id="account_number" value="{{ transaction.account.account_number }}" disabled/>
+                </div>
+            {% endif %}
+            <div class="field">
+                <label for="category_id">Category</label>
+                <select name="category_id" id="category_id">
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id == transaction.category.id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="amount">Amount</label>
+                <input type="number" name="amount" id="amount" value="{{ transaction.amount }}" step="0.01" {% if transaction.account %}disabled{% endif %}>
+            </div>
+            <div class="field">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" rows="5">{{ transaction.description }}</textarea>
+            </div>
+            <button type="submit">Modify</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,91 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    margin-top: 1em;
+    background-color: white;
+    border-radius: 1em;
+    padding: 2em;
+
+    .back {
+        background-color: var(--dark-1);
+        align-self: flex-start;
+        padding: 0.6em 1.2em 0.6em 1.8em;
+        color: var(--light-1);
+        border-radius: 3em;
+        text-decoration: none;
+        position: relative;
+        transition: padding-left 0.2s;
+
+        &::before {
+            content: "";
+            position: absolute;
+            width: 0.6em;
+            height: 0.6em;
+            border: var(--light-1) 2px;
+            border-style: none none solid solid;
+            left: 1.1em;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        &:hover {
+            padding-left: 2.2em;
+        }
+    }
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    max-width: 40em;
+    width: 100%;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 1em;
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4em;
+
+    }
+
+    label {
+        font-style: italic;
+    }
+
+    input, select, button, textarea {
+        font-family: inherit;
+        font-size: inherit;
+    }
+
+    input, select, textarea {
+        padding: 0.4em 0.8em;
+        border: solid var(--dark-1) 1px;
+        border-radius: 0.4em;
+    }
+
+    select {
+        cursor: pointer;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    button {
+        background-color: var(--dark-2);
+        color: var(--light-1);
+        padding: 0.8em 3.6em;
+        border: none;
+        border-radius: 0.8em;
+        align-self: center;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: var(--dark-3);
+    }
+}
