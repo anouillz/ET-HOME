@@ -1,4 +1,4 @@
-import time
+import time,json
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -243,6 +243,8 @@ def get_incomes(request, first_date, second_date):
 
 
 def check_category(request, category: SpendingCategory):
+    if category.trigger_notification == False:
+        return
     transactions = Transaction.objects.filter(
         account__user=request.user,
         category=category,
@@ -438,3 +440,34 @@ def sync_account(request, account_number, from_date: Optional[datetime] = None):
     synced = bank_auth.sync_account(request, account, from_date)
 
     return JsonResponse({"status": "success", "synced": synced})
+
+
+@require_POST
+@login_required
+def update_categories(request):
+    try:
+        data = json.loads(request.body)  # Parse incoming JSON data
+        categories = data.get("categories", [])  # Extract categories list
+        for category_data in categories:
+            category_id = category_data.get("id")
+            is_active = category_data.get("is_active")
+            user_budget = category_data.get("budget")
+            category = get_object_or_404(SpendingCategory,id=category_id)
+            category.is_active = is_active
+            category.user_budget = user_budget
+            category.save()
+        
+        Notification.objects.create(
+                user=request.user,
+                related_object_id=None,
+                type=NotificationType.BUDGET,
+                message="Successfully updated data for "+ str(len(categories))+ " categories"
+        )
+        
+        return JsonResponse({"status": "success"}, status=200)
+
+
+    except json.JSONDecodeError:
+            return JsonResponse({"status": "error", "message": "Invalid JSON format."}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)

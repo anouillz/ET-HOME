@@ -7,19 +7,21 @@
 {% endblock %}
 {% block main %}
     {% csrf_token %}
+    
     <div class="categories-container">
         <h1>Manage Your Categories</h1>
     
         <p>Total categories: {{ categories|length }}</p>
     
-        <div class="categories-list">
+        <div class="categories-list" id="categories-list">
             {% for category in categories %}
             <div class="category-item widget-box" data-id="{{ category.id }}">
+                <input class="hidden_changed_input" type="hidden" id="changed" value="false">
                 <div class="category-left">
                     <input
                         type="checkbox"
                         class="toggle-category"
-                        {% if category.is_active %}checked{% endif %}
+                        {% if category.trigger_notification %}checked{% endif %}
                         data-id="{{ category.id }}"
                     />
                     <span class="category-name">{{ category.name }}</span>
@@ -40,7 +42,10 @@
             <p>No categories available. Add one below!</p>
             {% endfor %}
         </div>
-        <button id="add-category-btn" class="add-category-btn">+ Add Category</button>
+        <div>
+            <button id="add-category-btn" class="add-category-btn">+ Add Category</button>
+            <button id="update-categories-btn" class="add-category-btn">update categories</button>
+        </div>
     </div>
     
     

@@ -14,6 +14,7 @@ urlpatterns = [
     path("incomes/<date:first_date>/<date:second_date>/", api_views.get_incomes, name="get_incomes"),
     path("categories/<uuid:id>/", api_views.CategoryAPI.as_view(), name="category_api"),
     path("categories/", api_views.categories_api, name="categories_api"),
+    path("categories/update", api_views.update_categories, name="update_categories"),
     path("accounts/", api_views.accounts_api, name="accounts_api"),
     path("test_secret", api_views.test_secret, name="test_secret"),
     path("export/", api_views.export_data, name="export_data"),
