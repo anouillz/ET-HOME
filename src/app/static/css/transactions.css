@@ -4,16 +4,6 @@
     border-radius: 20px;
 }
 
-.transaction-header {
-    display: flex;
-}
-
-
-.other {
-    display: none;
-}
-
-
 .header-transaction {
     display: flex;
     align-items: center;
@@ -22,22 +12,50 @@
     margin: 20px;
 }
 
-.header-transaction button {
+.header-transaction a {
     text-align: center;
     color: white;
     background-color: black;
     border-radius: 20px;
     padding: 10px;
+    text-decoration: none;
 }
 
-.header-transaction ul {
-    display: flex;
+.header-transaction a:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    background-color: #f1f1f1;
+    padding: 10px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
     list-style: none;
     padding: 0;
     margin: 0;
-    gap: 10px;
+    width: 150px;
 }
 
-.header-transaction li {
+.dropdown-menu li {
+    padding: 10px;
     cursor: pointer;
 }
+
+.dropdown-menu li:hover {
+    background-color: #f0f0f0;
+}
+
+
+

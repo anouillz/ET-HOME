@@ -151,7 +151,7 @@ def post_req(request, account, url, data):
         }
     )
 
-def sync_account(request, account, from_date: Optional[datetime] = None):
+def sync_account(request, account: BankAccount, from_date: Optional[datetime] = None):
     res = get_req(request, account, reverse("bank:get_account"))
     if res is not None and res.status_code == 200:
         data = res.json()
@@ -163,10 +163,24 @@ def sync_account(request, account, from_date: Optional[datetime] = None):
         account.account_number = data["account_number"]
         account.bank_name = data["bank_name"]
         account.save()
+        account.refresh_from_db()
+
+        if account.balance < 0:
+            Notification.objects.create(
+                user=account.user,
+                type=NotificationType.ACCOUNT,
+                related_object_id=account.id,
+                message=f"Account {account.account_number} balance is below 0 !"
+            )
 
         if sync_transactions(request, account, from_date):
-            message = f"Successfully synchronised account {account.id} with bank"
-            Notification.objects.create(user=request.user,type=NotificationType.ACCOUNT,related_object_id=account.id,message=message)
+            message = f"Successfully synchronised account {account.account_number} with bank ({account.bank_name})"
+            Notification.objects.create(
+                user=account.user,
+                type=NotificationType.ACCOUNT,
+                related_object_id=account.id,
+                message=message
+            )
             return True
     return False
 
@@ -230,9 +244,6 @@ def sync_transactions(request, account: BankAccount, from_date: Optional[datetim
 
         # Delete missing transactions
         Transaction.objects.filter(bank_transaction_id__in=list(deleted_ids)).delete()
-        
-        
-
 
         return True
     return False
