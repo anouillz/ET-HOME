@@ -31,10 +31,12 @@
 }
 
 .dropdown-toggle {
-    background-color: #f1f1f1;
+    background-color: white;
     padding: 10px;
     cursor: pointer;
     border: 1px solid #ccc;
+    border-radius: 20px;
+
 }
 
 .dropdown-menu {
@@ -55,6 +57,26 @@
 
 .dropdown-menu li:hover {
     background-color: #f0f0f0;
+}
+
+table {
+    width: 90%;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+th {
+    text-align: left;
+}
+
+.transaction_table td {
+    padding: 20px 0;
+}
+
+
+.spacer-row {
+    background-color: #f5f5f5;
 }
 
 

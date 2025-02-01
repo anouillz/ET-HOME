@@ -99,7 +99,7 @@ def logout_view(request):
 @login_required
 def transactions_view(request):
     sort_param = request.GET.get("sort", "date")
-    if sort_param not in ["date", "category"]:
+    if sort_param not in ["date", "category", "amount"]:
         sort_param = "date"
     context = {
         "transactions": Transaction.objects.filter(account__user=request.user).order_by(sort_param)
