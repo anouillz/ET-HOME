@@ -1,5 +1,5 @@
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 
 import qrcode.main
@@ -102,8 +102,8 @@ def categories_view(request):
             total=Sum(
                 "transaction__amount",
                 filter=Q(
-                    transaction__date__gte=start_date,
-                    transaction__date__lt=end_date
+                    transaction__date__gte=start_date.date(),
+                    transaction__date__lt=end_date.date()
                 ),
                 default=0
             )
