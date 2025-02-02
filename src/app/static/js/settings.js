@@ -136,4 +136,11 @@ window.addEventListener("load", () => {
         e.preventDefault()
         changePassword()
     })
+
+    let mfaBtn = document.getElementById("enable-2fa")
+    if (mfaBtn) {
+        mfaBtn.addEventListener("click", () => {
+            window.location.href = "/totp/"
+        })
+    }
 })

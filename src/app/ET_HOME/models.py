@@ -6,10 +6,11 @@ from django.db import models
 from django.utils.timezone import now
 
 class User(AbstractUser):
-    otp_secret = models.CharField(max_length=16, blank=True, null=True)     # double auth with otp
+    otp_secret = models.CharField(max_length=32, blank=True, null=True)     # double auth with otp
+    otp_activated = models.BooleanField(default=False)
 
     def generate_otp_secret(self):
-        self.otp_secret = pyotp.random_base32()
+        self.otp_secret = pyotp.random_base32(length=32)
         self.save()
 
     def get_otp_uri(self):
@@ -20,7 +21,7 @@ class User(AbstractUser):
 
     def verify_otp(self, otp):
         totp = pyotp.TOTP(self.otp_secret)
-        return totp.verify(otp)
+        return totp.verify(otp, valid_window=1)
 
 
 class BankAccount(models.Model):

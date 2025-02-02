@@ -1,10 +1,12 @@
+import base64
 from datetime import datetime, timedelta
+from io import BytesIO
 
+import qrcode.main
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum
-from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .models import Transaction, SpendingCategory, User, BankAccount
@@ -57,8 +59,31 @@ def register_view(request):
         create_default_categories(user)
 
         return redirect("login")
+    return render(request, "register.html")
 
-    return render(request, 'register.html')
+def totp_setup_view(request):
+    user: User = request.user
+    if user.otp_activated:
+        return redirect("settings")
+
+    user.generate_otp_secret()
+    qr = qrcode.main.QRCode(
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        border=4
+    )
+    qr.add_data(user.get_otp_uri())
+    qr.make(fit=True)
+    qr_img = qr.make_image()
+    buffered = BytesIO()
+    qr_img.save(buffered, format="JPEG")
+    img_str = base64.b64encode(buffered.getvalue())
+    img_str = bytes("data:image/jpeg;base64,", encoding="utf-8") + img_str
+
+    context = {
+        "key": user.otp_secret,
+        "qrcode": img_str.decode("utf-8")
+    }
+    return render(request, "totp_setup.html", context)
 
 
 @login_required

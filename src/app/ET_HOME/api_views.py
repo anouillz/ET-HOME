@@ -536,3 +536,23 @@ def change_password(request):
     return JsonResponse({
         "status": "success"
     })
+
+
+def activate_totp(request):
+    code = request.POST.get("code")
+    if request.user.verify_otp(code):
+        request.user.otp_activated = True
+        request.user.save()
+        Notification.objects.create(
+            user=request.user,
+            type=NotificationType.GENERAL,
+            message="Successfully configured TOTP"
+        )
+
+        return JsonResponse({
+            "status": "success"
+        })
+    return JsonResponse({
+        "status": "error",
+        "error": "Invalid code"
+    })

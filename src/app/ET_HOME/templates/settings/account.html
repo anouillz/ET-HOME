@@ -25,6 +25,15 @@
         <h3>Password</h3>
         <button id="change-pwd-btn">Change password</button>
     </section>
+    <section class="2fa">
+        <h3>Two-Factor Authentication</h3>
+        <p>Two-Factor Authentication adds an extra layer of security to your account, ensuring that only you have the rights to log in.</p>
+        {% if user.otp_activated %}
+            <button disabled>2FA enabled</button>
+        {% else %}
+            <button class="inverted" id="enable-2fa">Enable 2FA</button>
+        {% endif %}
+    </section>
 </div>
 <div class="popup" id="change-pwd-popup">
     <div class="popup-container">
