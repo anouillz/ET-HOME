@@ -228,7 +228,7 @@ def check_category(request, category: SpendingCategory):
         category=category,
         amount__lt=0
     )
-    total = transactions.aggregate(total=Sum("amount"))["total"]
+    total = transactions.aggregate(total=Sum("amount", default=0))["total"]
     budget = category.user_budget
     if budget != 0 and category.trigger_notification:
         message = None

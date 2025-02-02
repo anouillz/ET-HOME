@@ -13,7 +13,7 @@ urlpatterns = [
     # Accounts
     path("accounts/<uuid:id>/transactions/<date:first_date>/<date:second_date>/", api_views.get_account_transactions, name="get_account_transactions"),
     path("accounts/<uuid:id>/", api_views.AccountAPI.as_view(), name="account_api"),
-    path("accounts/<str:account_number>/sync/<date:from_date>", api_views.sync_account, name="sync_account_from"),
+    path("accounts/<str:account_number>/sync/<date:from_date>/", api_views.sync_account, name="sync_account_from"),
     path("accounts/<str:account_number>/sync/", api_views.sync_account, name="sync_account"),
     path("accounts/", api_views.accounts_api, name="accounts_api"),
 

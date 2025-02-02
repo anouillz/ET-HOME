@@ -93,11 +93,6 @@ def add_account_view(request):
 
 
 @login_required
-def account_view(request):
-    return render(request, "account.html")
-
-
-@login_required
 def dashboard_view(request):
     context = {
         "user": request.user

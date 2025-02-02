@@ -15,7 +15,7 @@
             <h2>Bank</h2>
             <nav>
                 {% for link in bank_nav_links %}
-                    <a href="{% url link.url_name %}" class="{% if request.resolver_match.view_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
+                    <a href="{% url link.url_name %}" class="link {% if request.resolver_match.view_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
                 {% endfor %}
             </nav>
         </aside>
