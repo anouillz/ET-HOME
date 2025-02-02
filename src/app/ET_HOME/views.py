@@ -61,7 +61,7 @@ def register_view(request):
 @login_required
 def categories_view(request):
     context = {
-        "categories": SpendingCategory.objects.filter(user=request.user)
+        "categories": SpendingCategory.objects.filter(user=request.user).order_by("created_at")
     }
     return render(request, "categories.html", context)
 
