@@ -23,6 +23,12 @@
     gap: 10px;
 }
 
+.this-month {
+    font-size: 90%;
+    font-style: italic;
+    margin-left: 1em;
+}
+
 /* Right section: budget and delete button */
 .category-right {
     display: flex;
