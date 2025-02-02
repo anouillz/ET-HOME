@@ -25,10 +25,8 @@ from bank.middlewares import check_token_validity
 from ET_HOME.core import bank_auth
 from ET_HOME.models import User, BankAccount as ETBankAccount, AppToken
 
-################################################################################
-# Tests for the bank app (models, middleware, and views)
-################################################################################
 
+# Test models, middleware, views
 class TestBankViews(TestCase):
     databases = {"default", "db_bank"}
     def setUp(self):
@@ -197,10 +195,8 @@ class TestBankMiddleware(TestCase):
         valid = check_token_validity(request)
         self.assertFalse(valid)
 
-################################################################################
-# Tests for ET_HOME/core/bank_auth functions (which call external endpoints)
-################################################################################
 
+# test endpoints
 class TestETHomeBankAuth(TestCase):
     databases = {"default", "db_bank"}
     def setUp(self):
@@ -264,43 +260,42 @@ class TestETHomeBankAuth(TestCase):
         self.assertIsNone(err)
         self.assertIsNotNone(token_data)
         self.assertEqual(token_data["code"], "et_token_code")
-@patch("ET_HOME.core.bank_auth.requests.post")
-def test_generate_token_et_home(self, mock_post):
-    request = self.factory.post("/")
-    csrf_token = get_token(request)
-    # First call returns a challenge.
-    challenge = "abcdef1234567890abcdef1234567890"
-    token_id = str(uuid.uuid4())
-    mock_resp_challenge = MagicMock()
-    mock_resp_challenge.status_code = 200
-    mock_resp_challenge.json.return_value = {
-        "status": "success",
-        "challenge": challenge,
-        "token_id": token_id
-    }
-    # Second call returns token details.
-    mock_resp_validation = MagicMock()
-    mock_resp_validation.status_code = 200
-    mock_resp_validation.json.return_value = {
-        "status": "success",
-        "token": {
-            "id": str(uuid.uuid4()),
-            "code": "et_token_code",
-            "expires_at": (now() + timedelta(hours=1)).isoformat()
+
+    @patch("ET_HOME.core.bank_auth.requests.post")
+    def test_generate_token_et_home(self, mock_post):
+        request = self.factory.post("/")
+        csrf_token = get_token(request)
+        # First call returns a challenge.
+        challenge = "abcdef1234567890abcdef1234567890"
+        token_id = str(uuid.uuid4())
+        mock_resp_challenge = MagicMock()
+        mock_resp_challenge.status_code = 200
+        mock_resp_challenge.json.return_value = {
+            "status": "success",
+            "challenge": challenge,
+            "token_id": token_id
         }
-    }
-    mock_post.side_effect = [mock_resp_challenge, mock_resp_validation]
-    # Provide a valid hex secret (64 characters).
-    valid_hex_secret = "a" * 64
-    token_data, err = bank_auth.generate_token(request, "ET123456", valid_hex_secret, "dummy-secret-id")
-    self.assertIsNone(err)
-    self.assertIsNotNone(token_data)
-    self.assertEqual(token_data["code"], "et_token_code")
+        # Second call returns token details.
+        mock_resp_validation = MagicMock()
+        mock_resp_validation.status_code = 200
+        mock_resp_validation.json.return_value = {
+            "status": "success",
+            "token": {
+                "id": str(uuid.uuid4()),
+                "code": "et_token_code",
+                "expires_at": (now() + timedelta(hours=1)).isoformat()
+            }
+        }
+        mock_post.side_effect = [mock_resp_challenge, mock_resp_validation]
+        # Provide a valid hex secret (64 characters).
+        valid_hex_secret = "a" * 64
+        token_data, err = bank_auth.generate_token(request, "ET123456", valid_hex_secret, "dummy-secret-id")
+        self.assertIsNone(err)
+        self.assertIsNotNone(token_data)
+        self.assertEqual(token_data["code"], "et_token_code")
 
-################################################################################
-# Tests for ET_HOME/views (authentication and template-based views)
-################################################################################
 
+# test authentication and views
 class TestETHomeViews(TestCase):
     def setUp(self):
         self.client = Client()
