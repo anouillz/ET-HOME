@@ -31,7 +31,7 @@ urlpatterns = [
     # Categories
     path("categories/<uuid:id>/", api_views.CategoryAPI.as_view(), name="category_api"),
     path("categories/", api_views.categories_api, name="categories_api"),
-    path("categories/update", api_views.update_categories, name="update_categories"),
+    path("categories/update/", api_views.update_categories, name="update_categories"),
     path("accounts/", api_views.accounts_api, name="accounts_api"),
 
     # Misc
