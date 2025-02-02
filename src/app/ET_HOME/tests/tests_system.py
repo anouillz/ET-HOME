@@ -6,14 +6,15 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from django.contrib.auth import get_user_model
-
+from selenium.common.exceptions import NoAlertPresentException, UnexpectedAlertPresentException
 import time
+
 
 class SystemTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Initialize the webdriver (adjust the executable_path if needed)
+        # initiate webdriver for Chrome
         cls.selenium = webdriver.Chrome()
         cls.selenium.implicitly_wait(10)
 
@@ -23,35 +24,47 @@ class SystemTests(StaticLiveServerTestCase):
         super().tearDownClass()
 
     def setUp(self):
-        # Create a test user (using your project's user model)
+        # create test user
         User = get_user_model()
         self.test_username = "systemuser"
         self.test_password = "systempass"
         User.objects.create_user(username=self.test_username, password=self.test_password)
 
     def test_homepage_contains_dashboard_link(self):
-        # 1. Navigate to the login page.
+        # login page
         login_url = self.live_server_url + reverse("login")
         self.selenium.get(login_url)
 
-        # 2. Fill in the login form.
+        # log in the app with test user
         username_input = self.selenium.find_element(By.NAME, "username")
         password_input = self.selenium.find_element(By.NAME, "password")
         username_input.send_keys(self.test_username)
         password_input.send_keys(self.test_password)
         password_input.send_keys(Keys.RETURN)
 
-        # 3. Wait until redirected to the dashboard or a page that contains a "Dashboard" link.
+        # wait for dashboard access
         try:
             dashboard_link = WebDriverWait(self.selenium, 10).until(
                 EC.presence_of_element_located((By.LINK_TEXT, "Dashboard"))
             )
         except Exception as e:
-            self.fail("Dashboard link was not found after login.")
+            self.fail("Dashboard link not found")
 
-        # 4. Assert that the Dashboard link exists.
+        # check if dashboard link is present
         self.assertIsNotNone(dashboard_link)
-        # Optionally, click the Dashboard link and verify that the dashboard loads.
+
+        # click on dashboard link
         dashboard_link.click()
-        time.sleep(2)  # Consider using explicit waits for a production test.
+
+        # manage eventual alert
+        try:
+            WebDriverWait(self.selenium, 5).until(EC.alert_is_present())
+            alert = self.selenium.switch_to.alert
+            print("Alerte détectée :", alert.text)
+            alert.accept()
+        except (NoAlertPresentException, UnexpectedAlertPresentException):
+            pass
+
+        # wait for page to load
+        time.sleep(2)
         self.assertIn("Dashboard", self.selenium.title)
