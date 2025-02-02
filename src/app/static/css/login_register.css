@@ -38,6 +38,10 @@ form {
     gap: 0.4em;
 }
 
+.field.hidden {
+    display: none;
+}
+
 label {
     font-style: italic;
 }

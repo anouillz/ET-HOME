@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import AccessMixin
 from django.db.models import Sum
@@ -555,4 +555,41 @@ def activate_totp(request):
     return JsonResponse({
         "status": "error",
         "error": "Invalid code"
+    }, status=HTTP_400_BAD_REQUEST)
+
+
+def user_login(request):
+    username = request.POST.get("username")
+    password = request.POST.get("password")
+
+    if not username or not password:
+        return JsonResponse({
+            "status": "error",
+            "error": "Username and password required"
+        }, status=HTTP_400_BAD_REQUEST)
+
+
+    user = authenticate(request, username=username, password=password)
+    if user is None:
+        return JsonResponse({
+            "status": "error",
+            "error": "Invalid username or password"
+        }, status=HTTP_400_BAD_REQUEST)
+
+    if user.otp_activated:
+        code = request.POST.get("code")
+        if not code:
+            return JsonResponse({
+                "status": "totp-needed",
+                "message": "TOTP needed"
+            })
+        if not user.verify_otp(code):
+            return JsonResponse({
+                "status": "error",
+                "error": "Invalid TOTP code"
+            }, status=HTTP_400_BAD_REQUEST)
+
+    login(request, user)
+    return JsonResponse({
+        "status": "success"
     })

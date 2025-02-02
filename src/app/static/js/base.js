@@ -308,6 +308,8 @@ function updateNotificationBadge(change) {
 }
 
 window.addEventListener("load", () => {
-    fetchNotifications()
+    if (document.getElementById("notification-container")) {
+        fetchNotifications()
+    }
     initMultiSelects()
 })

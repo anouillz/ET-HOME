@@ -9,6 +9,7 @@ urlpatterns = [
 
     path("user/change_password/", api_views.change_password, name="change_password"),
     path("user/totp/", api_views.activate_totp, name="activate_totp"),
+    path("user/login/", api_views.user_login, name="login"),
     path("user/", api_views.modify_user, name="modify_user"),
 
     # Accounts

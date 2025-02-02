@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block page-title %}{% endblock %}</title>
     <link rel="shortcut icon" href="{% static "images/logo.svg" %}" type="image/svg+xml">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/login_register.css' %}">
-    <title>{% block page-title %}{% endblock %}</title>
+    {% block head %}{% endblock %}
 </head>
 <body>
     <h1 id="app-title">
