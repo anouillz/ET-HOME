@@ -22,6 +22,8 @@ urlpatterns = [
     # Transactions
     path("transactions/<date:first_date>/<date:second_date>/", api_views.get_transactions, name="get_transactions"),
     path("transactions/<uuid:id>/", api_views.TransactionAPI.as_view(), name="transaction_api"),
+    path("transactions/cash/<date:first_date>/<date:second_date>/", api_views.get_cash_transactions, name="get_cash_transactions"),
+    path("transactions/cash/", api_views.get_cash_transactions, name="get_cash_transactions"),
     path("transactions/", api_views.add_transaction, name="add_transactions"),
     path("outcomes/<date:first_date>/<date:second_date>/", api_views.get_outcomes, name="get_outcomes"),
     path("incomes/<date:first_date>/<date:second_date>/", api_views.get_incomes, name="get_incomes"),

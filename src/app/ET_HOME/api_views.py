@@ -37,7 +37,7 @@ def api_access(request):
 
 def get_transactions(request, first_date: datetime.date, second_date: datetime.date):
     transactions = Transaction.objects.filter(
-        account__user=request.user,
+        user=request.user,
         date__gte=first_date,
         date__lt=second_date + timedelta(days=1)
     ).order_by("date")
@@ -46,6 +46,22 @@ def get_transactions(request, first_date: datetime.date, second_date: datetime.d
         "transactions": TransactionSerializer(transactions, many=True).data
     })
 
+
+def get_cash_transactions(request, first_date: Optional[datetime.date] = None, second_date: Optional[datetime.date] = None):
+    kwargs = {}
+    if first_date and second_date:
+        kwargs["date__gte"] = first_date
+        kwargs["date__lt"] = second_date + timedelta(days=1)
+
+    transactions = Transaction.objects.filter(
+        user=request.user,
+        account=None,
+        **kwargs
+    ).order_by("date")
+    return JsonResponse({
+        "status": "success",
+        "transactions": TransactionSerializer(transactions, many=True).data
+    })
 
 def get_account_transactions(request, id, first_date, second_date):
     transactions = Transaction.objects.filter(

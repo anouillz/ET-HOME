@@ -52,8 +52,39 @@ async function refreshDashboard() {
     opt.value = "all"
     opt.innerText = "All accounts"
     accountFilter.appendChild(opt)
+    let promise = apiGet("transactions/cash/").then(info => {
+        if (info.status !== "success") {
+            return
+        }
+        let transactions = info.transactions
+        let lastMonthTrx = []
+        let curMonthTrx = []
+        transactions.forEach(t => {
+            let d = new Date(t.date)
+            if (d < curMonthDay) {
+                lastMonthTrx.push(t)
+                lastMonthTotal += +t.amount
+            } else {
+                curMonthTrx.push(t)
+                curMonthTotal += +t.amount
+                if (t.category !== null) {
+                    if (!(t.category.id in byCategory)) {
+                        byCategory[t.category.id] = 0
+                    }
+                    if (!(t.category.id in categoryNames)) {
+                        categoryNames[t.category.id] = t.category.name
+                    }
+                    if (t.amount < 0) {
+                        byCategory[t.category.id] += +t.amount
+                    }
+                }
+            }
+        })
+    })
+    accountsPromises.push(promise)
+
     accounts.forEach(account => {
-        let promise = apiGet(`accounts/${account.id}`).then(info => {
+        let promise = apiGet(`accounts/${account.id}/`).then(info => {
             console.log(info)
             if (info.status !== "success") {
                 return
