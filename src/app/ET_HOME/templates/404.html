@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found</title>
+    <link rel="shortcut icon" href="{% static "images/logo.svg" %}" type="image/svg+xml">
+
+    <style>
+        /* CSS to center the content */
+        body {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            align-items: center; /* Vertically center */
+            height: 100vh; /* Make sure the body takes the full height of the viewport */
+            margin: 0; /* Remove any default margin */
+            font-family: Arial, sans-serif; /* Optional: change font */
+            background-color: #f4f4f4; /* Optional: background color */
+        }
+
+        .content {
+            text-align: center; /* Center the text inside the content div */
+        }
+
+        h1 {
+            color: #333; /* Optional: color for the heading */
+        }
+
+        p {
+            color: #555; /* Optional: color for the paragraph */
+        }
+
+        a {
+            color: #007bff; /* Optional: link color */
+            text-decoration: none; /* Remove underline */
+        }
+
+        a:hover {
+            text-decoration: underline; /* Add underline on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Oops! Page Not Found</h1>
+        <p>We're sorry, but the page you're looking for could not be found.</p>
+        <p>
+            {% if user.is_authenticated %}
+                You can go back to your <a href="{% url 'dashboard' %}">dashboard</a>.
+            {% else %}
+                You can go back to the <a href="{% url 'login' %}">login page</a>.
+            {% endif %}
+        </p>
+    </div>
+</body>
+</html>

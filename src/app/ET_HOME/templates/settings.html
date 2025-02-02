@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Settings{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static "css/settings.css" %}">
+    <script src="{% static "js/settings.js" %}"></script>
+{% endblock %}
+{% block main %}
+    {% csrf_token %}
+    <div class="container">
+        <nav class="menu">
+            <a class="current" href="#account">My User Account</a>
+            <a href="#bank-accounts">Bank Accounts</a>
+            <a href="#export">Data Export</a>
+        </nav>
+        <div class="tabs">
+            <div class="tab show" id="account">
+                {% include "settings/account.html" %}
+            </div>
+            <div class="tab" id="bank-accounts">
+                {% include "settings/bank_accounts.html" %}
+            </div>
+            <div class="tab" id="export">
+                {% include "settings/export.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

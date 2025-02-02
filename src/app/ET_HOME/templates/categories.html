@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Manage Categories{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/categories.css' %}">
+    <script src="{% static 'js/categories.js' %}" defer></script>
+{% endblock %}
+{% block header %}
+    <h1>Manage Your Categories</h1>
+{% endblock %}
+{% block main %}
+    {% csrf_token %}
+    
+    <div class="categories-container">
+        <p>Total categories: {{ categories|length }}</p>
+        <div class="categories-list" id="categories-list">
+            {% for category in categories %}
+                <div class="category-item widget-box" data-id="{{ category.id }}">
+                    <input class="hidden-changed-input" type="hidden" value="false">
+                    <div class="category-left">
+                        <input
+                            type="checkbox"
+                            class="toggle-category"
+                            {% if category.trigger_notification %}checked{% endif %}
+                            data-id="{{ category.id }}"
+                        />
+                        <span class="category-name">{{ category.name }}</span>
+                        <span class="this-month">(This month: CHF&nbsp;{{ category.total|floatformat:2 }})</span>
+                    </div>
+                    <div class="category-right">
+                        <input
+                            type="number"
+                            class="category-budget"
+                            value="{{ category.user_budget }}"
+                            data-id="{{ category.id }}"
+                        />
+                        {% if not category.is_default %}
+                            <button class="delete-category" data-id="{{ category.id }}">Delete</button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <p>No categories available. Add one below!</p>
+            {% endfor %}
+        </div>
+        <div>
+            <button id="add-category-btn" class="add-category-btn">+ Add Category</button>
+            <button id="update-categories-btn" class="add-category-btn">Update categories</button>
+        </div>
+    </div>
+    
+    
+    <!-- Modal : budget change confirmation -->
+    <div id="budget-modal" class="modal">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+            <button id="close-modal">OK</button>
+        </div>
+    </div>
+    
+    <!-- Modal : asking confirmation to delete category  -->
+    <div id="confirm-delete-modal" class="modal">
+        <div class="modal-content">
+            <p id="confirm-delete-message">Are you sure you want to delete this category?</p>
+            <div class="modal-buttons">
+                <button id="confirm-delete-btn">Yes</button>
+                <button id="cancel-delete-btn">No</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal : category deleted confirmation -->
+    <div id="success-delete-modal" class="modal">
+        <div class="modal-content">
+            <p id="success-delete-message"></p>
+            <button id="close-success-modal">OK</button>
+        </div>
+    </div>
+    
+    <!-- Modal : add category -->
+    <div id="add-category-modal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Category</h2>
+            <input type="text" id="new-category-name" placeholder="Category name">
+            <input type="number" id="new-category-budget" placeholder="Budget (CHF)">
+            <div class="modal-buttons">
+                <button id="confirm-add-category">Add</button>
+                <button id="cancel-add-category">Cancel</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

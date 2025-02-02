@@ -1,0 +1,450 @@
+:root {
+    --light-1: #ffffff;
+    --light-2: #f4f4f4;
+    --light-3: #ebebeb;
+    --light-4: #cccccc;
+    --dark-1: #1D1E20;
+    --dark-2: #565658;
+    --dark-3: #616163;
+    --dark-4: #818182;
+
+    --accent: #75d9f8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--light-2);
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--dark-1);
+    color: var(--light-1);
+    padding-bottom: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .app-title {
+    color: var(--light-1);
+    text-decoration: none;
+}
+
+.sidebar h2 {
+    margin: 0;
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.sidebar .logo {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: -4px;
+}
+
+.sidebar .link {
+    color: var(--light-3);
+    text-decoration: none;
+    display: block;
+    padding: 10px 20px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.sidebar .link:hover {
+    color: var(--light-1);
+}
+
+.sidebar .link.active {
+    border-left: solid var(--light-1) 4px;
+    padding-left: 16px;
+}
+
+.sidebar .logout {
+    margin-top: auto;
+}
+
+.main-content {
+    flex: 1;
+    padding: 0 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+.template {
+    display: none !important;
+}
+
+header {
+    background-color: white;
+    display: flex;
+    position: sticky;
+    top: 0;
+    align-items: center;
+    margin: 0 -20px;
+    width: calc(100% + 40px);
+    padding: 1em 20px;
+    z-index: 20;
+
+    h1 {
+        margin: 0;
+    }
+}
+
+header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--light-2);
+    border-radius: 25px;
+    margin-left: auto;
+}
+
+header input{
+    background-color: #f4f4f4;
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
+}
+
+
+.notification-menu {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}
+
+.notification-toggle {
+    border: none;
+    background:none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+}
+
+.notification-toggle img {
+    transition: transform 0.2s;
+}
+
+.notification-toggle img:hover {
+    animation: shake 0.5s infinite;
+}
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+
+.notification-bell {
+    width: 1.5rem;
+    height: 1.5rem;
+    color:transparent
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+.notification-badge.hidden {
+    display: none;
+}
+
+.notification-panel {
+    position: absolute;
+    top: calc(100% + 1rem);
+    right: 0;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    width: 24rem;
+    max-height: 32rem;
+    overflow-y: auto;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform-origin: top right;
+}
+
+.notification-panel.hidden {
+    transform: scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.notification-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+}
+
+.notification-header h3 {
+    font-size: 1rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.clear-all {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.clear-all:hover {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+.notification-list {
+    padding: 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    animation: slideDown 0.3s ease-out forwards;
+    position: relative;
+    gap:0.4em
+}
+
+.notification.success {
+    background-color: var(--success-bg);
+    border: 1px solid var(--success-color);
+}
+
+.notification.error {
+    background-color: var(--error-bg);
+    border: 1px solid var(--error-color);
+}
+
+.notification.info {
+    background-color: var(--info-bg);
+    border: 1px solid var(--info-color);
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.75rem;
+}
+
+.notification.success .notification-icon {
+    color: var(--success-color);
+}
+
+.notification.error .notification-icon {
+    color: var(--error-color);
+}
+
+.notification.info .notification-icon {
+    color: var(--info-color);
+}
+
+.notification-message {
+    color: #1f2937;
+    font-size: 0.875rem;
+    margin-right: 2rem;
+    flex-grow: 1;
+}
+
+.notification-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s ease;
+}
+
+.notification-close:hover {
+    color: #4b5563;
+}
+.notification-icon-text {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px; /* Adjust size as needed */
+    height: 32px; /* Adjust size as needed */
+    background-color: #f0f0f0; /* Icon background color */
+    border-radius: 50%; /* Make it circular */
+    font-size: 14px; /* Text size */
+    font-weight: bold; /* Make text bold */
+    color: #333; /* Text color */
+    border: 1px solid #ddd; /* Optional border */
+    text-transform: uppercase; /* Ensure text is uppercase */
+    flex-shrink: 0;
+}
+
+
+.notification.removing {
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-1rem);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-1rem);
+        opacity: 0;
+    }
+}
+
+@keyframes highlight {
+    0% {
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.nice-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4em;
+
+    }
+
+    label {
+        font-style: italic;
+    }
+
+    input, select, textarea {
+        font-family: inherit;
+        font-size: inherit;
+        padding: 0.4em 0.8em;
+        border: solid var(--dark-1) 1px;
+        border-radius: 0.4em;
+    }
+
+    select {
+        cursor: pointer;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    button {
+        font-family: inherit;
+        font-size: inherit;
+        background-color: var(--dark-2);
+        color: var(--light-1);
+        padding: 0.8em 3.6em;
+        border: none;
+        border-radius: 0.8em;
+        cursor: pointer;
+        align-self: center;
+
+        &.inverted {
+            background-color: var(--light-2);
+            color: var(--dark-1);
+            border: solid var(--light-4) 1px;
+        }
+    }
+
+    button:hover {
+        background-color: var(--dark-3);
+
+        &.inverted {
+            background-color: var(--light-3);
+        }
+    }
+
+    button:disabled {
+        background-color: var(--light-4);
+        color: var(--dark-4);
+        pointer-events: none;
+        cursor: default;
+    }
+}

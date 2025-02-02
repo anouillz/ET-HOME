@@ -1,0 +1,16 @@
+{% extends "widgets/base.html" %}
+{% block classes %}accounts{% endblock %}
+{% block title %}
+    <span>Your accounts</span>
+    <a class="goto-btn" href="{% url "settings" %}#accounts"></a>
+{% endblock %}
+{% block content %}
+    <div class="template account">
+        <div class="name">
+            <div class="id"></div>
+            <div class="bank"></div>
+        </div>
+        <div class="balance"></div>
+    </div>
+    <div class="list"></div>
+{% endblock %}

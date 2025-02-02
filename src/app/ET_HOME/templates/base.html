@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Title{% endblock %}</title>
+        <link rel="shortcut icon" href="{% static "images/logo.svg" %}" type="image/svg+xml">
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+        <script src="{% static 'js/base.js' %}"></script>
+        {% block head %}{% endblock head %}
+    </head>
+    <body>
+        <input type="hidden" id="userId" value="{{ user.id }}">
+        <aside class="sidebar">
+            <a class="app-title" href="/"><h2><img class="logo" src="{% static "images/logo.svg" %}" alt="ET-HOME logo">ET-HOME</h2></a>
+            <nav>
+                {% for link in nav_links %}
+                    <a href="{% url link.url_name %}" class="link {% if request.resolver_match.url_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+            <a href="{% url "logout" %}" class="link logout">Logout</a>
+        </aside>
+        <main class="main-content">
+            <header>
+                {% block header %}{% endblock %}
+                <div class="user-info">
+                    <img src="{% static "images/icon_profile.svg" %}" alt="User Avatar"/>
+                    <span>{{ user.first_name }} {{ user.last_name }}</span>
+                    <button class="notification-toggle" onclick="toggleNotificationMenu()">
+                        <img src="{% static "images/bell_icon.svg" %}" alt="Notification Icon" />
+                        <span class="notification-badge hidden">0</span>
+                    </button>
+                    <div class="notification-panel hidden">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <button onclick="clearAllNotifications()" class="clear-all">Clear all</button>
+                        </div>
+                        <div class="notification-list" id="notification-container">
+                            <div class="empty-state">No notifications yet</div>
+                        </div>
+                </div>
+                </div>
+            </header>
+            {% block main %}{% endblock %}
+        </main>
+    </body>
+</html>

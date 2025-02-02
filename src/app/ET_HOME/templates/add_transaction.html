@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}New transaction{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/add_transaction.css' %}">
+    <script src="{% static 'js/add_transaction.js' %}"></script>
+{% endblock %}
+{% block header %}
+    <h1>New transaction</h1>
+{% endblock %}
+{% block main %}
+    <div class="container">
+        <a class="back" href="{% url "transactions" %}">Back to list</a>
+        <form id="transaction-form" class="nice-form">
+            {% csrf_token %}
+            <div class="field">
+                <label for="category_id">Category</label>
+                <select name="category_id" id="category_id">
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="amount">Amount</label>
+                <input type="number" name="amount" id="amount" step="0.01">
+            </div>
+            <div class="field">
+                <label for="date">Date</label>
+                <input type="date" name="date" id="date">
+            </div>
+            <div class="field">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" rows="5"></textarea>
+            </div>
+            <button type="submit">Create</button>
+        </form>
+    </div>
+{% endblock %}
+
+
+
+

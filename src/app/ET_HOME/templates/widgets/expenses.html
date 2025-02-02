@@ -1,0 +1,28 @@
+{% extends "widgets/base.html" %}
+{% block classes %}expenses{% endblock %}
+{% block title %}Expenses{% endblock %}
+{% block content %}
+    <div class="filters">
+        {% include "elements/multi_select.html" with id='expenses-categories' text_all='All categories' text_singular='category' text_plural='categories' %}
+        <div class="select-wrapper">
+            <select id="expenses-account">
+                <option value="all">All accounts</option>
+            </select>
+        </div>
+        <div class="select-wrapper">
+            <select id="expenses-range">
+                <option value="week">Last 7 days</option>
+                <option value="fortnight">Last 14 days</option>
+                <option value="month">Last 30 days</option>
+                <option value="year">Last year</option>
+            </select>
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas class="chart" width="800" height="400"></canvas>
+    </div>
+    <div class="footer">
+        <div class="series incomes">Incomes</div>
+        <div class="series outcomes">Outcomes</div>
+    </div>
+{% endblock %}

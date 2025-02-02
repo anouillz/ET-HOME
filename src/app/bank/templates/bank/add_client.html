@@ -1,0 +1,30 @@
+{% extends 'bank/base.html' %}
+{% load static %}
+{% block title %}Add Client{% endblock %}
+{% block page-name %}Add a client{% endblock %}
+{% block main %}
+    <form data-endpoint="clients/add">
+        {% csrf_token %}
+        <div class="field">
+            <label for="username">Username</label>
+            <input type="text" required name="username" id="username">
+        </div>
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" required name="password" id="password">
+        </div>
+        <div class="field">
+            <label for="firstname">Firstname</label>
+            <input type="text" required name="firstname" id="firstname">
+        </div>
+        <div class="field">
+            <label for="lastname">Lastname</label>
+            <input type="text" required name="lastname" id="lastname">
+        </div>
+        <div class="field">
+            <label for="email">Email</label>
+            <input type="email" required name="email" id="email">
+        </div>
+        <button type="submit">Create</button>
+    </form>
+{% endblock %}

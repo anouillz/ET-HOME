@@ -1,0 +1,14 @@
+{% extends "widgets/base.html" %}
+{% block classes %}top-categories{% endblock %}
+{% block title %}
+    <span>Top Categories</span>
+    <a class="goto-btn" href="{% url "categories" %}"></a>
+{% endblock %}
+{% block content %}
+    <canvas class="chart" width="400" height="300"></canvas>
+    <div class="template category">
+        <div class="name"></div>
+        <div class="amount"></div>
+    </div>
+    <div class="list"></div>
+{% endblock %}

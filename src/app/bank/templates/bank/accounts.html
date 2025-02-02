@@ -1,0 +1,32 @@
+{% extends 'bank/base.html' %}
+{% load static %}
+{% block title %}Accounts{% endblock %}
+{% block head %}
+    <script src="{% static "js/bank/accounts.js" %}"></script>
+{% endblock %}
+{% block page-name %}Accounts{% endblock %}
+{% block main %}
+    {% csrf_token %}
+    <table>
+        <thead>
+            <tr>
+                <th>Bank name</th>
+                <th>Account number</th>
+                <th>Client</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+                <tr data-id="{{ account.id }}">
+                    <td>{{ account.bank_name }}</td>
+                    <td>{{ account.account_number }}</td>
+                    <td>{{ account.user.first_name }} {{ account.user.last_name }}</td>
+                    <td>{{ account.balance }}</td>
+                    <td><button class="edit-btn">Edit</button></td>
+                    <td><button class="delete-btn">Delete</button></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,27 +1,27 @@
+{% extends "login_register_base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <title>Login</title>
-</head>
-<body>
-    <div class="login">
-        <h2>Login</h2>
-        {% if messages %}
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-        <form method="post">
-            {% csrf_token %}
-            <input type="text" name="username" placeholder="Username" id="username" required="required"/><br />
-            <input type="password" name="password" placeholder="Password" id="password" required="required" /><br />
-            <button type="submit">Login</button>
-        </form>
-        Don't have an account? <a href="{% url 'register' %}">Register here</a>
+{% block page-title %}Login{% endblock %}
+{% block title %}Login{% endblock %}
+{% block head %}
+    <script src="{% static "js/base.js" %}"></script>
+    <script src="{% static "js/login.js" %}"></script>
+{% endblock %}
+{% block fields %}
+    <div class="field">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" placeholder="johnny" autocomplete="username" required/>
     </div>
-</body>
-</html>
+    <div class="field">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" autocomplete="current-password" required/>
+    </div>
+    <div class="field hidden" id="totp-code">
+        <label for="code">TOTP Code</label>
+        <input type="text" name="code" id="code" autocomplete="one-time-code" placeholder="000000"/>
+    </div>
+{% endblock %}
+{% block action %}Log in{% endblock %}
+{% block alternative %}
+    <span>Don't have an account?</span>
+    <a href="{% url 'register' %}">Register here</a>
+{% endblock %}
