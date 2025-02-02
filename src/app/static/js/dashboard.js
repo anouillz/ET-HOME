@@ -468,8 +468,11 @@ function drawGraph(ctx, lineColor, strokeColor, fillColor, points, hidden=[]) {
 }
 
 window.addEventListener("load", () => {
-    document.getElementById("add-expense").addEventListener("click", () => {
+    document.getElementById("add-transaction").addEventListener("click", () => {
         window.location.href = "/addTransaction/"
+    })
+    document.getElementById("add-account").addEventListener("click", () => {
+        window.location.href = "/addAccount/"
     })
 
     graphCanvas = document.querySelector("#expenses .chart")

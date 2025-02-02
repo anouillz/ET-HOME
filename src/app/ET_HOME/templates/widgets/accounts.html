@@ -1,6 +1,9 @@
 {% extends "widgets/base.html" %}
 {% block classes %}accounts{% endblock %}
-{% block title %}Your accounts{% endblock %}
+{% block title %}
+    <span>Your accounts</span>
+    <a class="goto-btn" href="{% url "settings" %}#accounts"></a>
+{% endblock %}
 {% block content %}
     <div class="template account">
         <div class="name">

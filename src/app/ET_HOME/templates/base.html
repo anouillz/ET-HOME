@@ -11,13 +11,13 @@
     <body>
         <input type="hidden" id="userId" value="{{ user.id }}">
         <aside class="sidebar">
-            <h2><img class="logo" src="{% static "images/logo.svg" %}" alt="ET-HOME logo">ET-HOME</h2>
+            <a class="app-title" href="/"><h2><img class="logo" src="{% static "images/logo.svg" %}" alt="ET-HOME logo">ET-HOME</h2></a>
             <nav>
                 {% for link in nav_links %}
-                    <a href="{% url link.url_name %}" class="{% if request.resolver_match.url_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
+                    <a href="{% url link.url_name %}" class="link {% if request.resolver_match.url_name == link.url_name %}active{% endif %}">{{ link.label }}</a>
                 {% endfor %}
             </nav>
-            <a href="{% url "logout" %}" class="logout">Logout</a>
+            <a href="{% url "logout" %}" class="link logout">Logout</a>
         </aside>
         <main class="main-content">
             <header>

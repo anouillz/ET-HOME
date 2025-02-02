@@ -13,7 +13,10 @@
     <section class="widgets">
         {% include "widgets/spendings.html" with id='current-month' icon='images/icon_current_month.svg' %}
         {% include "widgets/accounts.html" with id='accounts' icon='images/icon_accounts.svg' %}
-        {% include "widgets/add_expense.html" with id='add-expense' icon='images/icon_add_expense.svg' %}
+        <div class="small-widgets">
+            {% include "widgets/add_transaction.html" with id='add-transaction' icon='images/icon_add_transaction.svg' %}
+            {% include "widgets/add_account.html" with id='add-account' icon='images/icon_add_account.svg' %}
+        </div>
         {% include "widgets/last_month.html" with id='last-month' icon='images/icon_last_month.svg' %}
         {% include "widgets/expenses.html" with id='expenses' %}
         {% include "widgets/top_categories.html" with id='top-categories' %}
