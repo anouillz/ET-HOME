@@ -25,6 +25,7 @@
                             data-id="{{ category.id }}"
                         />
                         <span class="category-name">{{ category.name }}</span>
+                        <span class="this-month">(This month: CHF&nbsp;{{ category.total|floatformat:2 }})</span>
                     </div>
                     <div class="category-right">
                         <input

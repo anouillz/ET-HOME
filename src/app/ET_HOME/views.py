@@ -1,7 +1,10 @@
+from datetime import datetime, timedelta
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .models import Transaction, SpendingCategory, User, BankAccount
@@ -60,8 +63,26 @@ def register_view(request):
 
 @login_required
 def categories_view(request):
+    start_date = datetime.today()
+    start_date -= timedelta(days=start_date.day - 1)
+    month = start_date.month
+    year = start_date.year
+    month += 1
+    if month > 12:
+        month -= 12
+        year += 1
+    end_date = datetime(year, month, 1)
     context = {
-        "categories": SpendingCategory.objects.filter(user=request.user).order_by("created_at")
+        "categories": SpendingCategory.objects.filter(user=request.user).annotate(
+            total=Sum(
+                "transaction__amount",
+                filter=Q(
+                    transaction__date__gte=start_date,
+                    transaction__date__lt=end_date
+                ),
+                default=0
+            )
+        ).order_by("created_at")
     }
     return render(request, "categories.html", context)
 
@@ -105,9 +126,7 @@ def transactions_view(request):
     if sort_param not in ["date", "category", "amount"]:
         sort_param = "date"
     context = {
-        "transactions": Transaction.objects.filter(
-            Q(account__user=request.user) | Q(account=None)
-        ).order_by(sort_param)
+        "transactions": Transaction.objects.filter(user=request.user).order_by(sort_param)
     }
 
     return render(request, "transactions.html", context)
