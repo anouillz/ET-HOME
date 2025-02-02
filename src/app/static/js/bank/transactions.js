@@ -1,5 +1,5 @@
 function editTransaction(id) {
-    window.location.href += `/${id}`
+    window.location.href = `/transactions/${id}`
 }
 
 function deleteTransaction(id) {

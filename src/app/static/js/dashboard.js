@@ -140,7 +140,7 @@ async function refreshDashboard() {
             total: -total
         })
     })
-    categories = categories.sort((c1, c2) => c2.total - c1.total)
+    categories = categories.filter(c => c.total !== 0).sort((c1, c2) => c2.total - c1.total)
     showTopCategories(categories)
     showAccounts()
     resizeGraph()
@@ -281,7 +281,7 @@ async function updateGraph() {
             if (!(transaction.date in incomes)) {
                 incomes[transaction.date] = 0
             }
-            incomes[transaction.date] += transaction.amount
+            incomes[transaction.date] += +transaction.amount
         }
     })
     graphStartDate = startDate
